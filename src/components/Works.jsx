@@ -6,9 +6,24 @@ import './Works.css';
 gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
-  { id: 1, title: 'QUANTUM ANALYTICS', subtitle: 'Full-Stack Data Engine', year: '2025' },
-  { id: 2, title: 'ECO-SENTINEL', subtitle: 'Marine Conservation Platform', year: '2026' },
-  { id: 3, title: 'NEURAL NEXUS', subtitle: 'AI-Driven System Architecture', year: '2026' },
+  { 
+    id: 1, 
+    title: 'QUANTUM ANALYTICS', 
+    subtitle: 'Real-time Data Visualization Engine built with React & D3.js', 
+    year: '2025' 
+  },
+  { 
+    id: 2, 
+    title: 'ECO-SENTINEL', 
+    subtitle: 'Marine Life Monitoring System using Node.js & IoT Integration', 
+    year: '2026' 
+  },
+  { 
+    id: 3, 
+    title: 'NEURAL NEXUS', 
+    subtitle: 'AI-Powered Project Management Hub with Neural Network insights', 
+    year: '2026' 
+  },
 ];
 
 export default function Works() {
