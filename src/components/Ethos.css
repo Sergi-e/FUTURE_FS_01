@@ -1,0 +1,44 @@
+.ethos {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-color);
+  padding: 0 5vw;
+}
+
+.ethos-content {
+  max-width: 1200px;
+  width: 100%;
+}
+
+.ethos-title {
+  font-size: 1rem;
+  color: var(--accent-neon);
+  margin-bottom: 2rem;
+  letter-spacing: 0.1em;
+}
+
+.ethos-text-container {
+  overflow: hidden;
+}
+
+.ethos-text-mask {
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  margin: 0;
+  font-family: var(--font-sans);
+  
+  /* Text reveal effect setup */
+  background: linear-gradient(
+    to right, 
+    var(--text-primary) 50%, 
+    rgba(255, 255, 255, 0.1) 50%
+  );
+  background-size: 200% 100%;
+  background-position-x: 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

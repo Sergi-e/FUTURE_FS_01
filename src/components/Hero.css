@@ -1,0 +1,78 @@
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 0 5vw;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-color);
+}
+
+.hero-content {
+  width: 100%;
+}
+
+.title-overflow {
+  overflow: hidden;
+  line-height: 0.9;
+  margin-bottom: -0.05em;
+}
+
+.hero-title-line {
+  font-size: clamp(4rem, 11vw, 16rem);
+  font-weight: 700;
+  line-height: 0.9;
+  margin: 0;
+  position: relative;
+  z-index: 2;
+  color: var(--text-primary);
+  text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.hero-accent {
+  display: inline-block;
+  color: var(--accent-neon);
+  font-size: 0.6em;
+  vertical-align: super;
+  margin-left: 0.1em;
+  text-shadow: 0 0 20px rgba(204, 255, 0, 0.4);
+}
+
+.hero-subtitle {
+  margin-top: 2rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  color: var(--text-secondary);
+  max-width: 600px;
+  line-height: 1.6;
+  font-weight: 400;
+  font-family: var(--font-sans);
+}
+
+.hero-actions {
+  margin-top: 3rem;
+}
+
+.resume-button {
+  display: inline-block;
+  padding: 15px 35px;
+  border: 1px solid var(--accent-neon);
+  color: var(--accent-neon);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+
+.resume-button:hover {
+  background: var(--accent-neon);
+  color: var(--bg-color);
+  box-shadow: 0 0 30px rgba(204, 255, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 2rem;
+  }
+}
