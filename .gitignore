@@ -49,3 +49,34 @@ coverage
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Vite
+dist
+dist-ssr
+*.local
+
+# IDEs and Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Scratch and Temp
+/tmp
+/temp
+*.tmp
+*.temp
+/brain
+.agents/
+.agent/
+_agents/
+_agent/
+.gemini/
