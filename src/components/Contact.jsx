@@ -54,7 +54,7 @@ export default function Contact() {
         <div 
           className="magnetic-button-wrapper" 
         >
-          <a ref={buttonRef} href="mailto:hello@example.com" className="magnetic-button cursor-hover">
+          <a ref={buttonRef} href="mailto:ishserge16@gmail.com" className="magnetic-button cursor-hover">
             <span ref={textRef} className="magnetic-text">TRANSMIT</span>
           </a>
         </div>
@@ -65,9 +65,8 @@ export default function Contact() {
           <span>2026 © ALL RIGHTS RESERVED</span>
         </div>
         <div className="footer-right">
-          <a href="#" className="cursor-hover">LINKEDIN</a>
-          <a href="#" className="cursor-hover">GITHUB</a>
-          <a href="#" className="cursor-hover">TWITTER</a>
+          <a href="https://www.linkedin.com/in/ishimwe-serge/" target="_blank" rel="noopener noreferrer" className="cursor-hover">LINKEDIN</a>
+          <a href="https://github.com/Sergi-e" target="_blank" rel="noopener noreferrer" className="cursor-hover">GITHUB</a>
         </div>
       </footer>
     </section>
