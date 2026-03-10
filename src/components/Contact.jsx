@@ -49,14 +49,20 @@ export default function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="contact-container">
-        <h2 className="contact-title">INITIATE SEQUENCE</h2>
+        <h2 className="contact-title">LET'S CONNECT</h2>
         
-        <div 
-          className="magnetic-button-wrapper" 
-        >
-          <a ref={buttonRef} href="mailto:ishserge16@gmail.com" className="magnetic-button cursor-hover">
-            <span ref={textRef} className="magnetic-text">TRANSMIT</span>
-          </a>
+        <div className="contact-methods">
+          <div className="magnetic-button-wrapper">
+            <a ref={buttonRef} href="mailto:ishserge16@gmail.com" className="magnetic-button">
+              <span ref={textRef} className="magnetic-text">EMAIL ME</span>
+            </a>
+          </div>
+
+          <div className="whatsapp-link-container">
+            <a href="https://wa.me/250789353600" target="_blank" rel="noopener noreferrer" className="whatsapp-link">
+              <span className="wa-icon">WP</span> +250 789353600
+            </a>
+          </div>
         </div>
       </div>
       
