@@ -46,7 +46,7 @@ export default function Hero() {
 
         <div className="hero-actions">
           <a 
-            href="file:///C:/Users/serge/Downloads/Serge Ishimwe_Resume.pdf" 
+            href="/Serge_Ishimwe_Resume.pdf" 
             target="_blank" 
             rel="noopener noreferrer"
             className="resume-button cursor-hover"
