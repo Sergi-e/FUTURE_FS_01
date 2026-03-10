@@ -7,8 +7,8 @@ gsap.registerPlugin(ScrollTrigger);
 
 const hobbies = [
   { name: 'BASKETBALL', icon: '🏀', desc: 'Precision & Teamwork' },
-  { name: 'RUBIK\'S CUBE', icon: '🧩', desc: 'Algorithmic Solving' },
-  { name: 'GAMING', icon: '🎮', desc: 'Immersive Logic' }
+  { name: 'RUBIK\'S CUBE SOLVING', icon: '🧩', desc: 'Algorithmic Logic' },
+  { name: 'GAMING', icon: '🎮', desc: 'Immersive Strategy' }
 ];
 
 export default function Hobbies() {
@@ -19,13 +19,14 @@ export default function Hobbies() {
       gsap.from('.hobby-card', {
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 80%',
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
         },
-        y: 50,
+        y: 60,
         opacity: 0,
-        stagger: 0.2,
-        duration: 1,
-        ease: 'power3.out'
+        stagger: 0.15,
+        duration: 0.8,
+        ease: 'expo.out'
       });
     }, containerRef);
 
@@ -33,11 +34,11 @@ export default function Hobbies() {
   }, []);
 
   return (
-    <section className="hobbies" ref={containerRef}>
+    <section className="hobbies" id="hobbies" ref={containerRef}>
       <h2 className="hobbies-title">OFF-THE-CLOCK</h2>
       <div className="hobbies-grid">
         {hobbies.map((hobby, index) => (
-          <div key={index} className="hobby-card cursor-hover">
+          <div key={index} className="hobby-card">
             <span className="hobby-icon">{hobby.icon}</span>
             <h3 className="hobby-name">{hobby.name}</h3>
             <p className="hobby-desc">{hobby.desc}</p>
