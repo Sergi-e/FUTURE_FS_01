@@ -1,94 +1,58 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
-import portraitImg from '../assets/serge_portrait.png';
-
-const introWords = [
-  "I am a tech enthusiast whose work involves programming and data analysis, turning unstructured, real problems into systems that operate reliably.",
-  "Fullstack Developer & Aspiring AI Engineer crafting reliable systems and immersive digital experiences.",
-  "Beyond the screen, I am a committed environmental conservationist, dedicated to protecting our water bodies and marine life."
-];
 
 export default function Hero() {
-  const [index, setIndex] = useState(0);
-  const textRef = useRef(null);
   const container = useRef(null);
 
-  const nextWord = () => {
-    gsap.to(textRef.current, {
-      opacity: 0,
-      y: -20,
-      duration: 0.3,
-      onComplete: () => {
-        setIndex((prev) => (prev + 1) % introWords.length);
-        gsap.fromTo(textRef.current, 
-          { opacity: 0, y: 20 }, 
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-        );
-      }
-    });
-  };
+  useEffect(() => {
+    let ctx = gsap.context(() => {
+      gsap.from('.hero-title-line', {
+        y: 100,
+        opacity: 0,
+        duration: 2,
+        stagger: 0.2,
+        ease: 'power4.out',
+        delay: 0.2
+      });
+      
+      gsap.to('.hero-accent', {
+        rotation: 360,
+        duration: 20,
+        repeat: -1,
+        ease: 'linear'
+      });
+    }, container);
 
-  const prevWord = () => {
-    gsap.to(textRef.current, {
-      opacity: 0,
-      y: 20,
-      duration: 0.3,
-      onComplete: () => {
-        setIndex((prev) => (prev - 1 + introWords.length) % introWords.length);
-        gsap.fromTo(textRef.current, 
-          { opacity: 0, y: -20 }, 
-          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-        );
-      }
-    });
-  };
+    return () => ctx.revert();
+  }, []);
 
   return (
     <section className="hero" ref={container}>
-      <div className="hero-layout">
-        <div className="hero-visual">
-          <div className="image-container">
-            <img src={portraitImg} alt="Serge Ishimwe" className="hero-image" />
-            <div className="image-overlay">
-              <div className="overlay-top-left"></div>
-              <div className="overlay-bottom-right">
-                <span className="overlay-tag">IMG_ID: 01</span>
-                <span className="overlay-tag">RES: 4K</span>
-              </div>
-              <div className="scanning-line"></div>
-            </div>
-          </div>
-          
-          <div className="hero-nav">
-            <button onClick={prevWord} className="nav-btn">← PREV</button>
-            <div className="nav-progress">
-              <div className="progress-bar" style={{ width: `${((index + 1) / introWords.length) * 100}%` }}></div>
-            </div>
-            <button onClick={nextWord} className="nav-btn">NEXT →</button>
-          </div>
+      <div className="hero-content">
+        <div className="title-overflow">
+          <h1 className="hero-title-line">SERGE</h1>
         </div>
+        <div className="title-overflow">
+          <h1 className="hero-title-line">ISHIMWE</h1>
+        </div>
+        <div className="title-overflow">
+          <h1 className="hero-title-line">FULL-STACK <span className="hero-accent">✦</span></h1>
+        </div>
+        
+        <p className="hero-subtitle">
+          Fullstack Developer & Aspiring AI Engineer crafting reliable systems and immersive digital experiences.
+        </p>
 
-        <div className="hero-info">
-          <div className="quote-icon">“</div>
-          <p className="hero-intro-text" ref={textRef}>
-            {introWords[index]}
-          </p>
-
-          <footer className="hero-status">
-            <div className="status-item">
-              <span className="status-label">IDENTITY</span>
-              <span className="status-value">SERGE ISHIMWE</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">ROLE</span>
-              <span className="status-value highlight">FULLSTACK DEVELOPER</span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">LOC</span>
-              <span className="status-value">KIGALI, RWANDA</span>
-            </div>
-          </footer>
+        <div className="hero-actions">
+          <a 
+            href="/Serge_Ishimwe_Resume.pdf" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="resume-button cursor-hover"
+          >
+            VIEW RESUME
+          </a>
         </div>
       </div>
     </section>
