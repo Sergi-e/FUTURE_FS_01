@@ -1,3 +1,4 @@
+import Navbar from './components/Navbar';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import SmoothScroll from './components/SmoothScroll';
 import Hero from './components/Hero';
@@ -10,6 +11,7 @@ import Testimonials from './components/Testimonials';
 export default function App() {
   return (
     <>
+      <Navbar />
       <ThemeSwitcher />
       <SmoothScroll>
         <main className="app-main">
