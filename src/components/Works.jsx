@@ -8,21 +8,24 @@ gsap.registerPlugin(ScrollTrigger);
 const projects = [
   { 
     id: 1, 
-    title: 'QUANTUM ANALYTICS', 
-    subtitle: 'Real-time Data Visualization Engine built with React & D3.js', 
-    year: '2025' 
+    title: 'BE THE LIGHT WEBSITE', 
+    subtitle: 'Impactful Community Hub built with Lovable', 
+    year: '2025',
+    link: 'https://bethe-light-hub.lovable.app/'
   },
   { 
     id: 2, 
-    title: 'ECO-SENTINEL', 
-    subtitle: 'Marine Life Monitoring System using Node.js & IoT Integration', 
-    year: '2026' 
+    title: 'CLIMATE CHANGE IMPACT', 
+    subtitle: 'Marine Life Monitoring & Data Visualization via ArcGIS', 
+    year: '2026',
+    link: 'https://arcg.is/09v5GS1'
   },
   { 
     id: 3, 
     title: 'NEURAL NEXUS', 
-    subtitle: 'AI-Powered Project Management Hub with Neural Network insights', 
-    year: '2026' 
+    subtitle: 'AI-Powered Project Management Hub', 
+    year: '2026',
+    link: '#' 
   },
 ];
 
@@ -54,14 +57,14 @@ export default function Works() {
 
   return (
     <section className="works" ref={sectionRef}>
-      <div className="works-header">
-        <h2>SELECTED ARCHIVES</h2>
+      <div className="works-header" id="projects">
+        <h2>FEATURED PROJECTS</h2>
         <span className="works-count">[ 0{projects.length} ]</span>
       </div>
       
       <div className="works-wrapper" ref={wrapperRef}>
         {projects.map((project) => (
-          <div className="work-item" key={project.id}>
+          <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-item" key={project.id}>
             <div className="work-image-placeholder cursor-hover">
               <div className="work-overlay"></div>
             </div>
@@ -72,7 +75,7 @@ export default function Works() {
                 <span>{project.year}</span>
               </div>
             </div>
-          </div>
+          </a>
         ))}
       </div>
     </section>
