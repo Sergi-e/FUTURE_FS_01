@@ -53,7 +53,7 @@ export default function Contact() {
         
         <div className="contact-methods">
           <div className="magnetic-button-wrapper">
-            <a ref={buttonRef} href="mailto:ishserge16@gmail.com" className="magnetic-button">
+            <a ref={buttonRef} href="https://mail.google.com/mail/?view=cm&fs=1&to=ishserge16@gmail.com" target="_blank" rel="noopener noreferrer" className="magnetic-button">
               <span ref={textRef} className="magnetic-text">EMAIL ME</span>
             </a>
           </div>
