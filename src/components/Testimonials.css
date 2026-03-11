@@ -1,12 +1,28 @@
 .testimonials {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 5vw;
+  padding: 100px 5vw;
   background-color: var(--bg-color);
   position: relative;
   overflow: hidden;
+}
+
+.testimonials-header {
+  width: 100%;
+  max-width: 1400px;
+  margin-bottom: 50px;
+  text-align: left;
+}
+
+.testimonials-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
 }
 
 .testimonials-layout {
