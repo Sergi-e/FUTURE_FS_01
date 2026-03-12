@@ -81,27 +81,30 @@
 .whatsapp-link:hover {
   border-color: var(--accent-neon);
   color: var(--accent-neon);
-  background: rgba(204, 255, 0, 0.05);
+  background: rgba(var(--accent-neon-rgb, 204, 255, 0), 0.05);
 }
 
 .wa-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 35px;
+  height: 35px;
   background: var(--accent-neon);
   color: #000;
   border-radius: 50%;
-  font-size: 0.7rem;
-  font-weight: 800;
+  transition: transform 0.3s ease;
+}
+
+.whatsapp-link:hover .wa-icon {
+  transform: scale(1.1);
 }
 
 .footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #222;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   padding-top: 2rem;
   width: 100%;
 }
@@ -114,19 +117,32 @@
   color: var(--text-secondary);
 }
 
-.footer-right a {
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--text-secondary);
   text-decoration: none;
-  margin-left: 2rem;
   font-size: 0.75rem;
   font-family: var(--font-sans);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
+  margin-left: 2rem;
 }
 
-.footer-right a:hover {
+.footer-social-link:hover {
   color: var(--accent-neon);
+  transform: translateY(-2px);
+}
+
+.footer-social-link svg {
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.footer-social-link:hover svg {
+  opacity: 1;
 }
 
 @media (max-width: 768px) {
