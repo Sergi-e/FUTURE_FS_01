@@ -38,7 +38,10 @@ export default function Hero() {
       
       <div className="hero-info-bar">
         <span className="info-name">SERGE ISHIMWE</span>
-        <span className="info-location">KIGALI, RWANDA</span>
+        <div className="info-locations">
+          <span className="info-location">KIGALI, RWANDA</span>
+          <span className="info-location">ACCRA, GHANA</span>
+        </div>
       </div>
 
       <div className="hero-content-centered">

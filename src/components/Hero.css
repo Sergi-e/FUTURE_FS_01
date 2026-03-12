@@ -32,9 +32,10 @@
   transform: translateX(-50%);
   width: 60vw;
   height: 40vh;
-  background: radial-gradient(circle, rgba(136, 136, 136, 0.15) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-neon, rgba(136, 136, 136, 0.15)) 0%, transparent 70%);
   filter: blur(60px);
   z-index: 1;
+  transition: background 0.8s ease;
 }
 
 /* Info Bar */
@@ -51,10 +52,22 @@
 
 .hero-info-bar span {
   font-family: 'Inter', sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: #888;
-  letter-spacing: 1px;
+  color: #666;
+  letter-spacing: 1.5px;
+}
+
+.info-locations {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.info-locations .info-location {
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 /* Centered Content */
@@ -115,7 +128,8 @@
 }
 
 .accent-text {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--accent-neon, rgba(255, 255, 255, 0.9));
+  transition: color 0.8s ease;
 }
 
 /* Subtitle */
