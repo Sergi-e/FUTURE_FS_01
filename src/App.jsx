@@ -8,7 +8,6 @@ import Works from './components/Works';
 import Testimonials from './components/Testimonials';
 import Hobbies from './components/Hobbies';
 import Contact from './components/Contact';
-import SectionTransitions from './components/SectionTransitions';
 
 export default function App() {
   return (
@@ -17,15 +16,13 @@ export default function App() {
       <ThemeSwitcher />
       <SmoothScroll>
         <main className="app-main">
-          <SectionTransitions>
-            <Hero />
-            <Ethos />
-            <Skills />
-            <Works />
-            <Testimonials />
-            <Hobbies />
-            <Contact />
-          </SectionTransitions>
+          <Hero />
+          <Ethos />
+          <Skills />
+          <Works />
+          <Testimonials />
+          <Hobbies />
+          <Contact />
         </main>
       </SmoothScroll>
     </>
