@@ -1,26 +1,89 @@
+import React, { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
 import rubiksImg from '../assets/rubiks_cube_realistic.png';
 import gamepadImg from '../assets/gamepad_realistic.png';
 import './Hobbies.css';
 
+gsap.registerPlugin(ScrollTrigger);
+
 const hobbiesData = [
-  { name: 'BASKETBALL', image: basketballImg, desc: 'Precision & Teamwork' },
-  { name: 'RUBIK\'S CUBE SOLVING', image: rubiksImg, desc: 'Algorithmic Logic' },
-  { name: 'GAMING', image: gamepadImg, desc: 'Immersive Strategy' }
+  { id: '01', name: 'BASKETBALL', image: basketballImg, desc: 'The rhythm of the court, the precision of the shot. A game of strategy and split-second decisions.' },
+  { id: '02', name: 'RUBIK\'S CUBE', image: rubiksImg, desc: 'Algorithmic beauty in the palm of my hand. Solving the complex through logical progression.' },
+  { id: '03', name: 'GAMING', image: gamepadImg, desc: 'Immersive worlds and tactical depth. Exploring digital frontiers and competitive strategy.' }
 ];
 
 export default function Hobbies() {
+  const sectionRef = useRef(null);
+  const itemsRef = useRef([]);
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      itemsRef.current.forEach((item, index) => {
+        const image = item.querySelector('.hobby-float-img');
+        const text = item.querySelector('.hobby-name-big');
+
+        gsap.fromTo(image, 
+          { y: 50, rotate: -10, opacity: 0 },
+          { 
+            y: -50, 
+            rotate: 10, 
+            opacity: 1,
+            scrollTrigger: {
+              trigger: item,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1
+            }
+          }
+        );
+
+        gsap.fromTo(text,
+          { x: index % 2 === 0 ? -100 : 100, opacity: 0 },
+          {
+            x: 0,
+            opacity: 0.1,
+            scrollTrigger: {
+              trigger: item,
+              start: "top 80%",
+              end: "top 20%",
+              scrub: true
+            }
+          }
+        );
+      });
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="hobbies" id="hobbies">
-      <h2 className="hobbies-title">OFF-THE-CLOCK</h2>
-      <div className="hobbies-grid">
+    <section className="hobbies-innovative" id="hobbies" ref={sectionRef}>
+      <div className="hobbies-header-alt">
+        <span className="hobbies-tag-alt">OFF THE CLOCK</span>
+        <h2 className="hobbies-main-title">PASSIONS & PERSPECTIVES</h2>
+      </div>
+
+      <div className="hobbies-list-alt">
         {hobbiesData.map((hobby, index) => (
-          <div key={index} className="hobby-card cursor-hover">
-            <div className="hobby-icon">
-              <img src={hobby.image} alt={hobby.name} style={{ width: '40px', height: '40px', objectFit: 'contain' }} />
+          <div 
+            key={hobby.id} 
+            className="hobby-row-alt" 
+            ref={el => itemsRef.current[index] = el}
+          >
+            <div className="hobby-content-alt">
+              <span className="hobby-num-alt">{hobby.id}</span>
+              <div className="hobby-text-alt">
+                <h3 className="hobby-title-alt">{hobby.name}</h3>
+                <p className="hobby-desc-alt">{hobby.desc}</p>
+              </div>
             </div>
-            <h3 className="hobby-name">{hobby.name}</h3>
-            <p className="hobby-desc">{hobby.desc}</p>
+            
+            <div className="hobby-visual-alt">
+              <h4 className="hobby-name-big">{hobby.name}</h4>
+              <img src={hobby.image} alt={hobby.name} className="hobby-float-img" />
+            </div>
           </div>
         ))}
       </div>
