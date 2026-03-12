@@ -13,17 +13,19 @@ export default function Navbar() {
     if (isOpen) {
       gsap.to(menuRef.current, {
         clipPath: 'circle(150% at 100% 0%)',
-        duration: 0.8,
+        scale: 1,
+        duration: 1.2,
         ease: 'power4.inOut'
       });
       gsap.fromTo(linksRef.current, 
-        { y: 50, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, ease: 'power3.out', delay: 0.3 }
+        { y: 100, rotate: 5, opacity: 0 },
+        { y: 0, rotate: 0, opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power3.out', delay: 0.4 }
       );
     } else {
       gsap.to(menuRef.current, {
-        clipPath: 'circle(0% at 100% 0%)',
-        duration: 0.6,
+        clipPath: 'circle(0% at 95% 5%)',
+        scale: 0.9,
+        duration: 0.8,
         ease: 'power4.inOut'
       });
     }
@@ -40,12 +42,18 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <div className="nav-logo">SERGE</div>
-      
-      <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
-        <span className="line"></span>
-        <span className="line"></span>
-      </button>
+      <div className="nav-left">
+        <div className="nav-logo">SERGE</div>
+        
+        <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
+          <span className="line"></span>
+          <span className="line"></span>
+        </button>
+      </div>
+
+      <div className="nav-right">
+        {/* Placeholder for potential right-side items, ThemeSwitcher is fixed anyway */}
+      </div>
 
       <div className="nav-menu" ref={menuRef}>
         <div className="nav-links">
