@@ -44,7 +44,7 @@ export default function Navbar() {
   return (
     <nav className="navbar">
       <div className="nav-left">
-        <div className="nav-logo">SERGE</div>
+        <div className="nav-logo">SERGE ISHIMWE</div>
       </div>
 
       <div className="nav-right">
