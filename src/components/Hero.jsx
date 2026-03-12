@@ -8,7 +8,7 @@ export default function Hero() {
 
   useEffect(() => {
     let ctx = gsap.context((self) => {
-      const elements = self.selector('.info-name, .top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle');
+      const elements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle');
       
       // Reveal animation
       gsap.from(elements, {
@@ -38,7 +38,6 @@ export default function Hero() {
       <div className="hero-top-glow"></div>
       
       <div className="hero-info-bar">
-        <span className="info-name">SERGE ISHIMWE</span>
         <span className="info-location top-right-loc">KIGALI, RWANDA</span>
       </div>
 
