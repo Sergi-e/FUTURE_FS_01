@@ -56,8 +56,8 @@ export default function Works() {
   }, []);
 
   return (
-    <section className="works" ref={sectionRef}>
-      <div className="works-header" id="projects">
+    <section className="works" id="projects" ref={sectionRef}>
+      <div className="works-header">
         <h2>FEATURED PROJECTS</h2>
         <span className="works-count">[ 0{projects.length} ]</span>
       </div>

@@ -34,9 +34,10 @@ export default function Navbar() {
   const navLinks = [
     { name: 'HOME', href: '#home' },
     { name: 'PHILOSOPHY', href: '#philosophy' },
-    { name: 'HOBBIES', href: '#hobbies' },
-    { name: 'TESTIMONIALS', href: '#testimonials' },
+    { name: 'SKILLS', href: '#skills' },
     { name: 'PROJECTS', href: '#projects' },
+    { name: 'TESTIMONIALS', href: '#testimonials' },
+    { name: 'HOBBIES', href: '#hobbies' },
     { name: 'CONTACT', href: '#contact' }
   ];
 
@@ -44,15 +45,14 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="nav-left">
         <div className="nav-logo">SERGE</div>
-        
-        <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
-          <span className="line"></span>
-          <span className="line"></span>
-        </button>
       </div>
 
       <div className="nav-right">
-        {/* Placeholder for potential right-side items, ThemeSwitcher is fixed anyway */}
+        <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
+          <span className="line"></span>
+          <span className="line"></span>
+          <span className="line"></span>
+        </button>
       </div>
 
       <div className="nav-menu" ref={menuRef}>
@@ -63,7 +63,9 @@ export default function Navbar() {
               href={link.href} 
               className="nav-link"
               onClick={() => setIsOpen(false)}
-              ref={el => linksRef.current[index] = el}
+              ref={el => {
+                if (el) linksRef.current[index] = el;
+              }}
             >
               <span className="link-number">0{index + 1}</span>
               <span className="link-text">{link.name}</span>
