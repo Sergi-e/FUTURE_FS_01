@@ -58,15 +58,27 @@
   letter-spacing: 1.5px;
 }
 
-.info-locations {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 5px;
+.top-right-loc {
+  position: absolute;
+  right: 50px;
 }
 
-.info-locations .info-location {
-  font-size: 0.8rem;
+.hero-bottom-info {
+  position: absolute;
+  bottom: 15vh;
+  left: 50px;
+  width: calc(100% - 100px);
+  display: flex;
+  justify-content: flex-start;
+  z-index: 10;
+}
+
+.bottom-left-loc {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #666;
+  letter-spacing: 1.5px;
   opacity: 0.8;
 }
 
