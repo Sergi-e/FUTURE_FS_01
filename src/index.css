@@ -14,9 +14,16 @@
   --font-display: "Oswald", "Inter", sans-serif;
 }
 
+@property --accent-neon {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ccff00;
+}
+
 body {
   transition: background-color var(--transition-speed) var(--transition-ease),
-              color var(--transition-speed) var(--transition-ease);
+              color var(--transition-speed) var(--transition-ease),
+              --accent-neon 0.8s ease;
 }
 
 /* Ensure accent color transitions smoothly */
