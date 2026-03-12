@@ -33,7 +33,7 @@ export default function Ethos() {
   }, []);
 
   return (
-    <section className="ethos" ref={sectionRef}>
+    <section className="ethos" id="philosophy" ref={sectionRef}>
       <div className="ethos-content" ref={textRef}>
         <h2 className="ethos-title">THE PHILOSOPHY</h2>
         <div className="ethos-text-container">
