@@ -1,5 +1,5 @@
 .hobbies-innovative {
-  padding: 15vw 10%;
+  padding: 80px 10%;
   background-color: var(--color-bg, #0a0a0a);
   overflow: hidden;
   position: relative;
@@ -44,7 +44,7 @@
   justify-content: space-between;
   align-items: center;
   position: relative;
-  min-height: 40vh;
+  min-height: 30vh;
 }
 
 .hobby-row-alt:nth-child(even) {
@@ -85,7 +85,7 @@
 
 .hobby-visual-alt {
   width: 50%;
-  height: 500px;
+  height: 400px;
   position: relative;
   display: flex;
   align-items: center;
