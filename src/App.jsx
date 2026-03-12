@@ -3,10 +3,11 @@ import ThemeSwitcher from './components/ThemeSwitcher';
 import SmoothScroll from './components/SmoothScroll';
 import Hero from './components/Hero';
 import Ethos from './components/Ethos';
+import Skills from './components/Skills';
 import Works from './components/Works';
+import Testimonials from './components/Testimonials';
 import Hobbies from './components/Hobbies';
 import Contact from './components/Contact';
-import Testimonials from './components/Testimonials';
 
 export default function App() {
   return (
@@ -17,9 +18,10 @@ export default function App() {
         <main className="app-main">
           <Hero />
           <Ethos />
-          <Hobbies />
-          <Testimonials />
+          <Skills />
           <Works />
+          <Testimonials />
+          <Hobbies />
           <Contact />
         </main>
       </SmoothScroll>
