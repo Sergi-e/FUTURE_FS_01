@@ -20,18 +20,29 @@ export default function SectionTransitions({ children }) {
           gsap.set(section, { clipPath: 'circle(0% at 50% 50%)' });
 
           // Rise and Reveal animation
-          gsap.to(section, {
-            clipPath: 'circle(150% at 50% 50%)',
-            ease: 'none',
+          const tl = gsap.timeline({
             scrollTrigger: {
               trigger: section,
               start: "top top",
-              end: "+=100%", // Reveal over 100% of viewport height
+              end: "+=100%", 
               scrub: 1,
-              pin: sections[i-1], // Pin the PREVIOUS section while this one reveals
+              pin: sections[i-1], 
               pinSpacing: false
             }
           });
+
+          // Reveal current section
+          tl.to(section, {
+            clipPath: 'circle(150% at 50% 50%)',
+            ease: 'none'
+          }, 0);
+
+          // Exit previous section (Shrink & Fade)
+          tl.to(sections[i-1], {
+            scale: 0.9,
+            opacity: 0,
+            ease: 'none'
+          }, 0);
         }
       });
     }, containerRef);
