@@ -117,6 +117,11 @@
   color: var(--text-secondary);
 }
 
+.footer-right {
+  display: flex;
+  align-items: center;
+}
+
 .footer-social-link {
   display: flex;
   align-items: center;
@@ -128,7 +133,7 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   transition: all 0.3s ease;
-  margin-left: 2rem;
+  margin-left: 3rem;
 }
 
 .footer-social-link:hover {
