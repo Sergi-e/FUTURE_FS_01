@@ -3,21 +3,28 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding: 20px 50px;
+  padding: 30px 50px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  background: rgba(10, 10, 10, 0.8);
-  backdrop-filter: blur(10px);
+  pointer-events: none; /* Allow clicking through to Hero if needed, but we'll enable for children */
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  pointer-events: auto;
 }
 
 .nav-logo {
   font-family: 'Inter', sans-serif;
   font-weight: 800;
-  font-size: 1.5rem;
-  letter-spacing: -1px;
+  font-size: 1.2rem;
+  letter-spacing: -0.5px;
   color: white;
+  text-transform: uppercase;
 }
 
 .hamburger {
@@ -26,25 +33,43 @@
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 10px;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 15px;
   z-index: 1001;
+  transition: transform 0.3s ease;
+}
+
+.hamburger:hover {
+  transform: scale(1.1);
 }
 
 .line {
   display: block;
-  width: 30px;
   height: 2px;
   background-color: white;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.line:nth-child(1) {
+  width: 32px;
+}
+
+.line:nth-child(2) {
+  width: 20px;
 }
 
 .hamburger.open .line:nth-child(1) {
-  transform: translateY(4px) rotate(45deg);
+  width: 30px;
+  transform: translateY(5px) rotate(45deg);
+  background-color: var(--accent-neon, #ccff00);
 }
 
 .hamburger.open .line:nth-child(2) {
-  transform: translateY(-4px) rotate(-45deg);
+  width: 30px;
+  transform: translateY(-5px) rotate(-45deg);
+  background-color: var(--accent-neon, #ccff00);
 }
 
 .nav-menu {
