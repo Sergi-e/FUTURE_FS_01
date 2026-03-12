@@ -1,10 +1,10 @@
 .ethos {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--bg-color);
-  padding: 0 5vw;
+  padding: 60px 5vw;
 }
 
 .ethos-content {
