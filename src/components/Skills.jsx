@@ -30,16 +30,14 @@ export default function Skills() {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
-      // Infinite Marquee Animation
       const marquee = marqueeRef.current;
-      const marqueeContent = marquee.querySelector('.tech-marquee-content');
-      const clone = marqueeContent.cloneNode(true);
-      marquee.appendChild(clone);
-
-      gsap.to([marqueeContent, clone], {
-        xPercent: -100,
+      const marqueeWrapper = marquee.querySelector('.tech-marquee-wrapper');
+      
+      // Infinite Seamless Revolution
+      gsap.to(marqueeWrapper, {
+        xPercent: -50,
         repeat: -1,
-        duration: 30,
+        duration: 40,
         ease: "none"
       });
     }, sectionRef);
@@ -55,21 +53,51 @@ export default function Skills() {
           <h2 className="skills-title">TECHNICAL TOOLS I USE</h2>
         </header>
 
-        {/* New Tech Ecosystem Marquee */}
+        {/* Seamless Circular Marquee */}
         <div className="tech-ecosystem">
           <div className="tech-marquee" ref={marqueeRef}>
-            <div className="tech-marquee-content">
-              {techStack.map((tech, i) => (
-                <div className="tech-pill" key={i}>
-                  <div className="tech-icon-circle" style={{ color: tech.color }}>
-                    {tech.icon}
+            <div className="tech-marquee-wrapper">
+              {/* Primary Set */}
+              <div className="tech-marquee-content">
+                {techStack.map((tech, i) => (
+                  <div className="tech-pill" key={i}>
+                    <div className="tech-icon-circle" style={{ color: tech.color }}>
+                      {tech.icon}
+                    </div>
+                    <span className="tech-name-label">{tech.name}</span>
+                    <div className="tech-role-info">
+                      <span className="tech-role-tag">{tech.role}</span>
+                    </div>
                   </div>
-                  <span className="tech-name-label">{tech.name}</span>
-                  <div className="tech-role-info">
-                    <span className="tech-role-tag">{tech.role}</span>
+                ))}
+              </div>
+              {/* Duplicate Set for Seamless Loop */}
+              <div className="tech-marquee-content">
+                {techStack.map((tech, i) => (
+                  <div className="tech-pill" key={`clone-${i}`}>
+                    <div className="tech-icon-circle" style={{ color: tech.color }}>
+                      {tech.icon}
+                    </div>
+                    <span className="tech-name-label">{tech.name}</span>
+                    <div className="tech-role-info">
+                      <span className="tech-role-tag">{tech.role}</span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="experience-card">
+          <div className="exp-left">
+            <h3 className="exp-number">1 YEAR</h3>
+            <p className="exp-description">Developing Solutions</p>
+          </div>
+          <div className="exp-right">
+            <div className="exp-visual-box">
+              <div className="exp-glow-layer"></div>
+              <div className="exp-text-center">1+ YR</div>
             </div>
           </div>
         </div>
