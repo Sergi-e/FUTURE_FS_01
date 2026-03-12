@@ -14,7 +14,12 @@
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 30px;
+  pointer-events: auto;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
   pointer-events: auto;
 }
 
@@ -57,18 +62,27 @@
 }
 
 .line:nth-child(2) {
-  width: 20px;
+  width: 24px;
+}
+
+.line:nth-child(3) {
+  width: 32px;
 }
 
 .hamburger.open .line:nth-child(1) {
-  width: 30px;
-  transform: translateY(5px) rotate(45deg);
+  width: 32px;
+  transform: translateY(10px) rotate(45deg);
   background-color: var(--accent-neon, #ccff00);
 }
 
 .hamburger.open .line:nth-child(2) {
-  width: 30px;
-  transform: translateY(-5px) rotate(-45deg);
+  opacity: 0;
+  transform: translateX(10px);
+}
+
+.hamburger.open .line:nth-child(3) {
+  width: 32px;
+  transform: translateY(-10px) rotate(-45deg);
   background-color: var(--accent-neon, #ccff00);
 }
 
