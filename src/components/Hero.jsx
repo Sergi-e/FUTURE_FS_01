@@ -7,18 +7,19 @@ export default function Hero() {
   const container = useRef(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Reveal animation for all elements
-      gsap.from('.hero-info-bar span, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle', {
+    let ctx = gsap.context((self) => {
+      const elements = self.selector('.info-name, .top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle');
+      
+      // Reveal animation
+      gsap.from(elements, {
         y: 40,
         opacity: 0,
         duration: 1.5,
-        stagger: 0.15,
+        stagger: 0.1,
         ease: 'power4.out',
         delay: 0.5
       });
       
-      // Subtle pulse for the portrait glow
       gsap.to('.hero-portrait-glow', {
         opacity: 0.6,
         duration: 2,
@@ -37,11 +38,12 @@ export default function Hero() {
       <div className="hero-top-glow"></div>
       
       <div className="hero-info-bar">
+        <span className="info-name">SERGE ISHIMWE</span>
         <span className="info-location top-right-loc">KIGALI, RWANDA</span>
       </div>
 
       <div className="hero-bottom-info">
-        <span className="info-location bottom-left-loc">ACCRA, GHANA</span>
+        <span className="info-location bottom-right-loc">ACCRA, GHANA</span>
       </div>
 
       <div className="hero-content-centered">
