@@ -91,13 +91,19 @@ export default function Skills() {
 
         <div className="experience-card">
           <div className="exp-left">
-            <h3 className="exp-number">1 YEAR</h3>
-            <p className="exp-description">Developing Solutions</p>
+            <h3 className="exp-number">1 Year</h3>
+            <p className="exp-description">Of Development Experience</p>
+          </div>
+          <div className="exp-middle">
+            <div className="exp-visual-box flower">
+              <div className="flower-shape-layer s1"></div>
+              <div className="flower-shape-layer s2"></div>
+              <div className="exp-text-center">C2C</div>
+            </div>
           </div>
           <div className="exp-right">
-            <div className="exp-visual-box">
-              <div className="exp-glow-layer"></div>
-              <div className="exp-text-center">1+ YR</div>
+            <div className="exp-visual-box simple">
+              <div className="exp-text-center small">1+ YR</div>
             </div>
           </div>
         </div>
