@@ -27,7 +27,7 @@ export default function Hero() {
         yoyo: true,
         ease: 'sine.inOut'
       });
-    }, container);
+    }, container.current);
 
     return () => ctx.revert();
   }, []);
