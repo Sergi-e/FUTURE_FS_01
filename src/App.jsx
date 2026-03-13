@@ -1,5 +1,4 @@
 import Navbar from './components/Navbar';
-import ThemeSwitcher from './components/ThemeSwitcher';
 import SmoothScroll from './components/SmoothScroll';
 import Hero from './components/Hero';
 import Ethos from './components/Ethos';
@@ -13,7 +12,6 @@ export default function App() {
   return (
     <>
       <Navbar />
-      <ThemeSwitcher />
       <SmoothScroll>
         <main className="app-main">
           <Hero />
