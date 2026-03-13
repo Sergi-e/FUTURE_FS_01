@@ -35,19 +35,30 @@ export default function Works() {
 
   useEffect(() => {
     let ctx = gsap.context(() => {
+      const workItems = gsap.utils.toArray('.work-item');
+      
+      // Initial positioning: all items except first are off-screen at bottom
+      gsap.set(workItems.slice(1), { yPercent: 100 });
+
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
+          start: "top top",
+          end: () => `+=${window.innerHeight * workItems.length}`,
           pin: true,
           scrub: 1,
-          start: 'top top',
-          end: () => `+=${wrapperRef.current.scrollWidth - window.innerWidth}`,
+          anticipatePin: 1,
         }
       });
 
-      tl.to(wrapperRef.current, {
-        x: () => -(wrapperRef.current.scrollWidth - window.innerWidth),
-        ease: 'none',
+      // Animate each item to slide up over the current one
+      workItems.forEach((item, i) => {
+        if (i === 0) return; // Skip first item as it's already there
+        
+        tl.to(item, {
+          yPercent: 0,
+          ease: "none",
+        });
       });
       
     }, sectionRef);

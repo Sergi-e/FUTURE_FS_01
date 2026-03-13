@@ -103,6 +103,7 @@ export default function Skills() {
           </div>
           <div className="exp-right">
             <div className="exp-visual-box simple">
+              <div className="exp-glow-layer"></div>
               <div className="exp-text-center small">1+ YR</div>
             </div>
           </div>

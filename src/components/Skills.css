@@ -140,16 +140,16 @@
 
 .experience-card {
   display: grid;
-  grid-template-columns: 1fr 180px;
+  grid-template-columns: 1fr auto 1fr; /* Symmetrical split */
   align-items: center;
-  max-width: 800px; /* Significantly reduced width */
-  margin: 0 auto 40px; /* Centered and added margin */
-  background: rgba(25, 25, 25, 0.6); /* Slightly darker */
+  max-width: 950px; /* Increased overall width */
+  margin: 0 auto 40px;
+  background: rgba(20, 20, 20, 0.4);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(15px);
 }
 
 .exp-left {
@@ -173,23 +173,51 @@
   letter-spacing: 0.5px;
 }
 
-.exp-right {
+.exp-middle {
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.exp-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Push to right edge */
   height: 100%;
-  background: rgba(0, 0, 0, 0.3); /* Darker right side as in screenshot */
-  padding: 40px;
-  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 40px 60px;
 }
 
 .exp-visual-box {
-  width: 90px;
-  height: 90px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.exp-visual-box.flower {
+  width: 120px;
+  height: 120px;
+}
+
+.exp-visual-box.simple {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.exp-glow-layer {
+  position: absolute;
+  width: 140%;
+  height: 140%;
+  background: radial-gradient(circle, var(--accent-neon, #ccff0022) 0%, transparent 70%);
+  filter: blur(20px);
+  animation: pulse-glow 4s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .flower-shape-layer {
@@ -198,8 +226,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 35%; /* Soft squircle/petal shape */
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 35%;
   backdrop-filter: blur(5px);
 }
 
@@ -208,16 +236,21 @@
 }
 
 .flower-shape-layer.s2 {
-  transform: rotate(45deg); /* Creates the 8-lobed effect */
+  transform: rotate(45deg);
 }
 
 .exp-text-center {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 900;
   color: white;
   letter-spacing: 1px;
   z-index: 2;
   font-family: var(--font-display);
+}
+
+.exp-text-center.small {
+  font-size: 1.1rem;
+  opacity: 0.8;
 }
 
 @keyframes pulse-glow {
