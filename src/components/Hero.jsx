@@ -7,6 +7,7 @@ export default function Hero() {
   const container = useRef(null);
 
   useEffect(() => {
+    if (!container.current) return;
     let ctx = gsap.context((self) => {
       const elements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle');
       
