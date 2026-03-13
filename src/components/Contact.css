@@ -137,17 +137,79 @@
 }
 
 .footer-social-link:hover {
-  color: var(--accent-neon);
   transform: translateY(-2px);
 }
 
 .footer-social-link svg {
   opacity: 0.6;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, color 0.3s ease;
 }
 
 .footer-social-link:hover svg {
   opacity: 1;
+}
+
+/* Brand Colors on Hover */
+.gmail-link {
+  position: relative;
+}
+
+.gmail-icon-hover {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.5);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.gmail-link:hover {
+  background-color: #ffffff !important;
+  box-shadow: 0 0 50px rgba(255, 255, 255, 0.4);
+}
+
+.magnetic-text {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.gmail-link:hover .magnetic-text {
+  opacity: 0 !important;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+.gmail-link:hover .gmail-icon-hover {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.whatsapp-link:hover {
+  border-color: #25D366;
+  color: #25D366;
+  background: rgba(37, 211, 102, 0.05);
+}
+
+.whatsapp-link:hover .wa-icon {
+  background: #25D366;
+  transform: scale(1.1);
+}
+
+.linkedin-link:hover {
+  color: #0077B5;
+}
+
+.linkedin-link:hover svg {
+  color: #0077B5;
+}
+
+.github-link:hover {
+  color: #ffffff;
+}
+
+.github-link:hover svg {
+  color: #ffffff;
 }
 
 @media (max-width: 768px) {
