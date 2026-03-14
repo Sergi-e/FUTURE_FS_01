@@ -10,7 +10,12 @@ const themes = [
 ];
 
 export default function ThemeSwitcher() {
-  const [currentTheme, setCurrentTheme] = useState(0);
+  const [currentTheme, setCurrentTheme] = useState(1); // Default to Cyber
+
+  useEffect(() => {
+    // Set initial theme on mount
+    document.documentElement.style.setProperty('--accent-neon', themes[currentTheme].color);
+  }, []);
 
   const cycleTheme = () => {
     const next = (currentTheme + 1) % themes.length;
