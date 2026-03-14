@@ -62,6 +62,13 @@ export default function Contact() {
                   <path d="M0 4.5v15c0 .85.65 1.5 1.5 1.5H6V7l-6-4.5z" fill="#4285F4" />
                   <path d="M24 4.5v15c0 .85-.65 1.5-1.5 1.5H18V7l6-4.5z" fill="#34A853" />
                 </svg>
+                <span className="gmail-text-logo">
+                  <span style={{color: '#4285F4'}}>G</span>
+                  <span style={{color: '#EA4335'}}>m</span>
+                  <span style={{color: '#FBBC05'}}>a</span>
+                  <span style={{color: '#EA4335'}}>i</span>
+                  <span style={{color: '#34A853'}}>l</span>
+                </span>
               </div>
             </a>
           </div>
