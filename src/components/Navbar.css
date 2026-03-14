@@ -25,6 +25,7 @@
   pointer-events: auto;
   z-index: 1001;
   position: relative;
+  mix-blend-mode: difference;
 }
 
 .nav-logo {
