@@ -2,18 +2,20 @@
   position: relative;
   background-color: var(--bg-color);
   overflow: hidden;
+  perspective: 1500px; /* Add 3D depth */
 }
 
 .works-header {
-  padding: 30px 5vw;
+  padding: 100px 5vw 40px; /* Pushed below site navbar */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: fixed; /* Keep header visible during stack */
+  position: fixed;
   top: 0;
   width: 100%;
-  z-index: 100;
+  z-index: 90;
   pointer-events: none;
+  mix-blend-mode: difference;
 }
 
 .works-header * {
@@ -21,15 +23,11 @@
 }
 
 .works-header h2 {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.2em;
-}
-
-.works-count {
-  font-family: var(--font-display);
-  color: var(--accent-neon);
-  font-size: 1.2rem;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.5;
 }
 
 .works-wrapper {
@@ -48,50 +46,71 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 0 5vw;
+  padding: 160px 5vw 40px; /* Reduced to give more room for media */
   text-decoration: none;
   background-color: var(--bg-color);
-  will-change: transform;
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+}
+
+.work-media-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.9);
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), border-color 0.4s ease;
+  background-color: transparent;
+}
+
+.work-media-asset {
+  width: 95vw;
+  max-width: 1400px;
+  height: auto;
+  max-height: 55vh;
+  display: block;
+  object-fit: contain;
+  transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .work-image-placeholder {
-  width: 80%;
-  height: 60vh;
-  background-color: #0a0a0a;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(45deg, #111, #050505);
 }
 
 .work-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.6), transparent 70%);
-  opacity: 0.4;
+  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+  transition: background 0.4s ease;
 }
 
-.work-item:hover .work-image-placeholder {
-  transform: scale(0.99) translateY(-10px);
-  border-color: var(--accent-neon);
+.work-item:hover .work-media-container {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .work-meta {
-  width: 80%;
+  width: 85%;
   text-align: left;
 }
 
 .work-meta h3 {
-  font-size: clamp(3rem, 8vw, 10rem);
-  margin-bottom: 1.5rem;
+  font-size: clamp(2.5rem, 7vw, 9rem);
+  margin-bottom: 1.2rem;
   color: var(--text-primary);
-  line-height: 0.9;
+  line-height: 0.85;
   font-weight: 900;
   text-transform: uppercase;
   font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 .work-details {
@@ -99,27 +118,27 @@
   justify-content: space-between;
   align-items: flex-end;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 1.5rem;
-}
-
-.work-details span:first-child {
-  max-width: 60%;
+  letter-spacing: 0.15em;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 1.2rem;
+  opacity: 0.6;
 }
 
 @media (max-width: 768px) {
-  .work-image-placeholder {
+  .work-item {
+    padding-top: 100px;
+  }
+  .work-media-container {
     width: 100%;
-    height: 40vh;
+    height: 35vh;
   }
   .work-meta {
     width: 100%;
   }
   .work-meta h3 {
-    font-size: clamp(2rem, 12vw, 4rem);
+    font-size: clamp(1.8rem, 10vw, 3.5rem);
   }
 }
