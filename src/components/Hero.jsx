@@ -21,7 +21,7 @@ export default function Hero() {
         delay: 0.5
       });
 
-      // Quick letter-by-letter animation for main title
+      // Infinite letter-by-letter animation for main title without scroll effect
       const letters = self.selector('.title-word .char');
       gsap.fromTo(letters, 
         { y: 30, opacity: 0, scale: 0.8 },
@@ -29,10 +29,13 @@ export default function Hero() {
           y: 0, 
           opacity: 1, 
           scale: 1, 
-          duration: 0.6, 
-          stagger: 0.04, 
+          duration: 0.4, 
+          stagger: 0.05, 
           ease: 'back.out(1.5)', 
-          delay: 0.2
+          delay: 0.2,
+          repeat: -1,
+          repeatDelay: 1.5,
+          yoyo: true // Makes them disappear smoothly before restarting
         }
       );
       
