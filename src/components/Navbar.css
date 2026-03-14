@@ -23,6 +23,8 @@
 
 .nav-left, .nav-right {
   pointer-events: auto;
+  z-index: 1001;
+  position: relative;
 }
 
 .nav-logo {
@@ -267,7 +269,7 @@
   .discovery-text {
     font-size: 1.8rem;
   }
-  .link-title, .nav-link-item::after {
-    font-size: clamp(2rem, 10vw, 4rem);
+  .link-title {
+    font-size: clamp(2rem, 8vw, 3.5rem);
   }
 }
