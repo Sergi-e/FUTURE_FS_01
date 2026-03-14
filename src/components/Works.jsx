@@ -26,14 +26,6 @@ const projects = [
     mediaType: 'video',
     mediaPath: kivuVid
   },
-  { 
-    id: 3, 
-    title: 'NEURAL NEXUS', 
-    subtitle: 'AI-Powered Project Management Hub', 
-    year: '2026',
-    link: '#',
-    mediaType: 'placeholder'
-  },
 ];
 
 export default function Works() {
@@ -52,7 +44,7 @@ export default function Works() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: () => `+=${window.innerHeight * (workItems.length)}`,
+          end: () => `+=${window.innerHeight * (workItems.length - 1)}`,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
