@@ -9,10 +9,10 @@ export default function Hero() {
   useEffect(() => {
     if (!container.current) return;
     let ctx = gsap.context((self) => {
-      const elements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-main-title h1, .hero-subtitle');
+      const otherElements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-subtitle, .hero-actions-minimal');
       
-      // Reveal animation
-      gsap.from(elements, {
+      // Reveal animation for non-title elements
+      gsap.from(otherElements, {
         y: 40,
         opacity: 0,
         duration: 1.5,
@@ -20,6 +20,21 @@ export default function Hero() {
         ease: 'power4.out',
         delay: 0.5
       });
+
+      // Quick letter-by-letter animation for main title
+      const letters = self.selector('.title-word .char');
+      gsap.fromTo(letters, 
+        { y: 30, opacity: 0, scale: 0.8 },
+        { 
+          y: 0, 
+          opacity: 1, 
+          scale: 1, 
+          duration: 0.6, 
+          stagger: 0.04, 
+          ease: 'back.out(1.5)', 
+          delay: 0.2
+        }
+      );
       
       gsap.to('.hero-portrait-glow', {
         opacity: 0.6,
@@ -32,6 +47,14 @@ export default function Hero() {
 
     return () => ctx.revert();
   }, []);
+
+  const splitTextToSpans = (text) => {
+    return text.split('').map((char, index) => (
+      <span key={index} className="char" style={{ display: 'inline-block', whiteSpace: 'pre' }}>
+        {char}
+      </span>
+    ));
+  };
 
   return (
     <section className="hero" id="home" ref={container}>
@@ -53,8 +76,14 @@ export default function Hero() {
         </div>
 
         <div className="hero-main-title">
-          <h1 className="hero-title-text">Full-stack</h1>
-          <h1 className="hero-title-text accent-text">Developer</h1>
+          <div className="title-row title-row-top">
+            <span className="title-word">{splitTextToSpans("FULL")}</span>
+            <span className="title-word title-hyphen">{splitTextToSpans("-")}</span>
+            <span className="title-word">{splitTextToSpans("STACK")}</span>
+          </div>
+          <div className="title-row title-row-bottom">
+            <span className="title-word accent-text">{splitTextToSpans("DEVELOPER")}</span>
+          </div>
         </div>
         
         <p className="hero-subtitle">
