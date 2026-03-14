@@ -1,8 +1,8 @@
 .theme-switcher {
-  position: fixed;
-  top: 40px;
-  right: 120px;
+  position: relative;
+  /* top/right removed to allow flex positioning in Navbar */
   z-index: 1000;
+  margin-right: 20px;
 }
 
 .theme-button {
