@@ -13,8 +13,8 @@
 
 .hobbies-tag-alt {
   font-family: var(--font-sans);
-  font-size: 0.8rem;
-  letter-spacing: 5px;
+  font-size: 1.4rem;
+  letter-spacing: 0.25em;
   color: var(--accent-neon, #ccff00);
   opacity: 0.6;
   text-transform: uppercase;
@@ -36,16 +36,17 @@
 .hobbies-list-alt {
   display: flex;
   flex-direction: column;
-  gap: 8vw;
+  gap: 3vw;
 }
 
 .hobby-row-alt {
   display: flex;
   justify-content: center;
-  gap: 8vw;
+  gap: 3vw;
   align-items: center;
   position: relative;
-  min-height: 30vh;
+  min-height: auto;
+  padding: 3vh 0;
 }
 
 .hobby-row-alt:nth-child(even) {
@@ -138,23 +139,25 @@
 
 /* Books Section */
 .books-section {
-  margin-top: 15vw;
+  margin-top: 5vw;
   position: relative;
   z-index: 10;
 }
 
 .books-marquee-container {
-  width: 100%;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
   overflow: hidden;
   position: relative;
-  padding: 40px 0;
+  padding: 80px 0;
   display: flex;
 }
 
 .books-marquee {
   display: flex;
-  gap: 40px;
+  gap: 60px;
   min-width: max-content;
+  padding: 0 5vw;
 }
 
 .book-item {
