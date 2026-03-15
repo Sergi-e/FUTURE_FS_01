@@ -6,6 +6,7 @@ import './Navbar.css';
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const prevScrollPos = useRef(window.pageYOffset);
   const menuRef = useRef(null);
   const linksRef = useRef([]);
@@ -16,6 +17,8 @@ export default function Navbar() {
     const handleScroll = () => {
       const currentScrollPos = window.pageYOffset;
       const isVisible = prevScrollPos.current > currentScrollPos || currentScrollPos < 10;
+      
+      setScrolled(currentScrollPos > 50);
 
       if (!isOpen) { 
         setVisible(isVisible);
@@ -66,7 +69,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className={`navbar ${!visible ? 'hidden' : ''} ${isOpen ? 'menu-open' : ''}`}>
+    <nav className={`navbar ${!visible ? 'hidden' : ''} ${isOpen ? 'menu-open' : ''} ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-left">
         <div className="nav-logo">SERGE ISHIMWE</div>
       </div>
