@@ -19,12 +19,13 @@ const booksData = [
   { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/isbn/9781593274245-L.jpg' },
   { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/isbn/9780140280197-L.jpg' },
   { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/isbn/9780143111375-L.jpg' },
-  { id: 'b5', title: 'Think and Grow Rich', image: 'https://covers.openlibrary.org/b/isbn/9781585424337-L.jpg' }
+  { id: 'b5', title: 'Atomic Habits', image: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg' }
 ];
 
 export default function Hobbies() {
   const sectionRef = useRef(null);
   const itemsRef = useRef([]);
+  const booksWrapperRef = useRef(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -61,24 +62,22 @@ export default function Hobbies() {
           }
         );
       });
-
-      const booksMarquee = document.querySelector('.books-marquee');
-      if (booksMarquee) {
-        gsap.to(booksMarquee, {
-          xPercent: -50,
-          ease: "none",
-          scrollTrigger: {
-            trigger: '.books-section',
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.5
-          }
-        });
-      }
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
+
+  const scrollLeft = () => {
+    if(booksWrapperRef.current) {
+      booksWrapperRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if(booksWrapperRef.current) {
+      booksWrapperRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="hobbies-innovative" id="hobbies" ref={sectionRef}>
@@ -116,13 +115,21 @@ export default function Hobbies() {
           <h2 className="hobbies-main-title" style={{ fontSize: '2.5rem' }}>BOOKS I READ</h2>
         </div>
         <div className="books-marquee-container">
-          <div className="books-marquee">
-            {booksData.concat(booksData).map((book, idx) => (
-              <div key={idx} className="book-item">
-                <img src={book.image} alt={book.title} className="book-img" />
-              </div>
-            ))}
+          <button className="book-scroll-btn left" onClick={scrollLeft} aria-label="Scroll left">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div className="books-marquee-wrapper" ref={booksWrapperRef}>
+            <div className="books-marquee">
+              {booksData.map((book, idx) => (
+                <div key={idx} className="book-item">
+                  <img src={book.image} alt={book.title} className="book-img" />
+                </div>
+              ))}
+            </div>
           </div>
+          <button className="book-scroll-btn right" onClick={scrollRight} aria-label="Scroll right">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
         </div>
       </div>
     </section>
