@@ -14,6 +14,14 @@ const hobbiesData = [
   { id: '03', name: 'GAMING', image: gamepadImg, desc: 'Immersive worlds and tactical depth. Exploring digital frontiers and competitive strategy.' }
 ];
 
+const booksData = [
+  { id: 'b1', title: 'The Pragmatic Programmer', image: 'https://covers.openlibrary.org/b/isbn/9780135957059-L.jpg' },
+  { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/isbn/9781593274245-L.jpg' },
+  { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/isbn/9780140280197-L.jpg' },
+  { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/isbn/9780143111375-L.jpg' },
+  { id: 'b5', title: 'Think and Grow Rich', image: 'https://covers.openlibrary.org/b/isbn/9781585424337-L.jpg' }
+];
+
 export default function Hobbies() {
   const sectionRef = useRef(null);
   const itemsRef = useRef([]);
@@ -53,6 +61,20 @@ export default function Hobbies() {
           }
         );
       });
+
+      const booksMarquee = document.querySelector('.books-marquee');
+      if (booksMarquee) {
+        gsap.to(booksMarquee, {
+          xPercent: -50,
+          ease: "none",
+          scrollTrigger: {
+            trigger: '.books-section',
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.5
+          }
+        });
+      }
     }, sectionRef);
 
     return () => ctx.revert();
@@ -86,6 +108,22 @@ export default function Hobbies() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="books-section">
+        <div className="hobbies-header-alt">
+          <span className="hobbies-tag-alt">READING LIST</span>
+          <h2 className="hobbies-main-title" style={{ fontSize: '2.5rem' }}>BOOKS I READ</h2>
+        </div>
+        <div className="books-marquee-container">
+          <div className="books-marquee">
+            {booksData.concat(booksData).map((book, idx) => (
+              <div key={idx} className="book-item">
+                <img src={book.image} alt={book.title} className="book-img" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );
