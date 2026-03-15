@@ -36,12 +36,13 @@
 .hobbies-list-alt {
   display: flex;
   flex-direction: column;
-  gap: 15vw;
+  gap: 8vw;
 }
 
 .hobby-row-alt {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8vw;
   align-items: center;
   position: relative;
   min-height: 30vh;
@@ -132,5 +133,66 @@
   .hobby-float-img {
     width: 150px;
     height: 150px;
+  }
+}
+
+/* Books Section */
+.books-section {
+  margin-top: 15vw;
+  position: relative;
+  z-index: 10;
+}
+
+.books-marquee-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 40px 0;
+  display: flex;
+}
+
+.books-marquee {
+  display: flex;
+  gap: 40px;
+  min-width: max-content;
+}
+
+.book-item {
+  width: 180px;
+  height: 270px;
+  flex-shrink: 0;
+  position: relative;
+  transform: rotate(10deg);
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  background-color: #111;
+}
+
+.book-item:nth-child(even) {
+  transform: rotate(-10deg) translateY(20px);
+}
+
+.book-item:nth-child(3n) {
+  transform: rotate(5deg) translateY(-10px);
+}
+
+.book-item:hover {
+  transform: rotate(0deg) scale(1.1) !important;
+  z-index: 10;
+  box-shadow: 0 20px 45px rgba(204, 255, 0, 0.2);
+}
+
+.book-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .book-item {
+    width: 140px;
+    height: 210px;
   }
 }
