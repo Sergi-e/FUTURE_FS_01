@@ -65,11 +65,25 @@ export default function Hero() {
       <div className="hero-top-glow"></div>
       
       <div className="hero-info-bar">
-        <span className="info-location top-right-loc">KIGALI, RWANDA</span>
+        <a 
+          href="https://maps.google.com/?q=Kigali,+Rwanda" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="info-location-link"
+        >
+          <span className="info-location top-right-loc">KIGALI, RWANDA</span>
+        </a>
       </div>
 
       <div className="hero-bottom-info">
-        <span className="info-location bottom-right-loc">ACCRA, GHANA</span>
+        <a 
+          href="https://maps.google.com/?q=Accra,+Ghana" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="info-location-link"
+        >
+          <span className="info-location bottom-right-loc">ACCRA, GHANA</span>
+        </a>
       </div>
 
       <div className="hero-content-centered">
