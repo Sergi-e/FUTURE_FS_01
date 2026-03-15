@@ -43,13 +43,16 @@ export default function Works() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top -120px",
-          end: () => `+=${window.innerHeight * (workItems.length - 1)}`,
+          start: "top top",
+          end: () => `+=${window.innerHeight * workItems.length}`,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
         }
       });
+
+      // Pause at the start to let user read the first project
+      tl.to({}, { duration: 1 });
 
       // Diagonal Slide-away transition (Bottom-Left)
       workItems.forEach((item, i) => {
@@ -62,7 +65,11 @@ export default function Works() {
           scale: 0.8,
           opacity: 0,
           ease: "none",
-        }, i); // Each transition happens sequentially based on scroll
+          duration: 1
+        });
+        
+        // Pause to let user read the NEXT project 
+        tl.to({}, { duration: 1 });
       });
       
     }, sectionRef);
