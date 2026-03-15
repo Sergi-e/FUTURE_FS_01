@@ -52,10 +52,10 @@
 
 .hero-info-bar span {
   font-family: var(--font-sans);
-  font-size: 1.4rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #666;
-  letter-spacing: 0.25em;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
 }
 
@@ -75,12 +75,24 @@
   z-index: 10;
 }
 
+.info-location-link {
+  text-decoration: none;
+  transition: all 0.3s ease;
+  z-index: 20;
+}
+
+.info-location-link:hover .info-location {
+  color: var(--accent-neon, #ccff00);
+  opacity: 1;
+  text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
+}
+
 .bottom-right-loc {
   font-family: var(--font-sans);
-  font-size: 1.4rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #666;
-  letter-spacing: 0.25em;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   opacity: 0.8;
 }
