@@ -43,7 +43,7 @@ export default function Works() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top top",
+          start: "top -120px",
           end: () => `+=${window.innerHeight * (workItems.length - 1)}`,
           pin: true,
           scrub: 1,
