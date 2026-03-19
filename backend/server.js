@@ -93,6 +93,26 @@ app.delete('/api/messages/:id', authenticate, async (req, res) => {
   res.json({ success: true });
 });
 
+// --- Testimonials ---
+app.get('/api/testimonials', async (req, res) => {
+  const testimonials = await db.all('SELECT * FROM testimonials ORDER BY id ASC');
+  res.json(testimonials);
+});
+
+app.post('/api/testimonials', authenticate, async (req, res) => {
+  const { name, role, location, image, quote, tag } = req.body;
+  const result = await db.run(
+    'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+    [name, role, location, image, quote, tag]
+  );
+  res.json({ id: result.lastID, name, role, location, image, quote, tag });
+});
+
+app.delete('/api/testimonials/:id', authenticate, async (req, res) => {
+  await db.run('DELETE FROM testimonials WHERE id = ?', [req.params.id]);
+  res.json({ success: true });
+});
+
 async function startServer() {
   db = await setupDatabase();
   app.listen(PORT, () => {
