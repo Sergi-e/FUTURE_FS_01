@@ -1,54 +1,39 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import './Testimonials.css';
-import testimonial1 from '../assets/testimonial_1.png';
-import testimonial2 from '../assets/testimonial_2.png';
-import sergePortrait from '../assets/serge_portrait.png';
-
-const testimonialsData = [
-  {
-    name: "ALEX RIVERA",
-    role: "TECH ARCHITECT",
-    location: "SAN FRANCISCO, CA",
-    image: testimonial1,
-    quote: "Serge is a tech enthusiast whose work involves programming and data analysis, turning unstructured, real problems into systems that operate reliably.",
-    tag: "IMG_ID: 01"
-  },
-  {
-    name: "SARAH CHEN",
-    role: "PROJECT MANAGER",
-    location: "LONDON, UK",
-    image: testimonial2,
-    quote: "Working with Serge was a game-changer. His ability to craft immersive digital experiences while maintaining clean, robust fullstack code is truly exceptional.",
-    tag: "IMG_ID: 02"
-  },
-  {
-    name: "DAVID OKORO",
-    role: "PRODUCT DESIGNER",
-    location: "LAGOS, NIGERIA",
-    image: sergePortrait,
-    quote: "Beyond the screen, Serge is a committed professional dedicated to protecting our environment. His passion for both tech and conservation is inspiring.",
-    tag: "IMG_ID: 03"
-  }
-];
 
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
+  const [testimonials, setTestimonials] = useState([]);
   const textRef = useRef(null);
   const infoRef = useRef(null);
   const imageRef = useRef(null);
 
+  useEffect(() => {
+    fetch('http://localhost:5000/api/testimonials')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          setTestimonials(data);
+        }
+      })
+      .catch(err => console.error("Failed to fetch testimonials", err));
+  }, []);
+
   const nextTestimonial = () => {
-    const nextIdx = (index + 1) % testimonialsData.length;
+    if (testimonials.length === 0) return;
+    const nextIdx = (index + 1) % testimonials.length;
     animateChange(nextIdx, -20);
   };
 
   const prevTestimonial = () => {
-    const nextIdx = (index - 1 + testimonialsData.length) % testimonialsData.length;
+    if (testimonials.length === 0) return;
+    const nextIdx = (index - 1 + testimonials.length) % testimonials.length;
     animateChange(nextIdx, 20);
   };
 
   const animateChange = (nextIdx, yOffset) => {
+    if (testimonials.length === 0) return;
     const tl = gsap.timeline();
 
     tl.to([textRef.current, infoRef.current, imageRef.current], {
@@ -65,7 +50,17 @@ export default function Testimonials() {
     });
   };
 
-  const current = testimonialsData[index];
+  if (testimonials.length === 0) {
+    return (
+      <section className="testimonials" id="testimonials">
+        <div className="testimonials-header">
+          <h2 className="testimonials-title">TESTIMONIALS</h2>
+        </div>
+      </section>
+    );
+  }
+
+  const current = testimonials[index];
 
   return (
     <section className="testimonials" id="testimonials">
@@ -89,7 +84,7 @@ export default function Testimonials() {
           <div className="testimonials-nav">
             <button onClick={prevTestimonial} className="nav-btn cursor-hover">← PREV</button>
             <div className="nav-progress">
-              <div className="progress-bar" style={{ width: `${((index + 1) / testimonialsData.length) * 100}%` }}></div>
+              <div className="progress-bar" style={{ width: `${((index + 1) / testimonials.length) * 100}%` }}></div>
             </div>
             <button onClick={nextTestimonial} className="nav-btn cursor-hover">NEXT →</button>
           </div>
