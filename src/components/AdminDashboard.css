@@ -1,0 +1,159 @@
+.admin-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: white;
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  background: #111;
+  padding: 40px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+}
+
+.admin-login-form h2 {
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: var(--font-display);
+}
+
+.admin-login-form input, .admin-form input, .admin-form select {
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #333;
+  background: #222;
+  color: white;
+  font-family: var(--font-sans);
+}
+
+.admin-login-form button, .admin-form button {
+  padding: 12px;
+  background: var(--accent-neon);
+  color: black;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.admin-login-form button:hover, .admin-form button:hover {
+  opacity: 0.8;
+}
+
+.admin-dashboard {
+  display: flex;
+  height: 100vh;
+  background-color: var(--bg-color);
+  color: white;
+  font-family: var(--font-sans);
+}
+
+.admin-sidebar {
+  width: 250px;
+  background: #0f0f0f;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+.admin-logo {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 40px;
+  color: var(--accent-neon);
+}
+
+.admin-sidebar button {
+  background: transparent;
+  color: #ccc;
+  border: none;
+  text-align: left;
+  padding: 15px 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  transition: all 0.3s;
+}
+
+.admin-sidebar button:hover, .admin-sidebar button.active {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.logout-btn {
+  margin-top: auto;
+  color: #ff4a4a !important;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+.admin-panel h2 {
+  font-family: var(--font-display);
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 10px;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-width: 600px;
+  margin-bottom: 40px;
+  background: #111;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.admin-list-item {
+  display: flex;
+  justify-content: space-between;
+  background: #1a1a1a;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.admin-list-item button, .message-card button {
+  background: #ff4a4a;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.message-card {
+  background: #1a1a1a;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+.msg-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  color: #aaa;
+  font-size: 0.9rem;
+}
+
+.msg-header strong {
+  color: white;
+}
