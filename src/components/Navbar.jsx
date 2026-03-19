@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import ThemeSwitcher from './ThemeSwitcher';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -75,7 +74,13 @@ export default function Navbar() {
       </div>
 
       <div className="nav-right">
-        <ThemeSwitcher />
+        <div className="nav-links-desktop">
+          {navLinks.map((link) => (
+            <a key={link.name} href={link.href} className="desktop-link" onClick={() => setIsOpen(false)}>
+              {link.name}
+            </a>
+          ))}
+        </div>
         <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
           <span className="line"></span>
           <span className="line"></span>
