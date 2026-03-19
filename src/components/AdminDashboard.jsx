@@ -11,9 +11,14 @@ export default function AdminDashboard() {
   
   const [projects, setProjects] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   
   const [newProject, setNewProject] = useState({
     title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
+  });
+
+  const [newTestimonial, setNewTestimonial] = useState({
+    name: '', role: '', location: '', image: '', quote: '', tag: ''
   });
 
   useEffect(() => {
@@ -33,6 +38,10 @@ export default function AdminDashboard() {
       });
       const msgData = await msgRes.json();
       setMessages(msgData);
+
+      const testRes = await fetch(`${API_URL}/testimonials`);
+      const testData = await testRes.json();
+      setTestimonials(testData);
     } catch (err) {
       console.error('Failed to fetch data', err);
     }
@@ -94,6 +103,34 @@ export default function AdminDashboard() {
     fetchData();
   };
 
+  const handleAddTestimonial = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/testimonials`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(newTestimonial)
+      });
+      if (res.ok) {
+        setNewTestimonial({ name: '', role: '', location: '', image: '', quote: '', tag: '' });
+        fetchData();
+      }
+    } catch (err) {
+      alert("Failed to add testimonial");
+    }
+  };
+
+  const handleDeleteTestimonial = async (id) => {
+    await fetch(`${API_URL}/testimonials/${id}`, {
+      method: 'DELETE',
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    fetchData();
+  };
+
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem('adminToken');
@@ -118,6 +155,7 @@ export default function AdminDashboard() {
         <div className="admin-logo">SERGE ADMIN</div>
         <button className={activeTab === 'projects' ? 'active' : ''} onClick={() => setActiveTab('projects')}>Projects</button>
         <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>Contact Messages</button>
+        <button className={activeTab === 'testimonials' ? 'active' : ''} onClick={() => setActiveTab('testimonials')}>Testimonials</button>
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
       <div className="admin-content">
@@ -163,6 +201,33 @@ export default function AdminDashboard() {
                   </div>
                   <p>{m.message}</p>
                   <button onClick={() => handleDeleteMessage(m.id)}>Delete</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'testimonials' && (
+          <div className="admin-panel">
+            <h2>Manage Testimonials</h2>
+            <form className="admin-form" onSubmit={handleAddTestimonial}>
+              <h3>Add New Testimonial</h3>
+              <input type="text" placeholder="Name" value={newTestimonial.name} onChange={e => setNewTestimonial({...newTestimonial, name: e.target.value})} required />
+              <input type="text" placeholder="Role" value={newTestimonial.role} onChange={e => setNewTestimonial({...newTestimonial, role: e.target.value})} required />
+              <input type="text" placeholder="Location" value={newTestimonial.location} onChange={e => setNewTestimonial({...newTestimonial, location: e.target.value})} />
+              <input type="text" placeholder="Image Path (e.g. /assets/user.png)" value={newTestimonial.image} onChange={e => setNewTestimonial({...newTestimonial, image: e.target.value})} />
+              <textarea placeholder="Quote" value={newTestimonial.quote} onChange={e => setNewTestimonial({...newTestimonial, quote: e.target.value})} required />
+              <input type="text" placeholder="Tag (e.g. IMG_ID: 01)" value={newTestimonial.tag} onChange={e => setNewTestimonial({...newTestimonial, tag: e.target.value})} />
+              <button type="submit">Add Testimonial</button>
+            </form>
+
+            <div className="admin-list">
+              {testimonials.map(t => (
+                <div key={t.id} className="admin-list-item">
+                  <div>
+                    <strong>{t.name}</strong> - {t.role}
+                  </div>
+                  <button onClick={() => handleDeleteTestimonial(t.id)}>Delete</button>
                 </div>
               ))}
             </div>
