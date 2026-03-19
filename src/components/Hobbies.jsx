@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
@@ -24,47 +24,67 @@ const booksData = [
 
 export default function Hobbies() {
   const sectionRef = useRef(null);
-  const itemsRef = useRef([]);
   const booksWrapperRef = useRef(null);
 
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      itemsRef.current.forEach((item, index) => {
-        const image = item.querySelector('.hobby-float-img');
-        const text = item.querySelector('.hobby-name-big');
+    // Adding a slight delay guarantees that any layout shifts from other components loading are finished.
+    const timer = setTimeout(() => {
+      const ctx = gsap.context(() => {
+        // Query ALL rows natively from the DOM (avoids any React array tracking bugs entirely)
+        const rows = document.querySelectorAll('.hobby-row-alt');
+        
+        rows.forEach((row, index) => {
+          const image = row.querySelector('.hobby-float-img');
+          const text = row.querySelector('.hobby-name-big');
 
-        gsap.fromTo(image, 
-          { y: 50, rotate: -10, opacity: 0 },
-          { 
-            y: -50, 
-            rotate: 10, 
-            opacity: 1,
-            scrollTrigger: {
-              trigger: item,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: 1
-            }
+          if (image) {
+            // Strong vertical parallax and floating rotation effect
+            gsap.fromTo(image, 
+              { y: 100, rotation: -15, opacity: 0 },
+              { 
+                y: -100, 
+                rotation: 15, 
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: row,
+                  start: "top 95%",
+                  end: "bottom 5%",
+                  scrub: 1.5 // extremely smooth scrubbing
+                }
+              }
+            );
           }
-        );
 
-        gsap.fromTo(text,
-          { x: index % 2 === 0 ? -100 : 100, opacity: 0 },
-          {
-            x: 0,
-            opacity: 0.1,
-            scrollTrigger: {
-              trigger: item,
-              start: "top 80%",
-              end: "top 20%",
-              scrub: true
-            }
+          if (text) {
+            // Horizontal sliding background text
+            gsap.fromTo(text,
+              { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
+              {
+                x: 0,
+                opacity: 0.1,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: row,
+                  start: "top 85%",
+                  end: "center center",
+                  scrub: 1
+                }
+              }
+            );
           }
-        );
-      });
-    }, sectionRef);
+        });
+        
+        ScrollTrigger.refresh(); // Force recalculation of all start/end positions
 
-    return () => ctx.revert();
+      }, sectionRef);
+
+      return () => {
+        ctx.revert();
+      };
+    }, 100);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const scrollLeft = () => {
@@ -91,7 +111,6 @@ export default function Hobbies() {
           <div 
             key={hobby.id} 
             className="hobby-row-alt" 
-            ref={el => itemsRef.current[index] = el}
           >
             <div className="hobby-content-alt">
               <span className="hobby-num-alt">{hobby.id}</span>
