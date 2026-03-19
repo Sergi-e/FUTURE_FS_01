@@ -38,6 +38,15 @@ async function setupDatabase() {
       message TEXT,
       date TEXT
     );
+    CREATE TABLE IF NOT EXISTS testimonials (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT,
+      role TEXT,
+      location TEXT,
+      image TEXT,
+      quote TEXT,
+      tag TEXT
+    );
   `);
 
   // Seed admin user if not exists (password: admin123)
@@ -58,6 +67,23 @@ async function setupDatabase() {
     await db.run(
       'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
       ['BE THE LIGHT WEBSITE', 'Impactful Community Hub built with Lovable', '2025', 'https://bethe-light-hub.lovable.app/', 'image', '/assets/bethelight.png']
+    );
+  }
+
+  // Seed testimonials if empty
+  const testimonial = await db.get('SELECT * FROM testimonials');
+  if (!testimonial) {
+    await db.run(
+      'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+      ['ALEX RIVERA', 'TECH ARCHITECT', 'SAN FRANCISCO, CA', '/assets/testimonial_1.png', 'Serge is a tech enthusiast whose work involves programming and data analysis, turning unstructured, real problems into systems that operate reliably.', 'IMG_ID: 01']
+    );
+    await db.run(
+      'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+      ['SARAH CHEN', 'PROJECT MANAGER', 'LONDON, UK', '/assets/testimonial_2.png', 'Working with Serge was a game-changer. His ability to craft immersive digital experiences while maintaining clean, robust fullstack code is truly exceptional.', 'IMG_ID: 02']
+    );
+    await db.run(
+      'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+      ['DAVID OKORO', 'PRODUCT DESIGNER', 'LAGOS, NIGERIA', '/assets/serge_portrait.png', 'Beyond the screen, Serge is a committed professional dedicated to protecting our environment. His passion for both tech and conservation is inspiring.', 'IMG_ID: 03']
     );
   }
 
