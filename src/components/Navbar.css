@@ -25,13 +25,22 @@
   background-color: var(--bg-color, #0a0a0a);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-  padding: 5px 5vw;
+  padding: 12px 5vw;
 }
 
-.nav-left, .nav-right {
+.nav-left {
   pointer-events: auto;
   z-index: 1001;
   position: relative;
+}
+
+.nav-right {
+  pointer-events: auto;
+  z-index: 1001;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 35px;
 }
 
 .nav-logo {
@@ -49,7 +58,8 @@
 }
 
 .navbar.scrolled .hamburger {
-  transform: scale(0.8);
+  transform: scale(0.85);
+  padding: 8px 10px;
 }
 
 .hamburger {
@@ -79,6 +89,46 @@
 .hamburger.open .line:nth-child(1) { transform: translateY(8px) rotate(45deg); width: 28px; background: var(--accent-neon); }
 .hamburger.open .line:nth-child(2) { opacity: 0; transform: translateX(10px); }
 .hamburger.open .line:nth-child(3) { transform: translateY(-8px) rotate(-45deg); width: 28px; background: var(--accent-neon); }
+
+/* Desktop Navigation Links */
+.nav-links-desktop {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+/* Initially hide the links, reveal them only when scrolled */
+.nav-links-desktop {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.navbar.scrolled .nav-links-desktop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.desktop-link {
+  color: white;
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.3s;
+}
+
+.desktop-link:hover {
+  color: var(--accent-neon);
+}
+
+@media (max-width: 1024px) {
+  .nav-links-desktop {
+    display: none;
+  }
+}
 
 /* Redesigned Menu Overlay */
 .nav-menu {
