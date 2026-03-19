@@ -3,8 +3,8 @@
 :root {
   --bg-color: #050505;
   --text-primary: #f8f8f8;
-  --text-secondary: #888888;
-  --accent-neon: #ccff00; /* Default: Toxic chartreuse */
+  --text-secondary: #c0c0c0;
+  --accent-neon: #00f2ff; /* Cyber Theme */
   
   /* Transition for theme switching */
   --transition-speed: 0.5s;
