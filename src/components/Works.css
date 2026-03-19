@@ -27,7 +27,7 @@
   color: var(--text-primary);
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  opacity: 0.6;
+  opacity: 0.9;
 }
 
 .works-wrapper {
@@ -126,7 +126,7 @@
   letter-spacing: 0.15em;
   border-top: 1px solid rgba(255,255,255,0.05);
   padding-top: 1.2rem;
-  opacity: 0.6;
+  opacity: 0.95;
 }
 
 @media (max-width: 768px) {
