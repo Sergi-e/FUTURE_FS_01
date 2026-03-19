@@ -1,3 +1,4 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import SmoothScroll from './components/SmoothScroll';
 import Hero from './components/Hero';
@@ -7,8 +8,9 @@ import Works from './components/Works';
 import Testimonials from './components/Testimonials';
 import Hobbies from './components/Hobbies';
 import Contact from './components/Contact';
+import AdminDashboard from './components/AdminDashboard';
 
-export default function App() {
+function Portfolio() {
   return (
     <>
       <Navbar />
@@ -24,5 +26,16 @@ export default function App() {
         </main>
       </SmoothScroll>
     </>
+  );
+}
+
+export default function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Portfolio />} />
+        <Route path="/admin/*" element={<AdminDashboard />} />
+      </Routes>
+    </Router>
   );
 }
