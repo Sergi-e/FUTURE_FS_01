@@ -86,7 +86,7 @@ export default function Contact() {
       
       <footer className="footer">
         <div className="footer-left">
-          <span>2026 SergeIshimwe. All rights reserved.</span>
+          <span style={{ fontSize: '0.85rem', fontWeight: '300', letterSpacing: '0.05em' }}>Copyright © 2026 SergeIshimwe</span>
         </div>
         <div className="footer-right">
           <a href="https://www.linkedin.com/in/ishimwe-serge/" target="_blank" rel="noopener noreferrer" className="footer-social-link linkedin-link cursor-hover">
