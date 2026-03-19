@@ -1,43 +1,31 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import bethelightImg from '../assets/bethelight.png';
-import kivuVid from '../assets/kivu.mp4';
 import './Works.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-const projects = [
-  { 
-    id: 1, 
-    title: 'BE THE LIGHT WEBSITE', 
-    subtitle: 'Impactful Community Hub built with Lovable', 
-    year: '2025',
-    link: 'https://bethe-light-hub.lovable.app/',
-    mediaType: 'image',
-    mediaPath: bethelightImg
-  },
-  { 
-    id: 2, 
-    title: 'CLIMATE CHANGE IMPACT', 
-    subtitle: 'Marine Life Monitoring & Data Visualization via ArcGIS', 
-    year: '2025',
-    link: 'https://arcg.is/09v5GS1',
-    mediaType: 'video',
-    mediaPath: kivuVid
-  },
-];
-
 export default function Works() {
   const sectionRef = useRef(null);
   const wrapperRef = useRef(null);
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
+    fetch('http://localhost:5000/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) setProjects(data);
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (projects.length === 0) return;
+
     let ctx = gsap.context(() => {
       const workItems = gsap.utils.toArray('.work-item');
       
       // Initial positioning: Stack items on top of each other
-      // They are already absolutely positioned in CSS
       gsap.set(workItems, { zIndex: (i) => workItems.length - i });
 
       const tl = gsap.timeline({
@@ -74,8 +62,10 @@ export default function Works() {
       
     }, sectionRef);
 
-    return () => ctx.revert();
-  }, []);
+    return () => {
+      ctx.revert();
+    };
+  }, [projects]);
 
   return (
     <section className="works" id="projects" ref={sectionRef}>
@@ -84,6 +74,7 @@ export default function Works() {
       </div>
       
       <div className="works-wrapper" ref={wrapperRef}>
+        {projects.length === 0 && <div className="work-item"><h3 style={{color: 'white'}}>Loading Projects...</h3></div>}
         {projects.map((project) => (
           <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-item" key={project.id}>
             <div className="work-media-container cursor-hover">
