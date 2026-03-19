@@ -21,7 +21,7 @@ const projects = [
     id: 2, 
     title: 'CLIMATE CHANGE IMPACT', 
     subtitle: 'Marine Life Monitoring & Data Visualization via ArcGIS', 
-    year: '2026',
+    year: '2025',
     link: 'https://arcg.is/09v5GS1',
     mediaType: 'video',
     mediaPath: kivuVid
