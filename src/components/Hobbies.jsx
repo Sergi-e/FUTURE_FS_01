@@ -15,11 +15,11 @@ const hobbiesData = [
 ];
 
 const booksData = [
-  { id: 'b1', title: 'The Pragmatic Programmer', image: 'https://covers.openlibrary.org/b/isbn/9780135957059-L.jpg' },
-  { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/isbn/9781593274245-L.jpg' },
-  { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/isbn/9780140280197-L.jpg' },
-  { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/isbn/9780143111375-L.jpg' },
-  { id: 'b5', title: 'Atomic Habits', image: 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg' }
+  { id: 'b1', title: 'The Pragmatic Programmer', image: 'https://covers.openlibrary.org/b/id/10143650-L.jpg' },
+  { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/id/11917842-L.jpg' },
+  { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/id/6424160-L.jpg' },
+  { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/id/10170095-L.jpg' },
+  { id: 'b5', title: 'Atomic Habits', image: 'https://covers.openlibrary.org/b/id/12539702-L.jpg' }
 ];
 
 export default function Hobbies() {
