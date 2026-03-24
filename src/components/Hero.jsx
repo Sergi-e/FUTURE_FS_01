@@ -112,7 +112,7 @@ export default function Hero() {
         </div>
         
         <p className="hero-subtitle">
-          Hello. I'm Serge, a full-stack developer, and an Aspiring AI Engineer. I craft <strong>strategic, user-focused</strong> digital products that ensure reliable systems and <strong>measurable impact</strong>. <a href="#philosophy" className="hero-more-link">more</a>
+          Hello. I'm Serge, a full-stack developer, and an Aspiring AI Engineer. I craft <strong>strategic, user-focused</strong> digital products that ensure reliable systems and <strong>measurable impact</strong>. <a href="#approach" className="hero-more-link">more</a>
         </p>
 
         <div className="hero-actions-minimal">
