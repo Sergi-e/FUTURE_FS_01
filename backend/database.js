@@ -47,6 +47,10 @@ async function setupDatabase() {
       quote TEXT,
       tag TEXT
     );
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT
+    );
   `);
 
   // Seed admin user if not exists (password: admin123)
@@ -85,6 +89,12 @@ async function setupDatabase() {
       'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
       ['DAVID OKORO', 'PRODUCT DESIGNER', 'LAGOS, NIGERIA', '/assets/serge_portrait.png', 'Beyond the screen, Serge is a committed professional dedicated to protecting our environment. His passion for both tech and conservation is inspiring.', 'IMG_ID: 03']
     );
+  }
+
+  // Seed settings if empty
+  const setting = await db.get('SELECT * FROM settings WHERE key = ?', ['resume_url']);
+  if (!setting) {
+    await db.run('INSERT INTO settings (key, value) VALUES (?, ?)', ['resume_url', '/Serge_Ishimwe_Resume.pdf']);
   }
 
   return db;
