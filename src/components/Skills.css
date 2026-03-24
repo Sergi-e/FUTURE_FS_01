@@ -269,18 +269,16 @@
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 20px;
+  opacity: 1;
   visibility: visible;
   overflow: hidden;
-  /* GSAP scrub will directly animate transform and opacity */
-  transition: background-color 0.4s ease, border-color 0.4s ease;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .skill-card:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: var(--accent-neon, #ccff00);
-  /* Use explicit !important so hover overrides any residual transform if needed, though GSAP scrub might hold values tightly */
-  transform: translateY(-10px) !important;
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.4s ease, border-color 0.4s ease;
+  transform: translateY(-10px);
 }
 
 .skill-category {
