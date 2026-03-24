@@ -27,17 +27,18 @@
 
 .testimonials-layout {
   display: grid;
-  grid-template-columns: 0.8fr 1.2fr;
+  grid-template-columns: 1fr 1.1fr;
   gap: 3rem;
   width: 100%;
   max-width: 1200px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .testimonials-visual {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  margin-top: 3.5rem; /* Push the left section down a little bit */
 }
 
 .image-container {
@@ -54,8 +55,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.9;
-  filter: grayscale(20%);
 }
 
 .image-overlay {
@@ -158,7 +157,7 @@
 
 .testimonials-intro-text {
   font-family: var(--font-sans);
-  font-size: clamp(1.2rem, 2.5vw, 2.2rem);
+  font-size: clamp(1rem, 2.2vw, 1.75rem);
   font-weight: 600;
   line-height: 1.3;
   color: var(--text-primary);

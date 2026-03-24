@@ -71,14 +71,6 @@ export default function Testimonials() {
         <div className="testimonials-visual">
           <div className="image-container">
             <img src={current.image} alt={current.name} className="testimonials-image" ref={imageRef} />
-            <div className="image-overlay">
-              <div className="overlay-top-left"></div>
-              <div className="overlay-bottom-right">
-                <span className="overlay-tag">{current.tag}</span>
-                <span className="overlay-tag">RES: 4K</span>
-              </div>
-              <div className="scanning-line"></div>
-            </div>
           </div>
           
           <div className="testimonials-nav">
