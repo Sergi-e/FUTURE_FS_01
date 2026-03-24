@@ -40,6 +40,38 @@ export default function Skills() {
         duration: 40,
         ease: "none"
       });
+
+      // Highly visible SCRUB GSAP effect!
+      // This is impossible to miss since it physically animates back and forth AS the user scrolls over it.
+      const cards = gsap.utils.toArray('.skill-card');
+      
+      cards.forEach((card, i) => {
+        // We stagger their apparent starting positions so they move up at different rates (Parallax effect)
+        gsap.fromTo(card, 
+          { 
+            y: 100 + (i % 2 === 0 ? 50 : 0), // Odds and evens start at slightly different depths
+            opacity: 0.2,
+            scale: 0.95
+          }, 
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            ease: "none", // Since scrub is true, ease: "none" is best
+            scrollTrigger: {
+              trigger: card,
+              start: "top bottom", // Starts when top of card hits bottom of viewport
+              end: "top 60%",      // Ends when top of card hits 60% up the viewport
+              scrub: 1,            // Smooth animation heavily tied to the scroll position
+            }
+          }
+        );
+      });
+
+      // Crucial: since 'Ethos.jsx' above this pins its content dynamically, it changes the document height.
+      // Refresh ScrollTrigger to recalculate exact card positions after Vite/React layout finishes building!
+      setTimeout(() => ScrollTrigger.refresh(), 500);
+      
     }, sectionRef);
 
     return () => ctx.revert();
