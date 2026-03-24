@@ -59,7 +59,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'HOME', href: '#home' },
-    { name: 'PHILOSOPHY', href: '#philosophy' },
+    { name: 'APPROACH', href: '#approach' },
     { name: 'SKILLS', href: '#skills' },
     { name: 'PROJECTS', href: '#projects' },
     { name: 'TESTIMONIALS', href: '#testimonials' },
