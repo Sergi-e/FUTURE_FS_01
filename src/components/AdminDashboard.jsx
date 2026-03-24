@@ -12,6 +12,7 @@ export default function AdminDashboard() {
   const [projects, setProjects] = useState([]);
   const [messages, setMessages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
+  const [resumeUrl, setResumeUrl] = useState('');
   
   const [newProject, setNewProject] = useState({
     title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
@@ -42,6 +43,10 @@ export default function AdminDashboard() {
       const testRes = await fetch(`${API_URL}/testimonials`);
       const testData = await testRes.json();
       setTestimonials(testData);
+
+      const setRes = await fetch(`${API_URL}/settings/resume`);
+      const setData = await setRes.json();
+      setResumeUrl(setData.value);
     } catch (err) {
       console.error('Failed to fetch data', err);
     }
@@ -131,6 +136,27 @@ export default function AdminDashboard() {
     fetchData();
   };
 
+  const handleUpdateResume = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`${API_URL}/settings/resume`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ value: resumeUrl })
+      });
+      if (res.ok) {
+        alert("Resume updated successfully!");
+      } else {
+        alert("Failed to update resume");
+      }
+    } catch (err) {
+      alert("Error updating resume");
+    }
+  };
+
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem('adminToken');
@@ -156,6 +182,7 @@ export default function AdminDashboard() {
         <button className={activeTab === 'projects' ? 'active' : ''} onClick={() => setActiveTab('projects')}>Projects</button>
         <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>Contact Messages</button>
         <button className={activeTab === 'testimonials' ? 'active' : ''} onClick={() => setActiveTab('testimonials')}>Testimonials</button>
+        <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>Settings</button>
         <button className="logout-btn" onClick={handleLogout}>Logout</button>
       </div>
       <div className="admin-content">
@@ -231,6 +258,24 @@ export default function AdminDashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {activeTab === 'settings' && (
+          <div className="admin-panel">
+            <h2>Website Settings</h2>
+            <form className="admin-form" onSubmit={handleUpdateResume}>
+              <h3>Resume Link</h3>
+              <p style={{marginBottom: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>Update the link to your resume. This can be a file path (e.g. <code>/Serge_Ishimwe_Resume.pdf</code>) or an external URL.</p>
+              <input 
+                type="text" 
+                placeholder="Resume URL or Path" 
+                value={resumeUrl} 
+                onChange={e => setResumeUrl(e.target.value)} 
+                required 
+              />
+              <button type="submit">Update Resume</button>
+            </form>
           </div>
         )}
       </div>
