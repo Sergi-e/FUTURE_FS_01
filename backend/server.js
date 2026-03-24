@@ -113,6 +113,23 @@ app.delete('/api/testimonials/:id', authenticate, async (req, res) => {
   res.json({ success: true });
 });
 
+// --- Settings ---
+app.get('/api/settings/resume', async (req, res) => {
+  const setting = await db.get('SELECT value FROM settings WHERE key = ?', ['resume_url']);
+  res.json({ value: setting ? setting.value : '/Serge_Ishimwe_Resume.pdf' });
+});
+
+app.put('/api/settings/resume', authenticate, async (req, res) => {
+  const { value } = req.body;
+  if (!value) return res.status(400).json({ error: 'Value is required' });
+  
+  await db.run(
+    'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
+    ['resume_url', value]
+  );
+  res.json({ success: true, value });
+});
+
 async function startServer() {
   db = await setupDatabase();
   app.listen(PORT, () => {
