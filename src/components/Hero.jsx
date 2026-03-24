@@ -1,12 +1,20 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
 
 export default function Hero() {
   const container = useRef(null);
+  const [resumeUrl, setResumeUrl] = useState('/Serge_Ishimwe_Resume.pdf');
 
   useEffect(() => {
+    fetch('http://localhost:5000/api/settings/resume')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.value) setResumeUrl(data.value);
+      })
+      .catch(err => console.error('Failed to fetch resume url', err));
+      
     if (!container.current) return;
     let ctx = gsap.context((self) => {
       const otherElements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-subtitle, .hero-actions-minimal');
@@ -109,7 +117,7 @@ export default function Hero() {
 
         <div className="hero-actions-minimal">
           <a 
-            href="/Serge_Ishimwe_Resume.pdf" 
+            href={resumeUrl}
             target="_blank" 
             rel="noopener noreferrer"
             className="minimal-resume-link"
