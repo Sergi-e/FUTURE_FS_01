@@ -51,7 +51,7 @@ export default function Contact() {
     e.preventDefault();
     setStatus('Sending...');
     try {
-      const res = await fetch('http://localhost:5000/api/contact', {
+      const res = await fetch('https://future-fs-01-huwr.onrender.com/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -143,7 +143,7 @@ export default function Contact() {
           {showForm && (
             <div className="contact-form-right" style={{ flex: '1', minWidth: '350px', maxWidth: '500px', animation: 'fadeInRight 0.5s ease forwards' }}>
               <form onSubmit={handleSubmit} className="inpage-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px', background: '#111', padding: '30px', borderRadius: '12px', width: '100%', textAlign: 'left' }}>
-                <h3 style={{fontFamily: 'var(--font-display)', color: 'var(--accent-neon)', marginBottom: '10px'}}>SEND A MESSAGE</h3>
+                <h3 style={{fontFamily: 'var(--font-display)', color: 'var(--accent-neon)', marginBottom: '10px'}}>SEND A MESSAGE / FREELANCING DEALS</h3>
                 <input type="text" placeholder="Your Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)'}}/>
                 <input type="email" placeholder="Your Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)'}}/>
                 <textarea placeholder="Your Message" rows="5" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)', resize: 'vertical'}}/>
