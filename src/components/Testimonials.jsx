@@ -10,7 +10,7 @@ export default function Testimonials() {
   const imageRef = useRef(null);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/testimonials')
+    fetch('https://future-fs-01-huwr.onrender.com/api/testimonials')
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) {

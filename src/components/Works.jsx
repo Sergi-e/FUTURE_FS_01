@@ -11,7 +11,7 @@ export default function Works() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/projects')
+    fetch('https://future-fs-01-huwr.onrender.com/api/projects')
       .then(res => res.json())
       .then(data => {
         if (data && data.length > 0) setProjects(data);

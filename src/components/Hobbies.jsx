@@ -27,6 +27,7 @@ export default function Hobbies() {
   const booksWrapperRef = useRef(null);
 
   useEffect(() => {
+    let resizeObserver;
     // Adding a slight delay guarantees that any layout shifts from other components loading are finished.
     const timer = setTimeout(() => {
       const ctx = gsap.context(() => {
@@ -77,9 +78,15 @@ export default function Hobbies() {
         
         ScrollTrigger.refresh(); // Force recalculation of all start/end positions
 
+        resizeObserver = new ResizeObserver(() => {
+          ScrollTrigger.refresh();
+        });
+        resizeObserver.observe(document.body);
+
       }, sectionRef);
 
       return () => {
+        if (resizeObserver) resizeObserver.disconnect();
         ctx.revert();
       };
     }, 100);
