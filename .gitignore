@@ -80,3 +80,6 @@ dist-ssr
 _agents/
 _agent/
 .gemini/
+
+# Local Netlify folder
+.netlify
