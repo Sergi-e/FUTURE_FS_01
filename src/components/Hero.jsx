@@ -8,7 +8,7 @@ export default function Hero() {
   const [resumeUrl, setResumeUrl] = useState('/Serge_Ishimwe_Resume.pdf');
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/settings/resume')
+    fetch('https://future-fs-01-huwr.onrender.com/api/settings/resume')
       .then(res => res.json())
       .then(data => {
         if (data && data.value) setResumeUrl(data.value);
@@ -29,22 +29,31 @@ export default function Hero() {
         delay: 0.5
       });
 
-      // Infinite letter-by-letter animation for main title without scroll effect
-      const letters = self.selector('.title-word .char');
-      gsap.fromTo(letters, 
+      // Sequential letter-by-letter animation for main title
+      const tl = gsap.timeline();
+      tl.fromTo(self.selector('.title-row-top .char'), 
         { y: 30, opacity: 0, scale: 0.8 },
         { 
           y: 0, 
           opacity: 1, 
           scale: 1, 
-          duration: 0.4, 
+          duration: 0.5, 
           stagger: 0.05, 
           ease: 'back.out(1.5)', 
-          delay: 0.2,
-          repeat: -1,
-          repeatDelay: 1.5,
-          yoyo: true // Makes them disappear smoothly before restarting
+          delay: 0.2
         }
+      )
+      .fromTo(self.selector('.title-row-bottom .char'), 
+        { y: 30, opacity: 0, scale: 0.8 },
+        { 
+          y: 0, 
+          opacity: 1, 
+          scale: 1, 
+          duration: 0.5, 
+          stagger: 0.05, 
+          ease: 'back.out(1.5)'
+        },
+        "+=0.2"
       );
       
       gsap.to('.hero-portrait-glow', {
@@ -80,6 +89,13 @@ export default function Hero() {
           className="info-location-link"
         >
           <span className="info-location top-right-loc">KIGALI, RWANDA</span>
+        </a>
+      </div>
+
+      <div className="hero-bottom-left-info" style={{ position: 'absolute', bottom: '2rem', left: '2rem', zIndex: 10 }}>
+        <a href="#contact" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)', textDecoration: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', letterSpacing: '0.1em', transition: 'color 0.3s' }} onMouseEnter={e => e.currentTarget.style.color='var(--accent-neon)'} onMouseLeave={e => e.currentTarget.style.color='var(--text-secondary)'}>
+          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-neon)', boxShadow: '0 0 8px var(--accent-neon)' }}></span>
+          AVAILABLE FOR FREELANCING
         </a>
       </div>
 
