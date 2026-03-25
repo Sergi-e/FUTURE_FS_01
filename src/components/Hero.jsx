@@ -29,32 +29,39 @@ export default function Hero() {
         delay: 0.5
       });
 
-      // Sequential letter-by-letter animation for main title
+      // Phase 1: Clean Entrance Animation
       const tl = gsap.timeline();
       tl.fromTo(self.selector('.title-row-top .char'), 
         { y: 30, opacity: 0, scale: 0.8 },
         { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1, 
-          duration: 0.5, 
-          stagger: 0.05, 
-          ease: 'back.out(1.5)', 
-          delay: 0.2
+          y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.05, ease: 'back.out(1.5)', delay: 0.2
         }
       )
       .fromTo(self.selector('.title-row-bottom .char'), 
         { y: 30, opacity: 0, scale: 0.8 },
         { 
-          y: 0, 
-          opacity: 1, 
-          scale: 1, 
-          duration: 0.5, 
-          stagger: 0.05, 
-          ease: 'back.out(1.5)'
+          y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.05, ease: 'back.out(1.5)'
         },
-        "+=0.2"
-      );
+        "-=0.2"
+      )
+      .add(() => {
+        // Phase 2: Endless original disappear/reappear loop
+        const loopTl = gsap.timeline({ repeat: -1 });
+        loopTl.to({}, { duration: 1.5 })
+          .to(self.selector('.title-row-top .char'), {
+            y: 30, opacity: 0, scale: 0.8, duration: 0.4, stagger: -0.05, ease: 'back.in(1.5)'
+          })
+          .to(self.selector('.title-row-top .char'), {
+            y: 0, opacity: 1, scale: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(1.5)', delay: 0.2
+          })
+          .to({}, { duration: 1.5 })
+          .to(self.selector('.title-row-bottom .char'), {
+            y: 30, opacity: 0, scale: 0.8, duration: 0.4, stagger: -0.05, ease: 'back.in(1.5)'
+          })
+          .to(self.selector('.title-row-bottom .char'), {
+            y: 0, opacity: 1, scale: 1, duration: 0.4, stagger: 0.05, ease: 'back.out(1.5)', delay: 0.2
+          });
+      });
       
       gsap.to('.hero-portrait-glow', {
         opacity: 0.6,
@@ -92,10 +99,21 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="hero-bottom-left-info" style={{ position: 'absolute', bottom: '2rem', left: '2rem', zIndex: 10 }}>
-        <a href="#contact" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--text-secondary)', textDecoration: 'none', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', letterSpacing: '0.1em', transition: 'color 0.3s' }} onMouseEnter={e => e.currentTarget.style.color='var(--accent-neon)'} onMouseLeave={e => e.currentTarget.style.color='var(--text-secondary)'}>
-          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--accent-neon)', boxShadow: '0 0 8px var(--accent-neon)' }}></span>
-          AVAILABLE FOR FREELANCING
+      <div className="hero-bottom-left-info freelance-badge-container" style={{ position: 'absolute', bottom: '2.5rem', left: '2.5rem', zIndex: 10 }}>
+        <a href="#contact" style={{ 
+          display: 'flex', alignItems: 'center', gap: '12px', 
+          color: 'var(--text-primary)', textDecoration: 'none', 
+          fontFamily: 'var(--font-display)', fontSize: '1.15rem', 
+          letterSpacing: '0.15em', fontWeight: 'bold',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
+        }} 
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-neon)'; e.currentTarget.style.transform = 'translateY(-3px)'; }} 
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.transform = 'none'; }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-neon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 2v20M17 5l-10 14M22 12H2M19 19L5 5" />
+            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite" />
+          </svg>
+          OPEN FOR FREELANCE
         </a>
       </div>
 
