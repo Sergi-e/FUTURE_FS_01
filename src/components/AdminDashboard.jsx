@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AdminDashboard.css';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://future-fs-01-huwr.onrender.com/api';
 
 export default function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('adminToken'));
