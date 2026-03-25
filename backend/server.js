@@ -134,6 +134,11 @@ async function startServer() {
   db = await setupDatabase();
   app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
+    
+    // Self-ping to keep Render free tier awake
+    setInterval(() => {
+      require('https').get('https://future-fs-01-huwr.onrender.com/api/projects');
+    }, 14 * 60 * 1000); // 14 minutes
   });
 }
 
