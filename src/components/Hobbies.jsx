@@ -15,11 +15,11 @@ const hobbiesData = [
 ];
 
 const booksData = [
-  { id: 'b1', title: 'The Pragmatic Programmer', image: '/assets/books/b1.jpg' },
-  { id: 'b2', title: 'Think Like a Programmer', image: '/assets/books/b2.jpg' },
-  { id: 'b3', title: '48 Laws of Power', image: '/assets/books/b3.jpg' },
-  { id: 'b4', title: 'Laws of Human Nature', image: '/assets/books/b4.jpg' },
-  { id: 'b5', title: 'Atomic Habits', image: '/assets/books/b5.jpg' }
+  { id: 'b1', title: 'The Pragmatic Programmer', image: 'https://covers.openlibrary.org/b/id/10143650-L.jpg' },
+  { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/id/11917842-L.jpg' },
+  { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/id/6424160-L.jpg' },
+  { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/id/10170095-L.jpg' },
+  { id: 'b5', title: 'Atomic Habits', image: 'https://covers.openlibrary.org/b/id/12539702-L.jpg' }
 ];
 
 export default function Hobbies() {
