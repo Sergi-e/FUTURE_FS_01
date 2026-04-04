@@ -2,13 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
+import { API_BASE_URL } from '../config/api';
 
 export default function Hero() {
   const container = useRef(null);
   const [resumeUrl, setResumeUrl] = useState('/Serge_Ishimwe_Resume.pdf');
 
   useEffect(() => {
-    fetch('https://future-fs-01-huwr.onrender.com/api/settings/resume')
+    fetch(`${API_BASE_URL}/settings/resume`)
       .then(res => res.json())
       .then(data => {
         if (data && data.value) setResumeUrl(data.value);
