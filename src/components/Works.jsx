@@ -34,7 +34,7 @@ export default function Works() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: () => `+=${window.innerHeight * workItems.length}`,
+          end: () => `+=${window.innerHeight * workItems.length * 1.5}`,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
@@ -77,29 +77,51 @@ export default function Works() {
       
       <div className="works-wrapper" ref={wrapperRef}>
         {projects.length === 0 && <div className="work-item"><h3 style={{color: 'white'}}>Loading Projects...</h3></div>}
-        {projects.map((project) => (
-          <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-item" key={project.id}>
-            <div className="work-media-container cursor-hover">
-              {project.mediaType === 'image' && (
-                <img src={resolveMediaUrl(project.mediaPath)} alt={project.title} className="work-media-asset" />
-              )}
-              {project.mediaType === 'video' && (
-                <video src={resolveMediaUrl(project.mediaPath)} autoPlay muted loop playsInline className="work-media-asset" />
-              )}
-              {project.mediaType === 'placeholder' && (
-                <div className="work-image-placeholder"></div>
-              )}
-              <div className="work-overlay"></div>
-            </div>
-            <div className="work-meta">
-              <h3>{project.title}</h3>
-              <div className="work-details">
-                <span>{project.subtitle}</span>
-                <span>{project.year}</span>
+        {projects.map((project) => {
+          const hasLink = Boolean(project.link && String(project.link).trim());
+          const inner = (
+            <>
+              <div className="work-media-container cursor-hover">
+                {project.mediaType === 'image' && (
+                  <img src={resolveMediaUrl(project.mediaPath)} alt={project.title} className="work-media-asset" />
+                )}
+                {project.mediaType === 'video' && (
+                  <video src={resolveMediaUrl(project.mediaPath)} autoPlay muted loop playsInline className="work-media-asset" />
+                )}
+                {project.mediaType === 'placeholder' && (
+                  <div className="work-image-placeholder"></div>
+                )}
+                <div className="work-overlay"></div>
               </div>
+              <div className="work-meta">
+                <h3>{project.title}</h3>
+                <div className="work-details">
+                  <span>{project.subtitle}</span>
+                  <span>{project.year}</span>
+                </div>
+                {hasLink && (
+                  <span className="work-view-more">VIEW MORE →</span>
+                )}
+              </div>
+            </>
+          );
+
+          return hasLink ? (
+            <a
+              key={project.id}
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="work-item"
+            >
+              {inner}
+            </a>
+          ) : (
+            <div key={project.id} className="work-item work-item--static">
+              {inner}
             </div>
-          </a>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
