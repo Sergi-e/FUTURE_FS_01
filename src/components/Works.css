@@ -6,16 +6,15 @@
 }
 
 .works-header {
-  padding: 100px 5vw 40px; /* Pushed below site navbar */
+  position: relative;
+  padding: 100px 5vw 36px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
-  top: 0;
   width: 100%;
-  z-index: 90;
+  z-index: 10;
   pointer-events: none;
-  mix-blend-mode: difference;
+  mix-blend-mode: normal;
 }
 
 .works-header * {
@@ -28,6 +27,12 @@
   letter-spacing: 0.25em;
   text-transform: uppercase;
   opacity: 0.9;
+}
+
+.works-pin-scope {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .works-wrapper {
@@ -69,10 +74,10 @@
   height: 600px;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
   transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), border-color 0.4s ease;
-  background-color: #0a0a0a;
+  background-color: #111;
 }
 
 .work-media-asset {
@@ -80,6 +85,8 @@
   height: 100%;
   display: block;
   object-fit: cover;
+  object-position: center;
+  background-color: #111;
   transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
@@ -99,7 +106,8 @@
 .work-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.18) 100%);
   transition: background 0.4s ease;
 }
 

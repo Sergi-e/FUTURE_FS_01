@@ -8,7 +8,7 @@ import './Works.css';
 gsap.registerPlugin(ScrollTrigger);
 
 export default function Works() {
-  const sectionRef = useRef(null);
+  const pinRef = useRef(null);
   const wrapperRef = useRef(null);
   const [projects, setProjects] = useState([]);
 
@@ -25,44 +25,46 @@ export default function Works() {
     if (projects.length === 0) return;
 
     let ctx = gsap.context(() => {
+      const pinEl = pinRef.current;
+      if (!pinEl) return;
+
       const workItems = gsap.utils.toArray('.work-item');
-      
-      // Initial positioning: Stack items on top of each other
       gsap.set(workItems, { zIndex: (i) => workItems.length - i });
 
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: sectionRef.current,
+          trigger: pinEl,
           start: 'top top',
-          end: () => `+=${window.innerHeight * workItems.length}`,
+          end: () =>
+            `+=${window.innerHeight * Math.max(1.2, 0.75 + workItems.length * 1.2)}`,
           pin: true,
+          pinSpacing: true,
           scrub: 1,
           anticipatePin: 1,
-        }
+        },
       });
 
-      // Pause at the start to let user read the first project
-      tl.to({}, { duration: 1 });
+      tl.to({}, { duration: 0.85 });
 
-      // Diagonal Slide-away transition (Bottom-Left)
       workItems.forEach((item, i) => {
-        if (i === workItems.length - 1) return; // Last item doesn't slide away
-        
-        tl.to(item, {
-          xPercent: -100,
-          yPercent: 100,
-          rotate: -15,
-          scale: 0.8,
-          opacity: 0,
-          ease: "none",
-          duration: 1
-        });
-        
-        // Pause to let user read the NEXT project 
-        tl.to({}, { duration: 1 });
+        if (i === workItems.length - 1) return;
+
+        tl.to(
+          item,
+          {
+            autoAlpha: 0,
+            xPercent: -100,
+            yPercent: 100,
+            rotate: -15,
+            scale: 0.8,
+            ease: 'power2.inOut',
+            duration: 0.95,
+          },
+          '>'
+        );
+        tl.to({}, { duration: 1.2 });
       });
-      
-    }, sectionRef);
+    }, pinRef);
 
     return () => {
       ctx.revert();
@@ -70,20 +72,31 @@ export default function Works() {
   }, [projects]);
 
   return (
-    <section className="works" id="projects" ref={sectionRef}>
+    <section className="works" id="projects">
       <div className="works-header">
         <h2>FEATURED PROJECTS</h2>
       </div>
-      
-      <div className="works-wrapper" ref={wrapperRef}>
-        {projects.length === 0 && <div className="work-item"><h3 style={{color: 'white'}}>Loading Projects...</h3></div>}
-        {projects.map((project) => {
+
+      <div className="works-pin-scope" ref={pinRef}>
+        <div className="works-wrapper" ref={wrapperRef}>
+          {projects.length === 0 && (
+            <div className="work-item">
+              <h3 style={{ color: 'white' }}>Loading Projects...</h3>
+            </div>
+          )}
+          {projects.map((project) => {
           const hasLink = Boolean(project.link && String(project.link).trim());
           const mediaBlock = (
             <>
               <div className="work-media-container">
                 {project.mediaType === 'image' && (
-                  <img src={resolveMediaUrl(project.mediaPath)} alt={project.title} className="work-media-asset" />
+                  <img
+                    src={resolveMediaUrl(project.mediaPath)}
+                    alt={project.title}
+                    className="work-media-asset"
+                    loading="eager"
+                    decoding="async"
+                  />
                 )}
                 {project.mediaType === 'video' && (
                   <video
@@ -92,6 +105,7 @@ export default function Works() {
                     muted
                     loop
                     playsInline
+                    preload="auto"
                     className="work-media-asset work-media-asset--video"
                   />
                 )}
@@ -113,22 +127,23 @@ export default function Works() {
             </>
           );
 
-          return hasLink ? (
-            <a
-              key={project.id}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="work-item"
-            >
-              {mediaBlock}
-            </a>
-          ) : (
-            <div key={project.id} className="work-item work-item--static">
-              {mediaBlock}
-            </div>
-          );
-        })}
+            return hasLink ? (
+              <a
+                key={project.id}
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="work-item"
+              >
+                {mediaBlock}
+              </a>
+            ) : (
+              <div key={project.id} className="work-item work-item--static">
+                {mediaBlock}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
