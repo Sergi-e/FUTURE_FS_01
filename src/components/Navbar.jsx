@@ -1,12 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Navbar.css';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const NAV_LINKS = [
+  { name: 'HOME', href: '#home' },
+  { name: 'APPROACH', href: '#approach' },
+  { name: 'SKILLS', href: '#skills' },
+  { name: 'PROJECTS', href: '#projects' },
+  { name: 'TESTIMONIALS', href: '#testimonials' },
+  { name: 'HOBBIES', href: '#hobbies' },
+  { name: 'CONTACT', href: '#contact' }
+];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const [visible, setVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
-  const prevScrollPos = useRef(window.pageYOffset);
+  const [activeSection, setActiveSection] = useState('#home');
   const menuRef = useRef(null);
   const linksRef = useRef([]);
 
@@ -14,20 +26,40 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      const isVisible = prevScrollPos.current > currentScrollPos || currentScrollPos < 10;
-      
-      setScrolled(currentScrollPos > 50);
-
-      if (!isOpen) { 
-        setVisible(isVisible);
-      }
-      prevScrollPos.current = currentScrollPos;
+      setScrolled(window.pageYOffset > 50);
     };
-
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isOpen]);
+  }, []);
+
+  useEffect(() => {
+    const triggers = [];
+    const ctx = gsap.context(() => {
+      NAV_LINKS.forEach((link) => {
+        const section = document.querySelector(link.href);
+        if (!section) return;
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: section,
+            start: 'top 55%',
+            end: 'bottom 45%',
+            onToggle: (self) => {
+              if (self.isActive) setActiveSection(link.href);
+            }
+          })
+        );
+      });
+    });
+    const refreshId = requestAnimationFrame(() => {
+      ScrollTrigger.refresh();
+    });
+    return () => {
+      cancelAnimationFrame(refreshId);
+      triggers.forEach((t) => t.kill());
+      ctx.revert();
+    };
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,7 +70,7 @@ export default function Navbar() {
         duration: 1.2,
         ease: 'power4.inOut'
       });
-      gsap.fromTo(linksRef.current, 
+      gsap.fromTo(linksRef.current,
         { y: 80, rotate: 2, opacity: 0 },
         { y: 0, rotate: 0, opacity: 1, duration: 0.8, stagger: 0.08, ease: 'power3.out', delay: 0.4 }
       );
@@ -57,30 +89,13 @@ export default function Navbar() {
     }
   }, [isOpen]);
 
-  const navLinks = [
-    { name: 'HOME', href: '#home' },
-    { name: 'APPROACH', href: '#approach' },
-    { name: 'SKILLS', href: '#skills' },
-    { name: 'PROJECTS', href: '#projects' },
-    { name: 'TESTIMONIALS', href: '#testimonials' },
-    { name: 'HOBBIES', href: '#hobbies' },
-    { name: 'CONTACT', href: '#contact' }
-  ];
-
   return (
-    <nav className={`navbar ${!visible ? 'hidden' : ''} ${isOpen ? 'menu-open' : ''} ${scrolled ? 'scrolled' : ''}`}>
+    <nav className={`navbar ${isOpen ? 'menu-open' : ''} ${scrolled ? 'scrolled' : ''}`}>
       <div className="nav-left">
         <div className="nav-logo">SERGE ISHIMWE</div>
       </div>
 
       <div className="nav-right">
-        <div className="nav-links-desktop">
-          {navLinks.map((link) => (
-            <a key={link.name} href={link.href} className="desktop-link" onClick={() => setIsOpen(false)}>
-              {link.name}
-            </a>
-          ))}
-        </div>
         <button className={`hamburger ${isOpen ? 'open' : ''}`} onClick={toggleMenu} aria-label="Toggle Menu">
           <span className="line"></span>
           <span className="line"></span>
@@ -93,7 +108,7 @@ export default function Navbar() {
           <div className="menu-left-col">
             <div className="menu-discovery-card">
               <p className="discovery-text">
-                Thank you for your interest in knowing what I do. 
+                Thank you for your interest in knowing what I do.
                 <span>To know more about me, navigate through my portfolio.</span>
               </p>
               <div className="shiny-arrow">
@@ -106,13 +121,13 @@ export default function Navbar() {
 
           <div className="menu-right-col">
             <div className="nav-links-grid">
-              {navLinks.map((link, index) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
-                  className="nav-link-item"
+              {NAV_LINKS.map((link, index) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className={`nav-link-item ${activeSection === link.href ? 'nav-link-active' : ''}`}
                   onClick={() => setIsOpen(false)}
-                  ref={el => {
+                  ref={(el) => {
                     if (el) linksRef.current[index] = el;
                   }}
                 >
@@ -125,7 +140,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-        
+
         <div className="menu-footer">
           <div className="menu-contact-exclusive">
             <span>GET IN TOUCH</span>
