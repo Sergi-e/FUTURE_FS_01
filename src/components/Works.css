@@ -5,7 +5,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding-top: 40vh;
 }
 
 .works-header {
@@ -105,16 +104,4 @@
   letter-spacing: 0.05em;
   border-top: 1px solid #333;
   padding-top: 1rem;
-}
-
-.work-view-more {
-  display: block;
-  margin-top: 1rem;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: var(--accent-neon);
-  text-decoration: none;
 }

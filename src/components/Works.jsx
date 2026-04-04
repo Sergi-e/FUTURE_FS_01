@@ -6,27 +6,9 @@ import './Works.css';
 gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
-  {
-    id: 1,
-    title: 'QUANTUM ANALYTICS',
-    subtitle: 'Full-Stack Data Engine',
-    year: '2025',
-    link: 'https://github.com/Sergi-e',
-  },
-  {
-    id: 2,
-    title: 'ECO-SENTINEL',
-    subtitle: 'Marine Conservation Platform',
-    year: '2026',
-    link: 'https://github.com/Sergi-e',
-  },
-  {
-    id: 3,
-    title: 'NEURAL NEXUS',
-    subtitle: 'AI-Driven System Architecture',
-    year: '2026',
-    link: 'https://github.com/Sergi-e',
-  },
+  { id: 1, title: 'QUANTUM ANALYTICS', subtitle: 'Full-Stack Data Engine', year: '2025' },
+  { id: 2, title: 'ECO-SENTINEL', subtitle: 'Marine Conservation Platform', year: '2026' },
+  { id: 3, title: 'NEURAL NEXUS', subtitle: 'AI-Driven System Architecture', year: '2026' },
 ];
 
 export default function Works() {
@@ -74,16 +56,6 @@ export default function Works() {
                 <span>{project.subtitle}</span>
                 <span>{project.year}</span>
               </div>
-              {project.link ? (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="work-view-more"
-                >
-                  VIEW MORE →
-                </a>
-              ) : null}
             </div>
           </div>
         ))}
