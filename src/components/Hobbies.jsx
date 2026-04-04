@@ -28,70 +28,67 @@ export default function Hobbies() {
 
   useEffect(() => {
     let resizeObserver;
-    // Adding a slight delay guarantees that any layout shifts from other components loading are finished.
+    let ctx;
     const timer = setTimeout(() => {
-      const ctx = gsap.context(() => {
-        // Query ALL rows natively from the DOM (avoids any React array tracking bugs entirely)
+      ctx = gsap.context(() => {
         const rows = document.querySelectorAll('.hobby-row-alt');
-        
+
         rows.forEach((row, index) => {
           const image = row.querySelector('.hobby-float-img');
           const text = row.querySelector('.hobby-name-big');
 
           if (image) {
-            // Strong vertical parallax and floating rotation effect
-            gsap.fromTo(image, 
+            gsap.fromTo(image,
               { y: 100, rotation: -15, opacity: 0 },
-              { 
-                y: -100, 
-                rotation: 15, 
+              {
+                y: -100,
+                rotation: 15,
                 opacity: 1,
-                ease: "none",
+                ease: 'none',
                 scrollTrigger: {
                   trigger: row,
-                  start: "top 95%",
-                  end: "bottom 5%",
-                  scrub: 1.5 // extremely smooth scrubbing
+                  start: 'top 95%',
+                  end: 'bottom 5%',
+                  scrub: 1.5
                 }
               }
             );
           }
 
           if (text) {
-            // Horizontal sliding background text
             gsap.fromTo(text,
               { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
               {
                 x: 0,
                 opacity: 0.1,
-                ease: "power2.out",
+                ease: 'power2.out',
                 scrollTrigger: {
                   trigger: row,
-                  start: "top 85%",
-                  end: "center center",
+                  start: 'top 85%',
+                  end: 'center center',
                   scrub: 1
                 }
               }
             );
           }
         });
-        
-        ScrollTrigger.refresh(); // Force recalculation of all start/end positions
+
+        ScrollTrigger.refresh();
+        setTimeout(() => ScrollTrigger.refresh(), 300);
 
         resizeObserver = new ResizeObserver(() => {
           ScrollTrigger.refresh();
+          setTimeout(() => ScrollTrigger.refresh(), 300);
         });
         resizeObserver.observe(document.body);
-
       }, sectionRef);
-
-      return () => {
-        if (resizeObserver) resizeObserver.disconnect();
-        ctx.revert();
-      };
     }, 100);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      resizeObserver?.disconnect();
+      ctx?.revert();
+    };
   }, []);
 
   const scrollLeft = () => {
