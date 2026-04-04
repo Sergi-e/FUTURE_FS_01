@@ -46,6 +46,20 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: default;
+}
+
+a[href],
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+label[for],
+select,
+summary,
+.cursor-hover {
+  cursor: pointer;
 }
 
 h1,

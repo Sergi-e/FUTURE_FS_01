@@ -18,16 +18,35 @@ const NAV_LINKS = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
   const [activeSection, setActiveSection] = useState('#home');
   const menuRef = useRef(null);
   const linksRef = useRef([]);
+  const lastScrollY = useRef(0);
+  const isOpenRef = useRef(isOpen);
+
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+    if (isOpen) setNavHidden(false);
+  }, [isOpen]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.pageYOffset > 50);
+      const y = window.pageYOffset || document.documentElement.scrollTop;
+      setScrolled(y > 50);
+
+      if (y < 10) {
+        setNavHidden(false);
+      } else if (!isOpenRef.current) {
+        if (y > lastScrollY.current) setNavHidden(true);
+        else if (y < lastScrollY.current) setNavHidden(false);
+      }
+
+      lastScrollY.current = y;
     };
+
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -90,7 +109,9 @@ export default function Navbar() {
   }, [isOpen]);
 
   return (
-    <nav className={`navbar ${isOpen ? 'menu-open' : ''} ${scrolled ? 'scrolled' : ''}`}>
+    <nav
+      className={`navbar ${isOpen ? 'menu-open' : ''} ${scrolled ? 'scrolled' : ''} ${navHidden && !isOpen ? 'navbar--hidden' : ''}`}
+    >
       <div className="nav-left">
         <div className="nav-logo">SERGE ISHIMWE</div>
       </div>

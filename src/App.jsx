@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
-import CustomCursor from './components/CustomCursor';
 import SmoothScroll from './components/SmoothScroll';
 import Hero from './components/Hero';
 import Ethos from './components/Ethos';
@@ -14,7 +13,6 @@ import AdminDashboard from './components/AdminDashboard';
 function Portfolio() {
   return (
     <>
-      <CustomCursor />
       <Navbar />
       <SmoothScroll>
         <main className="app-main">
