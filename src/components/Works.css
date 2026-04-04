@@ -3,18 +3,22 @@
   background-color: var(--bg-color);
   overflow: hidden;
   perspective: 1500px; /* Add 3D depth */
+  /* Extra space so the section title scrolls up before the pin engages */
+  padding-top: clamp(6rem, 18vh, 14rem);
+  margin-top: clamp(3rem, 10vh, 7rem);
 }
 
 .works-header {
-  position: relative;
-  padding: 100px 5vw 36px;
+  padding: 100px 5vw 40px; /* Pushed below site navbar */
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: absolute;
+  top: 0;
   width: 100%;
-  z-index: 10;
+  z-index: 90;
   pointer-events: none;
-  mix-blend-mode: normal;
+  mix-blend-mode: difference;
 }
 
 .works-header * {
@@ -27,12 +31,6 @@
   letter-spacing: 0.25em;
   text-transform: uppercase;
   opacity: 0.9;
-}
-
-.works-pin-scope {
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
 }
 
 .works-wrapper {
@@ -67,47 +65,38 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 2.5rem;
+  margin-bottom: 2.5rem;
   position: relative;
-  width: 100%;
-  max-width: 75%;
-  height: 600px;
+  width: fit-content;
+  height: fit-content;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.9);
   transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), border-color 0.4s ease;
-  background-color: #111;
+  background-color: transparent;
 }
 
 .work-media-asset {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  max-width: 95vw;
+  height: auto;
+  max-height: 75vh;
   display: block;
-  object-fit: cover;
-  object-position: center;
-  background-color: #111;
+  object-fit: contain;
   transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
-}
-
-.work-media-asset--video {
-  transform: scale(1.08);
-  min-width: 100%;
-  min-height: 100%;
 }
 
 .work-image-placeholder {
   width: 100%;
   height: 100%;
-  min-height: 600px;
   background-image: linear-gradient(45deg, #111, #050505);
 }
 
 .work-overlay {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.18) 100%);
+  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
   transition: background 0.4s ease;
 }
 
@@ -164,14 +153,8 @@
     padding-top: 100px;
   }
   .work-media-container {
-    width: 100%;
-    max-width: 75%;
-    height: 600px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .work-image-placeholder {
-    min-height: 600px;
+    width: fit-content;
+    height: fit-content;
   }
   .work-meta {
     width: 100%;
