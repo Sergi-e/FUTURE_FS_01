@@ -1,10 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { API_BASE_URL } from '../config/api';
 import './Contact.css';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export default function Contact() {
   const buttonRef = useRef(null);
   const textRef = useRef(null);
+  const titleRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState('');
@@ -47,11 +52,34 @@ export default function Contact() {
     };
   }, []);
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const el = titleRef.current;
+      if (!el) return;
+      gsap.fromTo(
+        el,
+        { opacity: 0, y: 40 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            once: true
+          }
+        }
+      );
+    });
+    return () => ctx.revert();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus('Sending...');
     try {
-      const res = await fetch('https://future-fs-01-huwr.onrender.com/api/contact', {
+      const res = await fetch(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
@@ -71,7 +99,7 @@ export default function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="contact-container" style={{ width: '100%' }}>
-        <h2 className="contact-title" style={{ marginBottom: '2rem' }}>LET'S CONNECT</h2>
+        <h2 ref={titleRef} className="contact-title" style={{ marginBottom: '2rem' }}>LET&apos;S CONNECT</h2>
         
         <div style={{ 
           display: 'flex', 

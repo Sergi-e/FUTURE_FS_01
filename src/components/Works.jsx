@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { API_BASE_URL } from '../config/api';
+import { resolveMediaUrl } from '../lib/mediaUrl';
 import './Works.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -11,10 +13,10 @@ export default function Works() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    fetch('https://future-fs-01-huwr.onrender.com/api/projects')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.length > 0) setProjects(data);
+    fetch(`${API_BASE_URL}/projects`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setProjects(data);
       })
       .catch(console.error);
   }, []);
@@ -79,10 +81,10 @@ export default function Works() {
           <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-item" key={project.id}>
             <div className="work-media-container cursor-hover">
               {project.mediaType === 'image' && (
-                <img src={project.mediaPath} alt={project.title} className="work-media-asset" />
+                <img src={resolveMediaUrl(project.mediaPath)} alt={project.title} className="work-media-asset" />
               )}
               {project.mediaType === 'video' && (
-                <video src={project.mediaPath} autoPlay muted loop playsInline className="work-media-asset" />
+                <video src={resolveMediaUrl(project.mediaPath)} autoPlay muted loop playsInline className="work-media-asset" />
               )}
               {project.mediaType === 'placeholder' && (
                 <div className="work-image-placeholder"></div>

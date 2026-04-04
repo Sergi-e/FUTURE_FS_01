@@ -8,17 +8,12 @@
   justify-content: space-between;
   align-items: center;
   z-index: 1000;
-  transition: transform 0.6s cubic-bezier(0.76, 0, 0.24, 1), background-color 0.4s ease, padding 0.4s ease;
+  transition: background-color 0.4s ease, padding 0.4s ease;
   pointer-events: none;
-}
-
-.navbar.hidden {
-  transform: translateY(-100%);
 }
 
 .navbar.menu-open {
   background-color: transparent !important;
-  transform: translateY(0) !important;
 }
 
 .navbar.scrolled {
@@ -90,46 +85,6 @@
 .hamburger.open .line:nth-child(2) { opacity: 0; transform: translateX(10px); }
 .hamburger.open .line:nth-child(3) { transform: translateY(-8px) rotate(-45deg); width: 28px; background: var(--accent-neon); }
 
-/* Desktop Navigation Links */
-.nav-links-desktop {
-  display: flex;
-  gap: 25px;
-  align-items: center;
-}
-
-/* Initially hide the links, reveal them only when scrolled */
-.nav-links-desktop {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
-.navbar.scrolled .nav-links-desktop {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.desktop-link {
-  color: white;
-  text-decoration: none;
-  font-family: var(--font-sans);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  transition: color 0.3s;
-}
-
-.desktop-link:hover {
-  color: var(--accent-neon);
-}
-
-@media (max-width: 1024px) {
-  .nav-links-desktop {
-    display: none;
-  }
-}
-
 /* Redesigned Menu Overlay */
 .nav-menu {
   position: fixed;
@@ -146,6 +101,11 @@
   clip-path: circle(0% at 95% 5%);
   z-index: 999;
   pointer-events: auto; /* Ensure menu content is interactive */
+}
+
+/* Closed menu must not cover the page (hit-testing / some clip-path GPU quirks) */
+.navbar:not(.menu-open) .nav-menu {
+  pointer-events: none;
 }
 
 .nav-menu-content {
@@ -229,6 +189,11 @@
   padding: 0.8rem 0;
   display: block;
   transition: all 0.4s ease;
+}
+
+.nav-link-item.nav-link-active .link-title,
+.nav-link-item.nav-link-active .link-num {
+  color: var(--accent-neon);
 }
 
 .link-wrapper {
