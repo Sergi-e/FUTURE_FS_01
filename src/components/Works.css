@@ -1,107 +1,152 @@
 .works {
-  height: 100vh;
   position: relative;
   background-color: var(--bg-color);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  perspective: 1500px; /* Add 3D depth */
 }
 
 .works-header {
-  padding: 5vh 5vw;
+  padding: 100px 5vw 40px; /* Pushed below site navbar */
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: 10;
+  z-index: 90;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.works-header * {
+  pointer-events: auto;
 }
 
 .works-header h2 {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  letter-spacing: 0.1em;
-}
-
-.works-count {
-  font-family: var(--font-display);
-  color: var(--accent-neon);
-  font-size: 1.2rem;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  opacity: 0.9;
 }
 
 .works-wrapper {
-  display: flex;
+  position: relative;
+  width: 100%;
   height: 100vh;
-  width: max-content;
-  align-items: center;
-  padding: 0 5vw; /* Start with an offset */
 }
 
 .work-item {
-  width: 50vw; /* Desktop width */
-  height: 60vh;
-  margin-right: 10vw;
-  flex-shrink: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
+  padding: 160px 5vw 40px; /* Reduced to give more room for media */
+  text-decoration: none;
+  background-color: var(--bg-color);
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
 }
 
-/* Ensure the last item doesn't have huge right margin */
-.work-item:last-child {
-  margin-right: 5vw;
+.work-media-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+  position: relative;
+  width: fit-content;
+  height: fit-content;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.9);
+  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), border-color 0.4s ease;
+  background-color: transparent;
 }
 
-@media (max-width: 768px) {
-  .work-item {
-    width: 80vw;
-  }
+.work-media-asset {
+  width: auto;
+  max-width: 95vw;
+  height: auto;
+  max-height: 75vh;
+  display: block;
+  object-fit: contain;
+  transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
 .work-image-placeholder {
-  flex-grow: 1;
-  background-color: #111;
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  border-radius: 4px;
-  border: 1px solid #222;
-  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(45deg, #111, #050505);
 }
 
 .work-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent 50%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.4) 100%);
+  transition: background 0.4s ease;
 }
 
-.work-image-placeholder:hover {
-  transform: scale(0.98);
+.work-item:hover .work-media-container {
+  transform: translateY(-8px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
-.work-image-placeholder:hover .work-overlay {
-  opacity: 1;
+.work-meta {
+  width: 100%;
+  max-width: 1400px;
+  text-align: center;
 }
 
 .work-meta h3 {
-  font-size: clamp(2.5rem, 4vw, 5rem);
-  margin-bottom: 1rem;
+  font-size: clamp(2rem, 6vw, 4.5rem);
+  margin-bottom: 1.2rem;
   color: var(--text-primary);
-  line-height: 1;
+  line-height: 0.85;
+  font-weight: 900;
   text-transform: uppercase;
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
 }
 
 .work-details {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 30px;
+  align-items: center;
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-family: var(--font-sans);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-top: 1px solid #333;
-  padding-top: 1rem;
+  letter-spacing: 0.15em;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding-top: 1.2rem;
+  opacity: 0.95;
+}
+
+@media (max-width: 768px) {
+  .work-item {
+    padding-top: 100px;
+  }
+  .work-media-container {
+    width: fit-content;
+    height: fit-content;
+  }
+  .work-meta {
+    width: 100%;
+  }
+  .work-meta h3 {
+    font-size: clamp(1.8rem, 8vw, 3rem);
+  }
+  .work-details {
+    flex-direction: column;
+    gap: 8px;
+    border-top: none;
+    padding-top: 10px;
+  }
 }
