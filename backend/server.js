@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -11,6 +12,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
 
 app.use(cors());
 app.use(express.json());
+// Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
+app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 
 let db;
 
