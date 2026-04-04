@@ -13,12 +13,19 @@ export default function Works() {
   const [projects, setProjects] = useState([]);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/projects`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setProjects(data);
+    const url = `${API_BASE_URL}/projects`;
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Projects ${res.status}`);
+        return res.json();
       })
-      .catch(console.error);
+      .then((data) => {
+        setProjects(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch projects', url, err);
+        setProjects([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -82,13 +89,27 @@ export default function Works() {
           const mediaBlock = (
             <>
               <div className="work-media-container cursor-hover">
-                {project.mediaType === 'image' && (
-                  <img src={resolveMediaUrl(project.mediaPath)} alt={project.title} className="work-media-asset" />
+                {String(project.mediaType || '').toLowerCase() === 'image' && project.mediaPath && (
+                  <img
+                    src={resolveMediaUrl(project.mediaPath)}
+                    alt={project.title || 'Project'}
+                    className="work-media-asset"
+                    loading="eager"
+                    decoding="async"
+                  />
                 )}
-                {project.mediaType === 'video' && (
-                  <video src={resolveMediaUrl(project.mediaPath)} autoPlay muted loop playsInline className="work-media-asset" />
+                {String(project.mediaType || '').toLowerCase() === 'video' && project.mediaPath && (
+                  <video
+                    src={resolveMediaUrl(project.mediaPath)}
+                    className="work-media-asset"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                  />
                 )}
-                {project.mediaType === 'placeholder' && (
+                {String(project.mediaType || '').toLowerCase() === 'placeholder' && (
                   <div className="work-image-placeholder"></div>
                 )}
                 <div className="work-overlay"></div>

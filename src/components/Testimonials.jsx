@@ -16,12 +16,19 @@ export default function Testimonials() {
   const imageRef = useRef(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/testimonials`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setTestimonials(data);
+    const url = `${API_BASE_URL}/testimonials`;
+    fetch(url)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`Testimonials ${res.status}`);
+        return res.json();
       })
-      .catch((err) => console.error('Failed to fetch testimonials', err));
+      .then((data) => {
+        setTestimonials(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error('Failed to fetch testimonials', url, err);
+        setTestimonials([]);
+      });
   }, []);
 
   useEffect(() => {
@@ -88,7 +95,14 @@ export default function Testimonials() {
         <div className="testimonials-layout">
           <div className="testimonials-visual">
             <div className="image-container">
-              <img src={resolveMediaUrl(current.image)} alt={current.name} className="testimonials-image" ref={imageRef} />
+              <img
+                src={resolveMediaUrl(current.image)}
+                alt={current.name || 'Testimonial'}
+                className="testimonials-image"
+                ref={imageRef}
+                loading="eager"
+                decoding="async"
+              />
             </div>
 
             <div className="testimonials-nav">
