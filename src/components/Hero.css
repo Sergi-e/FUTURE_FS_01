@@ -1,7 +1,6 @@
 .hero {
   position: relative;
   height: 100vh;
-  height: 100dvh;
   width: 100%;
   overflow: hidden;
   background: linear-gradient(to bottom, #0c0c0c 0%, #0c0c0c 85%, var(--bg-color) 100%);
@@ -9,8 +8,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 50px max(40px, 7vh);
-  box-sizing: border-box;
+  padding: 0 50px;
 }
 
 /* Grain Overlay */
@@ -117,7 +115,7 @@
   position: relative;
   width: 120px;
   height: 120px;
-  margin-top: clamp(3.5rem, 6vh, 6.5rem);
+  margin-top: 2rem;
   margin-bottom: 20px;
 }
 
@@ -212,8 +210,6 @@
 /* Actions */
 .hero-actions-minimal {
   margin-top: 20px;
-  padding-bottom: 4px;
-  overflow: visible;
 }
 
 .minimal-resume-link {
@@ -225,9 +221,6 @@
   letter-spacing: 2px;
   transition: color 0.3s ease;
   text-transform: uppercase;
-  display: inline-block;
-  line-height: 1.6;
-  padding: 6px 0 10px;
 }
 
 .minimal-resume-link:hover {
@@ -235,11 +228,6 @@
 }
 
 @media (max-width: 768px) {
-  .hero {
-    padding-left: 30px;
-    padding-right: 30px;
-    padding-bottom: max(36px, 10vh);
-  }
   .hero-info-bar {
     padding: 0 30px;
     top: 5vh;

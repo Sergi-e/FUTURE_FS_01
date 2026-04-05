@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
@@ -26,68 +26,73 @@ export default function Hobbies() {
   const sectionRef = useRef(null);
   const booksWrapperRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    const root = sectionRef.current;
+    if (!root) return;
+
+    const scroller = document.documentElement;
     let resizeObserver;
-    let ctx;
-    const timer = setTimeout(() => {
-      ctx = gsap.context(() => {
-        const rows = document.querySelectorAll('.hobby-row-alt');
 
-        rows.forEach((row, index) => {
-          const image = row.querySelector('.hobby-float-img');
-          const text = row.querySelector('.hobby-name-big');
+    const ctx = gsap.context(() => {
+      const rows = root.querySelectorAll('.hobby-row-alt');
 
-          if (image) {
-            gsap.fromTo(image,
-              { y: 100, rotation: -15, opacity: 0 },
-              {
-                y: -100,
-                rotation: 15,
-                opacity: 1,
-                ease: 'none',
-                scrollTrigger: {
-                  trigger: row,
-                  start: 'top 95%',
-                  end: 'bottom 5%',
-                  scrub: 1.5
-                }
-              }
-            );
-          }
+      rows.forEach((row, index) => {
+        const image = row.querySelector('.hobby-float-img');
+        const text = row.querySelector('.hobby-name-big');
 
-          if (text) {
-            gsap.fromTo(text,
-              { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
-              {
-                x: 0,
-                opacity: 0.1,
-                ease: 'power2.out',
-                scrollTrigger: {
-                  trigger: row,
-                  start: 'top 85%',
-                  end: 'center center',
-                  scrub: 1
-                }
-              }
-            );
-          }
-        });
+        if (image) {
+          gsap.fromTo(
+            image,
+            { y: 100, rotation: -15, opacity: 0 },
+            {
+              y: -100,
+              rotation: 15,
+              opacity: 1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: row,
+                scroller,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1.5,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
 
-        ScrollTrigger.refresh();
-        setTimeout(() => ScrollTrigger.refresh(), 300);
+        if (text) {
+          gsap.fromTo(
+            text,
+            { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
+            {
+              x: 0,
+              opacity: 0.1,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: row,
+                scroller,
+                start: 'top bottom',
+                end: 'top 25%',
+                scrub: 1,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
+        }
+      });
 
-        resizeObserver = new ResizeObserver(() => {
-          ScrollTrigger.refresh();
-          setTimeout(() => ScrollTrigger.refresh(), 300);
-        });
-        resizeObserver.observe(document.body);
-      }, sectionRef);
-    }, 100);
+      requestAnimationFrame(() => ScrollTrigger.refresh());
+    }, root);
+
+    resizeObserver = new ResizeObserver(() => {
+      ScrollTrigger.refresh();
+    });
+    resizeObserver.observe(root);
 
     return () => {
-      clearTimeout(timer);
-      resizeObserver?.disconnect();
-      ctx?.revert();
+      resizeObserver.disconnect();
+      ctx.revert();
     };
   }, []);
 
