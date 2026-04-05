@@ -26,12 +26,15 @@ export default function Hobbies() {
   const sectionRef = useRef(null);
   const booksWrapperRef = useRef(null);
 
+  /* Scroll-scrubbed parallax (original feel) — uses documentElement scroller + Lenis proxy from SmoothScroll */
   useLayoutEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
 
     const scroller = document.documentElement;
     let resizeObserver;
+
+    const refreshST = () => ScrollTrigger.refresh();
 
     const ctx = gsap.context(() => {
       const rows = root.querySelectorAll('.hobby-row-alt');
@@ -73,7 +76,7 @@ export default function Hobbies() {
                 trigger: row,
                 scroller,
                 start: 'top bottom',
-                end: 'top 25%',
+                end: 'center center',
                 scrub: 1,
                 invalidateOnRefresh: true,
               },
@@ -82,12 +85,20 @@ export default function Hobbies() {
         }
       });
 
-      requestAnimationFrame(() => ScrollTrigger.refresh());
+      requestAnimationFrame(() => {
+        refreshST();
+        requestAnimationFrame(refreshST);
+      });
     }, root);
 
-    resizeObserver = new ResizeObserver(() => {
-      ScrollTrigger.refresh();
+    const hobbyImgs = root.querySelectorAll('.hobby-float-img');
+    hobbyImgs.forEach((img) => {
+      if (img.complete) return;
+      img.addEventListener('load', refreshST, { once: true });
+      img.addEventListener('error', refreshST, { once: true });
     });
+
+    resizeObserver = new ResizeObserver(() => refreshST());
     resizeObserver.observe(root);
 
     return () => {
@@ -97,13 +108,13 @@ export default function Hobbies() {
   }, []);
 
   const scrollLeft = () => {
-    if(booksWrapperRef.current) {
+    if (booksWrapperRef.current) {
       booksWrapperRef.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
   };
 
   const scrollRight = () => {
-    if(booksWrapperRef.current) {
+    if (booksWrapperRef.current) {
       booksWrapperRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
@@ -116,10 +127,10 @@ export default function Hobbies() {
       </div>
 
       <div className="hobbies-list-alt">
-        {hobbiesData.map((hobby, index) => (
-          <div 
-            key={hobby.id} 
-            className="hobby-row-alt" 
+        {hobbiesData.map((hobby) => (
+          <div
+            key={hobby.id}
+            className="hobby-row-alt"
           >
             <div className="hobby-content-alt">
               <span className="hobby-num-alt">{hobby.id}</span>
@@ -128,7 +139,7 @@ export default function Hobbies() {
                 <p className="hobby-desc-alt">{hobby.desc}</p>
               </div>
             </div>
-            
+
             <div className="hobby-visual-alt">
               <h4 className="hobby-name-big">{hobby.name}</h4>
               <img src={hobby.image} alt={hobby.name} className="hobby-float-img" />
@@ -140,22 +151,32 @@ export default function Hobbies() {
       <div className="books-section">
         <div className="hobbies-header-alt">
           <span className="hobbies-tag-alt">READING LIST</span>
-          <h2 className="hobbies-main-title" style={{ fontSize: '2.5rem' }}>BOOKS I READ</h2>
+          <h2 className="hobbies-main-title books-section-title">BOOKS I READ</h2>
         </div>
         <div className="books-marquee-container">
-          <button className="book-scroll-btn left" onClick={scrollLeft} aria-label="Scroll left">
+          <button type="button" className="book-scroll-btn left" onClick={scrollLeft} aria-label="Scroll left">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
           </button>
-          <div className="books-marquee-wrapper" ref={booksWrapperRef}>
+          <div
+            className="books-marquee-wrapper"
+            ref={booksWrapperRef}
+            data-lenis-prevent
+          >
             <div className="books-marquee">
-              {booksData.map((book, idx) => (
-                <div key={idx} className="book-item">
-                  <img src={book.image} alt={book.title} className="book-img" />
+              {booksData.map((book) => (
+                <div key={book.id} className="book-item">
+                  <img
+                    src={book.image}
+                    alt={book.title}
+                    className="book-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
                 </div>
               ))}
             </div>
           </div>
-          <button className="book-scroll-btn right" onClick={scrollRight} aria-label="Scroll right">
+          <button type="button" className="book-scroll-btn right" onClick={scrollRight} aria-label="Scroll right">
             <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
           </button>
         </div>
