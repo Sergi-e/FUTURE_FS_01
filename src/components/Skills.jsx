@@ -8,7 +8,7 @@ gsap.registerPlugin(ScrollTrigger);
 const SIMPLE_ICONS_BASE = 'https://cdn.jsdelivr.net/npm/simple-icons@v11/icons';
 
 const skillCategories = [
-  'DEVELOPMENT',
+  'FRONT END',
   'BACKEND, AI & DATA',
   'MOTION & UI',
   'GEOSPATIAL'
@@ -115,7 +115,7 @@ export default function Skills() {
         <div className="experience-card">
           <div className="exp-left">
             <h3 className="exp-number">1 Year</h3>
-            <p className="exp-description">Of Development Experience</p>
+            <p className="exp-description">Of Front End Experience</p>
           </div>
           <div className="exp-middle">
             <div className="exp-visual-box flower">

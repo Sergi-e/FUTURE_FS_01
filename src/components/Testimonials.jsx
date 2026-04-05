@@ -32,6 +32,11 @@ export default function Testimonials() {
   }, []);
 
   useEffect(() => {
+    if (testimonials.length === 0) return;
+    requestAnimationFrame(() => ScrollTrigger.refresh());
+  }, [testimonials.length]);
+
+  useEffect(() => {
     const ctx = gsap.context(() => {
       const el = titleRef.current;
       if (!el) return;
@@ -85,6 +90,7 @@ export default function Testimonials() {
   };
 
   const current = testimonials[index];
+  const imageSrc = current ? resolveMediaUrl(current.image) : '';
 
   return (
     <section className="testimonials" id="testimonials">
@@ -95,14 +101,18 @@ export default function Testimonials() {
         <div className="testimonials-layout">
           <div className="testimonials-visual">
             <div className="image-container">
-              <img
-                src={resolveMediaUrl(current.image)}
-                alt={current.name || 'Testimonial'}
-                className="testimonials-image"
-                ref={imageRef}
-                loading="eager"
-                decoding="async"
-              />
+              {imageSrc ? (
+                <img
+                  src={imageSrc}
+                  alt={current.name || 'Testimonial'}
+                  className="testimonials-image"
+                  ref={imageRef}
+                  loading="eager"
+                  decoding="async"
+                />
+              ) : (
+                <div className="testimonials-image testimonials-image--placeholder" ref={imageRef} aria-hidden />
+              )}
             </div>
 
             <div className="testimonials-nav">

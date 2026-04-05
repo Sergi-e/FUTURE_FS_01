@@ -21,9 +21,37 @@ export default function SmoothScroll({ children }) {
     gsap.ticker.add(raf);
     gsap.ticker.lagSmoothing(0);
 
+    const scroller = document.documentElement;
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length) {
+          lenis.scrollTo(value, { immediate: true });
+        }
+        return lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+    });
+
+    const onResize = () => {
+      lenis.resize();
+      ScrollTrigger.refresh();
+    };
+    window.addEventListener("resize", onResize);
+    ScrollTrigger.refresh();
+
     return () => {
+      window.removeEventListener("resize", onResize);
       gsap.ticker.remove(raf);
       lenis.destroy();
+      ScrollTrigger.scrollerProxy(scroller, {});
+      ScrollTrigger.refresh();
     };
   }, []);
 

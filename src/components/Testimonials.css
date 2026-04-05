@@ -57,6 +57,11 @@
   object-fit: cover;
 }
 
+.testimonials-image--placeholder {
+  background: linear-gradient(145deg, #1a1a1a, #0a0a0a);
+  object-fit: unset;
+}
+
 .image-overlay {
   position: absolute;
   top: 0;
