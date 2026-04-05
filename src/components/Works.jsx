@@ -6,9 +6,9 @@ import './Works.css';
 gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
-  { id: 1, title: 'QUANTUM ANALYTICS', subtitle: 'Full-Stack Data Engine', year: '2025' },
-  { id: 2, title: 'ECO-SENTINEL', subtitle: 'Marine Conservation Platform', year: '2026' },
-  { id: 3, title: 'NEURAL NEXUS', subtitle: 'AI-Driven System Architecture', year: '2026' },
+  { id: 1, title: 'QUANTUM ANALYTICS', subtitle: 'Full-Stack Data Engine', year: '2025', link: 'https://github.com' },
+  { id: 2, title: 'ECO-SENTINEL', subtitle: 'Marine Conservation Platform', year: '2026', link: 'https://github.com' },
+  { id: 3, title: 'NEURAL NEXUS', subtitle: 'AI-Driven System Architecture', year: '2026', link: 'https://github.com' },
 ];
 
 export default function Works() {
@@ -56,7 +56,10 @@ export default function Works() {
                 <span>{project.subtitle}</span>
                 <span>{project.year}</span>
               </div>
-              {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-neon)', textTransform:'uppercase', letterSpacing:'0.1em', fontSize:'0.85rem'}}>VIEW MORE →</a>}
+              {(() => {
+                const href = String(project.url || project.link || '').trim();
+                return href ? <a href={href} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-neon)', textTransform:'uppercase', letterSpacing:'0.1em', fontSize:'0.85rem', display: 'block', marginTop: '0.75rem'}}>VIEW MORE →</a> : null;
+              })()}
             </div>
           </div>
         ))}
