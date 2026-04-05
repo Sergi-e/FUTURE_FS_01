@@ -97,6 +97,7 @@ export default function Works() {
                 <span>{project.subtitle}</span>
                 <span>{project.year}</span>
               </div>
+              {project.url && <a href={project.url} target="_blank" rel="noopener noreferrer" style={{color:'var(--accent-neon)',textTransform:'uppercase',letterSpacing:'0.1em',fontSize:'0.85rem',display:'block',marginTop:'0.5rem'}}>VIEW MORE →</a>}
             </div>
           </a>
         ))}
