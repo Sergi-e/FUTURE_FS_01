@@ -39,7 +39,7 @@ export default function SmoothScroll({ children }) {
       },
     });
 
-    ScrollTrigger.defaults({ scroller: scroller });
+    ScrollTrigger.defaults({ scroller });
 
     const onResize = () => {
       lenis.resize();
@@ -53,7 +53,6 @@ export default function SmoothScroll({ children }) {
       gsap.ticker.remove(raf);
       lenis.destroy();
       ScrollTrigger.scrollerProxy(scroller, {});
-      ScrollTrigger.defaults({ scroller: window });
       ScrollTrigger.refresh();
     };
   }, []);
