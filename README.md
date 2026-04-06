@@ -160,6 +160,29 @@ The line under your repo name on your profile comes from the repo **About** desc
 - Click **Save changes** at the bottom of the About panel (closing the panel without saving discards edits).
 - Add **Topics** one at a time: type a word, press **Enter**, then save. Do not paste the whole topic list as one blob into the description box.
 - Try another browser or a private window if the button does nothing (extensions sometimes block GitHub).
+- Try **Settings** (not only the About gear): open `https://github.com/Sergi-e/FUTURE_FS_01/settings` → **General** → find the **Description** field under the repository name, save with **Save** at the bottom of that page.
+
+### Set the description via API (when the website still fails)
+
+This repo includes a small script that updates the description with GitHub’s REST API (same field as About).
+
+1. Create a **Personal Access Token** (do not commit it):
+   - [Fine-grained](https://github.com/settings/personal-access-tokens/new): choose repository **FUTURE_FS_01** → **Repository permissions** → **Administration**: **Read and write**.
+   - Or [classic](https://github.com/settings/tokens/new): enable scope **`repo`**.
+2. In **PowerShell** from the project root:
+
+```powershell
+$env:GITHUB_TOKEN = "paste_your_token_here"
+.\scripts\set-github-repo-description.ps1
+```
+
+Optional: custom text:
+
+```powershell
+.\scripts\set-github-repo-description.ps1 -Description "Personal portfolio - React, Vite, Express, SQLite."
+```
+
+If you see **401/403**, the token lacks permission to edit repository settings. Revoke the token after use if you prefer.
 
 ### Copy-paste descriptions (plain ASCII)
 
