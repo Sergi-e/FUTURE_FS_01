@@ -263,3 +263,9 @@
     height: 210px;
   }
 }
+
+@media (max-width: 480px) {
+  .hobbies-innovative {
+    padding: 56px max(16px, env(safe-area-inset-left, 0px)) 56px max(16px, env(safe-area-inset-right, 0px));
+  }
+}
