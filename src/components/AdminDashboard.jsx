@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, startTransition } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './AdminDashboard.css';
@@ -22,13 +22,8 @@ export default function AdminDashboard() {
     name: '', role: '', location: '', image: '', quote: '', tag: ''
   });
 
-  useEffect(() => {
-    if (token) {
-      fetchData();
-    }
-  }, [token]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!token) return;
     try {
       const projRes = await fetch(`${API_BASE_URL}/projects`);
       const projData = await projRes.json();
@@ -47,10 +42,16 @@ export default function AdminDashboard() {
       const setRes = await fetch(`${API_BASE_URL}/settings/resume`);
       const setData = await setRes.json();
       if (setData && typeof setData.value === 'string') setResumeUrl(setData.value);
-    } catch (err) {
-      console.error('Failed to fetch data', err);
+    } catch {
+      console.error('Failed to fetch admin data');
     }
-  };
+  }, [token]);
+
+  useEffect(() => {
+    startTransition(() => {
+      void fetchData();
+    });
+  }, [fetchData]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,7 +68,7 @@ export default function AdminDashboard() {
       } else {
         alert(data.error);
       }
-    } catch (err) {
+    } catch {
       alert("Login failed");
     }
   };
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
         setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
         fetchData();
       }
-    } catch (err) {
+    } catch {
       alert("Failed to add project");
     }
   };
@@ -123,7 +124,7 @@ export default function AdminDashboard() {
         setNewTestimonial({ name: '', role: '', location: '', image: '', quote: '', tag: '' });
         fetchData();
       }
-    } catch (err) {
+    } catch {
       alert("Failed to add testimonial");
     }
   };
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
       } else {
         alert("Failed to update resume");
       }
-    } catch (err) {
+    } catch {
       alert("Error updating resume");
     }
   };
