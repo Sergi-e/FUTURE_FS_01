@@ -1,22 +1,29 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Oswald:wght@500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
 
 :root {
   --bg-color: #050505;
   --text-primary: #f8f8f8;
-  --text-secondary: #888888;
-  --accent-neon: #ccff00; /* Default: Toxic chartreuse */
+  --text-secondary: #c0c0c0;
+  --accent-neon: #00f2ff; /* Cyber Theme */
   
   /* Transition for theme switching */
   --transition-speed: 0.5s;
   --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Oswald", "Inter", sans-serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Outfit", sans-serif;
+}
+
+@property --accent-neon {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #ccff00;
 }
 
 body {
   transition: background-color var(--transition-speed) var(--transition-ease),
-              color var(--transition-speed) var(--transition-ease);
+              color var(--transition-speed) var(--transition-ease),
+              --accent-neon 0.8s ease;
 }
 
 /* Ensure accent color transitions smoothly */
@@ -39,6 +46,40 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  cursor: default;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+.app-main {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
+
+a[href],
+button,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+input[type="reset"],
+label[for],
+select,
+summary,
+.cursor-hover {
+  cursor: pointer;
 }
 
 h1,
