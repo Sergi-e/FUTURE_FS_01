@@ -26,6 +26,13 @@
   overflow: hidden;
 }
 
+@media (max-width: 480px) {
+  .ethos {
+    padding: 48px max(16px, env(safe-area-inset-left, 0px)) 48px max(16px, env(safe-area-inset-right, 0px));
+    min-height: auto;
+  }
+}
+
 .ethos-text-mask {
   font-size: clamp(2rem, 5vw, 4.5rem);
   font-weight: 300;
