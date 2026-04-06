@@ -7,6 +7,39 @@ import './Works.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
+function ProjectMedia({ project, mediaKind, mediaSrc }) {
+  const [failed, setFailed] = useState(false);
+  const usePlaceholder = !mediaSrc || failed || mediaKind === 'placeholder';
+
+  if (usePlaceholder) {
+    return <div className="work-image-placeholder" />;
+  }
+  if (mediaKind === 'image') {
+    return (
+      <img
+        src={mediaSrc}
+        alt={project.title}
+        className="work-media-asset"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  if (mediaKind === 'video') {
+    return (
+      <video
+        src={mediaSrc}
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="work-media-asset"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
+  return <div className="work-image-placeholder" />;
+}
+
 function projectMediaType(project) {
   const t = project?.mediaType;
   if (t === 'image' || t === 'video' || t === 'placeholder') return t;
@@ -95,21 +128,7 @@ export default function Works() {
           const inner = (
             <>
               <div className="work-media-container cursor-hover">
-                {mediaKind === 'image' && mediaSrc && (
-                  <img src={mediaSrc} alt={project.title} className="work-media-asset" />
-                )}
-                {mediaKind === 'image' && !mediaSrc && (
-                  <div className="work-image-placeholder"></div>
-                )}
-                {mediaKind === 'video' && mediaSrc && (
-                  <video src={mediaSrc} autoPlay muted loop playsInline className="work-media-asset" />
-                )}
-                {mediaKind === 'video' && !mediaSrc && (
-                  <div className="work-image-placeholder"></div>
-                )}
-                {mediaKind === 'placeholder' && (
-                  <div className="work-image-placeholder"></div>
-                )}
+                <ProjectMedia key={project.id} project={project} mediaKind={mediaKind} mediaSrc={mediaSrc} />
                 <div className="work-overlay"></div>
               </div>
               <div className="work-meta">
