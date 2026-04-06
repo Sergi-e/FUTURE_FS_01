@@ -120,24 +120,45 @@
 }
 
 @media (max-width: 1024px) {
+  .hobbies-header-alt {
+    margin-bottom: 1.75rem;
+  }
+
   .hobby-row-alt {
     flex-direction: column !important;
-    gap: 50px;
+    gap: 1.25rem;
     align-items: flex-start;
-    min-height: clamp(340px, 62vh, 720px);
+    min-height: unset;
+    padding: 1.25rem 0;
   }
-  
-  .hobby-content-alt, .hobby-visual-alt {
+
+  .hobby-content-alt,
+  .hobby-visual-alt {
     width: 100%;
   }
-  
+
   .hobby-visual-alt {
-    height: 300px;
+    height: auto;
+    min-height: 200px;
   }
-  
+
   .hobby-float-img {
     width: 150px;
     height: 150px;
+  }
+
+  .books-section {
+    margin-top: 1.5rem;
+  }
+
+  .books-marquee-container {
+    min-height: unset;
+    padding: 20px 0;
+  }
+
+  .books-marquee-wrapper {
+    min-height: 200px;
+    padding: 20px 0;
   }
 }
 
@@ -269,6 +290,6 @@
 
 @media (max-width: 480px) {
   .hobbies-innovative {
-    padding: 56px max(16px, env(safe-area-inset-left, 0px)) 56px max(16px, env(safe-area-inset-right, 0px));
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px));
   }
 }

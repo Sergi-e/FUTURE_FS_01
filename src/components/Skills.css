@@ -342,7 +342,7 @@
 
 @media (max-width: 768px) {
   .skills {
-    padding: 60px max(20px, env(safe-area-inset-left, 0px)) 40px max(20px, env(safe-area-inset-right, 0px));
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px));
   }
 }
 

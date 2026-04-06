@@ -201,16 +201,19 @@
 @media (max-width: 1024px) {
   .testimonials-layout {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 1.5rem;
   }
   .testimonials-info {
     padding-left: 0;
+  }
+  .testimonials-visual {
+    margin-top: 0.75rem;
   }
 }
 
 @media (max-width: 640px) {
   .testimonials {
-    padding: 32px max(16px, env(safe-area-inset-left, 0px)) 48px max(16px, env(safe-area-inset-right, 0px));
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px));
   }
   .testimonials-visual {
     margin-top: 1.25rem;
