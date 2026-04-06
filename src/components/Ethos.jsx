@@ -10,26 +10,43 @@ export default function Ethos() {
   const textRef = useRef(null);
 
   useEffect(() => {
-    let ctx = gsap.context(() => {
-      // Pinning the section
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: '+=150%',
-          pin: true,
-          scrub: 1,
-        }
-      });
+    const mq = window.matchMedia('(max-width: 768px)');
+    let ctx;
 
-      // Text reveal animation based on scroll (using background clipping trick)
-      tl.to('.ethos-text-mask', {
-        backgroundPositionX: '0%',
-        ease: 'none',
-      });
-    }, sectionRef);
+    const setup = () => {
+      if (ctx) {
+        ctx.revert();
+        ctx = undefined;
+      }
+      if (mq.matches) {
+        ScrollTrigger.refresh();
+        return;
+      }
+      ctx = gsap.context(() => {
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: '+=150%',
+            pin: true,
+            scrub: 1,
+          },
+        });
 
-    return () => ctx.revert();
+        tl.to('.ethos-text-mask', {
+          backgroundPositionX: '0%',
+          ease: 'none',
+        });
+      }, sectionRef);
+      ScrollTrigger.refresh();
+    };
+
+    setup();
+    mq.addEventListener('change', setup);
+    return () => {
+      mq.removeEventListener('change', setup);
+      ctx?.revert();
+    };
   }, []);
 
   return (
