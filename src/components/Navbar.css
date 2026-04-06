@@ -79,6 +79,22 @@
 .line:nth-child(2) { width: 20px; }
 .line:nth-child(3) { width: 28px; }
 
+@media (max-width: 480px) {
+  .navbar {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-top: max(14px, env(safe-area-inset-top, 0px));
+  }
+  .navbar.scrolled {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .nav-logo {
+    font-size: clamp(0.95rem, 4.2vw, 1.45rem);
+    letter-spacing: 0.07em;
+  }
+}
+
 .hamburger.open .line:nth-child(1) { transform: translateY(8px) rotate(45deg); width: 28px; background: var(--accent-neon); }
 .hamburger.open .line:nth-child(2) { opacity: 0; transform: translateX(10px); }
 .hamburger.open .line:nth-child(3) { transform: translateY(-8px) rotate(-45deg); width: 28px; background: var(--accent-neon); }
