@@ -149,19 +149,33 @@ See `backend/server.js` for the full list.
 
 ---
 
-## GitHub profile & repo “About”
+## GitHub profile & repo About
 
-The **text under your repo name** on your profile (and on the repo home sidebar) comes from the **About** description on GitHub, not from the README. Set it once so pinned repos look like your CRM project.
+The line under your repo name on your profile comes from the repo **About** description on GitHub (not from this README).
 
-**Suggested About description** (same style as a one-line project summary):
+### If the description will not save
 
-> Full-stack developer portfolio with a React/Vite SPA, GSAP + Lenis smooth scrolling, and an Express/SQLite API for projects, testimonials, contact, and admin tools.
+- Use **plain typing** or paste from the **ASCII lines below** (avoid curly quotes or long em dashes copied from the web).
+- Stay under **350 characters** (GitHub’s limit).
+- Click **Save changes** at the bottom of the About panel (closing the panel without saving discards edits).
+- Add **Topics** one at a time: type a word, press **Enter**, then save. Do not paste the whole topic list as one blob into the description box.
+- Try another browser or a private window if the button does nothing (extensions sometimes block GitHub).
 
-Shorter option if you hit a character limit:
+### Copy-paste descriptions (plain ASCII)
 
-> Personal portfolio — React, Vite, GSAP, Lenis, Express/SQLite API, admin dashboard.
+**Recommended (one line):**
 
-**Topics:** `react` `vite` `portfolio` `gsap` `lenis` `express` `sqlite` `javascript` `fullstack`
+```text
+Full-stack portfolio: React, Vite, GSAP, Lenis, Express, SQLite API, projects, testimonials, contact, admin dashboard.
+```
+
+**Shorter:**
+
+```text
+Personal portfolio - React, Vite, GSAP, Lenis, Express, SQLite, admin tools.
+```
+
+**Topics to add separately** (each as its own topic chip): `react` `vite` `portfolio` `gsap` `lenis` `express` `sqlite` `javascript` `fullstack`
 
 ---
 
