@@ -1,20 +1,24 @@
 {
   "name": "portfolio-2026",
+  "description": "Full-stack developer portfolio — React/Vite, GSAP + Lenis, Express/SQLite API for projects, testimonials, contact, and admin.",
   "private": true,
   "version": "0.0.0",
+  "author": "Serge Ishimwe",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "repo:description": "node scripts/set-github-repo-description.mjs"
   },
   "dependencies": {
     "gsap": "^3.14.2",
     "lenis": "^1.3.18",
     "lucide-react": "^0.577.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
