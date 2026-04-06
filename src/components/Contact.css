@@ -1,10 +1,11 @@
 .contact {
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-color);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 5vh 5vw;
+  padding: max(5vh, env(safe-area-inset-top, 0px)) max(5vw, env(safe-area-inset-right, 0px)) max(5vh, env(safe-area-inset-bottom, 0px)) max(5vw, env(safe-area-inset-left, 0px));
   position: relative;
   z-index: 10;
 }
