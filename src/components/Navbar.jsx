@@ -27,10 +27,14 @@ export default function Navbar() {
 
   useEffect(() => {
     isOpenRef.current = isOpen;
-    if (isOpen) setNavHidden(false);
   }, [isOpen]);
 
-  const toggleMenu = () => setIsOpen(!isOpen);
+  const toggleMenu = () => {
+    setIsOpen((prev) => {
+      if (!prev) setNavHidden(false);
+      return !prev;
+    });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
