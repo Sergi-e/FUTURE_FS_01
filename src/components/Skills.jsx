@@ -115,7 +115,7 @@ export default function Skills() {
         <div className="experience-card">
           <div className="exp-left">
             <h3 className="exp-number">1 Year</h3>
-            <p className="exp-description">One year of dvpt experience</p>
+            <p className="exp-description">of dvpt experience</p>
           </div>
           <div className="exp-middle">
             <div className="exp-visual-box flower">
