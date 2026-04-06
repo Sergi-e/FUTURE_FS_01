@@ -3,9 +3,13 @@ import { API_ORIGIN } from '../config/api';
 /**
  * Turn DB media paths into a full URL for <img> / <video src>.
  * - Absolute http(s) URLs are unchanged.
- * - Root-relative paths (/assets/...) use the current site origin by default (same as src="/assets/…"
- *   on the deployed or dev app, where public/ files are served).
- * - Set VITE_ASSET_ORIGIN to force a host (e.g. https://future-fs-01-huwr.onrender.com if media is only on the API).
+ * - Root-relative `/assets/...` (and other `/...` paths): see resolution order below.
+ *
+ * Resolution order:
+ * 1. VITE_ASSET_ORIGIN — use when media is only on the API host (e.g. Render serves backend/public/assets).
+ * 2. In the browser (not file:), same origin as the page — use when you ship files in Vite `public/assets`
+ *    (static host). This avoids broken media when the API does not serve those static files.
+ * 3. API_ORIGIN — fallback for SSR, file://, or when window is unavailable.
  */
 export function resolveMediaUrl(path) {
   if (path == null || typeof path !== 'string') return '';
@@ -21,12 +25,17 @@ export function resolveMediaUrl(path) {
       typeof import.meta !== 'undefined' && import.meta.env?.VITE_ASSET_ORIGIN
         ? import.meta.env.VITE_ASSET_ORIGIN.replace(/\/$/, '')
         : '';
-    let origin = envOrigin;
-    if (!origin && typeof window !== 'undefined' && window.location?.origin && window.location.protocol !== 'file:') {
-      origin = window.location.origin;
+    if (envOrigin) return `${envOrigin}${p}`;
+
+    const apiOrigin = API_ORIGIN.replace(/\/$/, '');
+    if (
+      typeof window !== 'undefined' &&
+      window.location?.origin &&
+      window.location.protocol !== 'file:'
+    ) {
+      return `${window.location.origin.replace(/\/$/, '')}${p}`;
     }
-    if (!origin) origin = API_ORIGIN;
-    return `${origin.replace(/\/$/, '')}${p}`;
+    return `${apiOrigin}${p}`;
   }
   return p;
 }
