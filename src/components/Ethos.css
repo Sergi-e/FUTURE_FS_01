@@ -1,10 +1,10 @@
 .ethos {
-  min-height: 100vh;
+  min-height: 80vh;
   display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--bg-color);
-  padding: 0 5vw;
+  padding: 60px 5vw;
 }
 
 .ethos-content {
@@ -13,20 +13,31 @@
 }
 
 .ethos-title {
-  font-size: 1rem;
-  color: var(--accent-neon);
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 4.5rem);
+  font-weight: 900;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: -2px;
   margin-bottom: 2rem;
-  letter-spacing: 0.1em;
 }
 
 .ethos-text-container {
   overflow: hidden;
 }
 
+@media (max-width: 480px) {
+  .ethos {
+    padding: 48px max(16px, env(safe-area-inset-left, 0px)) 48px max(16px, env(safe-area-inset-right, 0px));
+    min-height: auto;
+  }
+}
+
 .ethos-text-mask {
   font-size: clamp(2rem, 5vw, 4.5rem);
-  font-weight: 500;
-  line-height: 1.2;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   margin: 0;
   font-family: var(--font-sans);
   

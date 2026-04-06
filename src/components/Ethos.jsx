@@ -33,9 +33,9 @@ export default function Ethos() {
   }, []);
 
   return (
-    <section className="ethos" ref={sectionRef}>
+    <section className="ethos" id="approach" ref={sectionRef}>
       <div className="ethos-content" ref={textRef}>
-        <h2 className="ethos-title">THE PHILOSOPHY</h2>
+        <h2 className="ethos-title">THE APPROACH</h2>
         <div className="ethos-text-container">
           <p className="ethos-text-mask">
             I am a tech enthusiast whose work involves programming and data analysis, 
