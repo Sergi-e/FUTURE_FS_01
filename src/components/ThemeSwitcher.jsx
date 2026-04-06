@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import './ThemeSwitcher.css';
 
 const themes = [
@@ -12,15 +12,12 @@ const themes = [
 export default function ThemeSwitcher() {
   const [currentTheme, setCurrentTheme] = useState(1); // Default to Cyber
 
-  useEffect(() => {
-    // Set initial theme on mount
+  useLayoutEffect(() => {
     document.documentElement.style.setProperty('--accent-neon', themes[currentTheme].color);
-  }, []);
+  }, [currentTheme]);
 
   const cycleTheme = () => {
-    const next = (currentTheme + 1) % themes.length;
-    setCurrentTheme(next);
-    document.documentElement.style.setProperty('--accent-neon', themes[next].color);
+    setCurrentTheme((prev) => (prev + 1) % themes.length);
   };
 
   return (
