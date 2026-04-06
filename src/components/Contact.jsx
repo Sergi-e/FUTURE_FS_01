@@ -91,7 +91,7 @@ export default function Contact() {
       } else {
         setStatus('Message failed. Try again.');
       }
-    } catch (err) {
+    } catch {
       setStatus('Error connecting to server.');
     }
   };
