@@ -100,21 +100,15 @@ export default function Hero() {
         </a>
       </div>
 
-      <div className="hero-bottom-left-info freelance-badge-container" style={{ position: 'absolute', bottom: '2.5rem', left: '2.5rem', zIndex: 10 }}>
-        <a href="#contact" style={{ 
-          display: 'flex', alignItems: 'center', gap: '12px', 
-          color: 'var(--text-primary)', textDecoration: 'none', 
-          fontFamily: 'var(--font-display)', fontSize: '1.15rem', 
-          letterSpacing: '0.15em', fontWeight: 'bold',
-          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' 
-        }} 
-        onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent-neon)'; e.currentTarget.style.transform = 'translateY(-3px)'; }} 
-        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.transform = 'none'; }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent-neon)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 2v20M17 5l-10 14M22 12H2M19 19L5 5" />
-            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite" />
-          </svg>
-          OPEN FOR FREELANCE
+      <div className="hero-freelance-wrap">
+        <a href="#contact" className="hero-freelance-link">
+          <span className="hero-freelance-icon" aria-hidden>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2v20M17 5l-10 14M22 12H2M19 19L5 5" />
+              <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite" />
+            </svg>
+          </span>
+          <span className="hero-freelance-label">OPEN TO FREELANCE</span>
         </a>
       </div>
 
