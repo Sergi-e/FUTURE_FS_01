@@ -84,17 +84,9 @@
   transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
-/* Project stills: bias framing to the top so headline art in the asset stays visible */
-.work-media-container img.work-media-asset {
-  object-position: center top;
-  max-height: min(82vh, 920px);
-}
-
 .work-image-placeholder {
-  width: min(85vw, 960px);
-  height: 38vh;
-  min-height: 220px;
-  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
   background-image: linear-gradient(45deg, #111, #050505);
 }
 
@@ -156,9 +148,6 @@
 @media (max-width: 768px) {
   .work-item {
     padding-top: 100px;
-  }
-  .work-media-container img.work-media-asset {
-    max-height: min(68vh, 560px);
   }
   .work-media-container {
     width: fit-content;
