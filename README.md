@@ -164,25 +164,35 @@ The line under your repo name on your profile comes from the repo **About** desc
 
 ### Set the description via API (when the website still fails)
 
-This repo includes a small script that updates the description with GitHub’s REST API (same field as About).
+Use **Node** (same as this project) so auth matches what GitHub expects:
 
-1. Create a **Personal Access Token** (do not commit it):
-   - [Fine-grained](https://github.com/settings/personal-access-tokens/new): choose repository **FUTURE_FS_01** → **Repository permissions** → **Administration**: **Read and write**.
-   - Or [classic](https://github.com/settings/tokens/new): enable scope **`repo`**.
-2. In **PowerShell** from the project root:
+1. Create a **Personal Access Token** (never commit it):
+   - **Classic (simplest):** [New classic token](https://github.com/settings/tokens/new) → enable **`repo`** → generate → copy `ghp_...`.
+   - **Fine-grained:** [New fine-grained token](https://github.com/settings/personal-access-tokens/new) → repository **FUTURE_FS_01** only → **Administration**: **Read and write**.
 
-```powershell
-$env:GITHUB_TOKEN = "paste_your_token_here"
-.\scripts\set-github-repo-description.ps1
+2. From the project root in a terminal:
+
+```bash
+# Windows CMD
+set GITHUB_TOKEN=ghp_your_token_here
+npm run repo:description
+
+# PowerShell
+$env:GITHUB_TOKEN = "ghp_your_token_here"
+npm run repo:description
 ```
 
-Optional: custom text:
+Custom one-liner:
 
-```powershell
-.\scripts\set-github-repo-description.ps1 -Description "Personal portfolio - React, Vite, Express, SQLite."
+```bash
+npm run repo:description -- "Personal portfolio - React, Vite, Express, SQLite."
 ```
 
-If you see **401/403**, the token lacks permission to edit repository settings. Revoke the token after use if you prefer.
+The script tries **Bearer** and **`token`** auth (classic PATs often need the second). If it still fails, the printed **JSON error message** is the real reason (wrong scopes, SSO not authorized, typo in token, etc.).
+
+**PowerShell-only** (alternative): `.\scripts\set-github-repo-description.ps1`
+
+Revoke the token after use if you want it gone.
 
 ### Copy-paste descriptions (plain ASCII)
 
