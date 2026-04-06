@@ -46,8 +46,9 @@
   gap: 2vw;
   align-items: center;
   position: relative;
-  min-height: auto;
-  padding: 1vh 0;
+  /* Tall rows so ScrollTrigger scrub (Lenis wheel) has enough scroll distance per hobby */
+  min-height: clamp(420px, 72vh, 880px);
+  padding: clamp(24px, 5vh, 56px) 0;
 }
 
 .hobby-row-alt:nth-child(even) {
@@ -115,6 +116,7 @@
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5));
+  will-change: transform, opacity;
 }
 
 @media (max-width: 1024px) {
@@ -122,6 +124,7 @@
     flex-direction: column !important;
     gap: 50px;
     align-items: flex-start;
+    min-height: clamp(340px, 62vh, 720px);
   }
   
   .hobby-content-alt, .hobby-visual-alt {

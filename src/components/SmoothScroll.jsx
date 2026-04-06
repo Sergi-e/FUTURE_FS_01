@@ -22,6 +22,11 @@ export default function SmoothScroll({ children }) {
     gsap.ticker.lagSmoothing(0);
 
     const scroller = document.documentElement;
+    const t =
+      scroller.style.transform ||
+      (document.body && document.body.style.transform) ||
+      "";
+    const pinType = t && t !== "none" ? "transform" : "fixed";
     ScrollTrigger.scrollerProxy(scroller, {
       scrollTop(value) {
         if (arguments.length) {
@@ -37,6 +42,7 @@ export default function SmoothScroll({ children }) {
           height: window.innerHeight,
         };
       },
+      pinType,
     });
 
     ScrollTrigger.defaults({ scroller });

@@ -57,7 +57,8 @@ export default function Hobbies() {
                 scroller,
                 start: 'top bottom',
                 end: 'bottom top',
-                scrub: 1.5,
+                scrub: 1.25,
+                fastScrollEnd: true,
                 invalidateOnRefresh: true,
               },
             }
@@ -70,14 +71,15 @@ export default function Hobbies() {
             { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
             {
               x: 0,
-              opacity: 0.1,
+              opacity: 0.12,
               ease: 'none',
               scrollTrigger: {
                 trigger: row,
                 scroller,
                 start: 'top bottom',
-                end: 'center center',
-                scrub: 1,
+                end: 'bottom top',
+                scrub: 1.25,
+                fastScrollEnd: true,
                 invalidateOnRefresh: true,
               },
             }
@@ -87,7 +89,10 @@ export default function Hobbies() {
 
       requestAnimationFrame(() => {
         refreshST();
-        requestAnimationFrame(refreshST);
+        requestAnimationFrame(() => {
+          refreshST();
+          requestAnimationFrame(refreshST);
+        });
       });
     }, root);
 
@@ -101,7 +106,11 @@ export default function Hobbies() {
     resizeObserver = new ResizeObserver(() => refreshST());
     resizeObserver.observe(root);
 
+    queueMicrotask(refreshST);
+    const refreshLater = window.setTimeout(refreshST, 120);
+
     return () => {
+      window.clearTimeout(refreshLater);
       resizeObserver.disconnect();
       ctx.revert();
     };
