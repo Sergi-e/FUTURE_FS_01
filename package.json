@@ -1,6 +1,6 @@
 {
   "name": "portfolio-2026",
-  "description": "Serge Ishimwe — personal portfolio (React, Vite, GSAP, Lenis) with optional Express/SQLite API.",
+  "description": "Full-stack developer portfolio — React/Vite, GSAP + Lenis, Express/SQLite API for projects, testimonials, contact, and admin.",
   "private": true,
   "version": "0.0.0",
   "author": "Serge Ishimwe",

@@ -1,8 +1,8 @@
 # Serge Ishimwe — Portfolio
 
-Personal portfolio site for **Serge Ishimwe**, a full-stack developer and aspiring AI engineer. The experience highlights approach, skills, featured projects, testimonials, hobbies, and contact—with smooth scrolling, scroll-driven motion, and a themeable accent system.
+A full-stack personal portfolio designed to present my work, skills, and story in one smooth, scroll-driven experience. It combines a React (Vite) frontend with GSAP and Lenis for motion, plus a small **Express + SQLite** API so projects, testimonials, the contact form, resume link, and an **admin dashboard** stay easy to update and deploy.
 
-**Live API (example):** the frontend is built to pair with a small **Express + SQLite** backend for projects, testimonials, contact messages, resume URL, and an admin dashboard.
+**Stack at a glance:** React 19 · Vite · GSAP / ScrollTrigger · Lenis · React Router · Express · SQLite · JWT.
 
 ---
 
@@ -149,15 +149,19 @@ See `backend/server.js` for the full list.
 
 ---
 
-## Suggested GitHub repository settings
+## GitHub profile & repo “About”
 
-Paste into the repository **About** description (short):
+The **text under your repo name** on your profile (and on the repo home sidebar) comes from the **About** description on GitHub, not from the README. Set it once so pinned repos look like your CRM project.
 
-> Personal portfolio — React, Vite, GSAP, Lenis, Express/SQLite API. Smooth scroll, scroll-driven UI, admin dashboard.
+**Suggested About description** (same style as a one-line project summary):
 
-**Topics / tags** you can add on GitHub:
+> Full-stack developer portfolio with a React/Vite SPA, GSAP + Lenis smooth scrolling, and an Express/SQLite API for projects, testimonials, contact, and admin tools.
 
-`react` `vite` `portfolio` `gsap` `lenis` `smooth-scroll` `express` `sqlite` `javascript` `frontend`
+Shorter option if you hit a character limit:
+
+> Personal portfolio — React, Vite, GSAP, Lenis, Express/SQLite API, admin dashboard.
+
+**Topics:** `react` `vite` `portfolio` `gsap` `lenis` `express` `sqlite` `javascript` `fullstack`
 
 ---
 
