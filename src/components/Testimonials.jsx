@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL } from '../config/api';
@@ -10,10 +10,13 @@ gsap.registerPlugin(ScrollTrigger);
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
   const [testimonials, setTestimonials] = useState([]);
+  const [failedImageKey, setFailedImageKey] = useState(null);
   const titleRef = useRef(null);
   const textRef = useRef(null);
   const infoRef = useRef(null);
   const imageRef = useRef(null);
+  /** After index updates, run fade-in on the new DOM (img vs placeholder swap). */
+  const pendingFadeInRef = useRef(null);
 
   useEffect(() => {
     const url = `${API_BASE_URL}/testimonials`;
@@ -35,6 +38,19 @@ export default function Testimonials() {
     if (testimonials.length === 0) return;
     requestAnimationFrame(() => ScrollTrigger.refresh());
   }, [testimonials.length]);
+
+  useLayoutEffect(() => {
+    const pending = pendingFadeInRef.current;
+    if (!pending) return;
+    pendingFadeInRef.current = null;
+    const targets = [textRef.current, infoRef.current, imageRef.current].filter(Boolean);
+    if (targets.length === 0) return;
+    gsap.fromTo(
+      targets,
+      { opacity: 0, y: pending.enterY },
+      { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
+    );
+  }, [index]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -74,23 +90,23 @@ export default function Testimonials() {
   const animateChange = (nextIdx, yOffset) => {
     if (testimonials.length === 0) return;
     const tl = gsap.timeline();
+    const outgoing = [textRef.current, infoRef.current, imageRef.current].filter(Boolean);
 
-    tl.to([textRef.current, infoRef.current, imageRef.current], {
+    tl.to(outgoing, {
       opacity: 0,
       y: yOffset,
       duration: 0.3,
       onComplete: () => {
+        pendingFadeInRef.current = { enterY: -yOffset };
         setIndex(nextIdx);
-        gsap.fromTo([textRef.current, infoRef.current, imageRef.current],
-          { opacity: 0, y: -yOffset },
-          { opacity: 1, y: 0, duration: 0.5, ease: 'power2.out' }
-        );
       }
     });
   };
 
   const current = testimonials[index];
   const imageSrc = current ? resolveMediaUrl(current.image) : '';
+  const imageKey = current ? `${index}-${imageSrc}` : '';
+  const showPortrait = Boolean(imageSrc) && failedImageKey !== imageKey;
 
   return (
     <section className="testimonials" id="testimonials">
@@ -101,7 +117,7 @@ export default function Testimonials() {
         <div className="testimonials-layout">
           <div className="testimonials-visual">
             <div className="image-container">
-              {imageSrc ? (
+              {showPortrait ? (
                 <img
                   src={imageSrc}
                   alt={current.name || 'Testimonial'}
@@ -109,6 +125,7 @@ export default function Testimonials() {
                   ref={imageRef}
                   loading="eager"
                   decoding="async"
+                  onError={() => setFailedImageKey(imageKey)}
                 />
               ) : (
                 <div className="testimonials-image testimonials-image--placeholder" ref={imageRef} aria-hidden />
