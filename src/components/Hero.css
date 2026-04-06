@@ -207,7 +207,7 @@
   font-weight: 500;
 }
 
-/* Actions */
+/* Resume only: paint slightly higher so brackets stay inside overflow; no hero padding (keeps portrait centered) */
 .hero-actions-minimal {
   margin-top: 20px;
 }
@@ -221,10 +221,59 @@
   letter-spacing: 2px;
   transition: color 0.3s ease;
   text-transform: uppercase;
+  display: inline-block;
+  line-height: 1.55;
+  transform: translateY(-10px);
 }
 
 .minimal-resume-link:hover {
   color: white;
+}
+
+.hero-freelance-wrap {
+  position: absolute;
+  bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
+  left: max(1.25rem, env(safe-area-inset-left, 0px));
+  z-index: 10;
+}
+
+.hero-freelance-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: nowrap;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: clamp(0.72rem, 2.8vw, 1.15rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.6rem 0.75rem;
+  margin: -0.6rem -0.75rem;
+  border-radius: 10px;
+  transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hero-freelance-link:hover,
+.hero-freelance-link:focus-visible {
+  color: var(--accent-neon);
+  transform: translateY(-3px);
+}
+
+.hero-freelance-icon {
+  display: flex;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.hero-freelance-icon svg {
+  display: block;
+}
+
+.hero-freelance-label {
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
@@ -238,5 +287,16 @@
   .hero-portrait-wrap {
     width: 100px;
     height: 100px;
+  }
+
+  .hero-freelance-wrap {
+    bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+    left: max(1rem, env(safe-area-inset-left, 0px));
+    max-width: min(18rem, calc(100vw - 2rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  }
+
+  .hero-freelance-label {
+    white-space: normal;
+    line-height: 1.3;
   }
 }
