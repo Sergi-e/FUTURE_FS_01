@@ -169,7 +169,7 @@ export default function Navbar() {
         <div className="menu-footer">
           <div className="menu-contact-exclusive">
             <span>GET IN TOUCH</span>
-            <a href="mailto:ishserge16@gmail.com" className="menu-email-link">
+            <a href="https://mail.google.com/mail/?view=cm&fs=1&to=ishserge16@gmail.com" target="_blank" rel="noopener noreferrer" className="menu-email-link">
               ishserge16@gmail.com
               <span className="email-underline"></span>
             </a>

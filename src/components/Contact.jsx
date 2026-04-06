@@ -116,7 +116,7 @@ export default function Contact() {
           
           <div className="contact-methods-left" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div className="magnetic-button-wrapper">
-              <a href="mailto:ishserge16@gmail.com" ref={buttonRef} className="magnetic-button gmail-link" style={{border: 'none', cursor: 'pointer', textDecoration: 'none'}}>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=ishserge16@gmail.com" target="_blank" rel="noopener noreferrer" ref={buttonRef} className="magnetic-button gmail-link" style={{border: 'none', cursor: 'pointer', textDecoration: 'none'}}>
                 <span ref={textRef} className="magnetic-text">EMAIL ME</span>
                 <div className="gmail-icon-hover">
                   <svg viewBox="0 0 24 24" width="45" height="45">
