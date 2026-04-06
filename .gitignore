@@ -9,7 +9,7 @@ lerna-debug.log*
 
 # Dependency directories
 node_modules
-/jspm_packages
+jspm_packages
 
 # Build artifacts
 dist
@@ -27,6 +27,12 @@ out
 .env.test.local
 .env.production.local
 
+# SQLite / local databases (use seeds; persist on server volume in production)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
 # Testing
 coverage
 .nyc_output
@@ -34,52 +40,43 @@ coverage
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.bak
-*.tmp
-*.temp
 
 # OS files
+.DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
 # Vite
-dist
-dist-ssr
 *.local
 
-# IDEs and Editors
-.vscode/*
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/settings.json
-!.vscode/tasks.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Vercel CLI local project link
+.vercel
 
-# Scratch and Temp
+# Local Netlify folder
+.netlify
+
+# Scratch, backups, and one-off exports (keep locally; not part of the app)
 /tmp
 /temp
 *.tmp
 *.temp
+*.bak
 /brain
 .agents/
 .agent/
 _agents/
 _agent/
 .gemini/
-
-# Local Netlify folder
-.netlify
+h_history.txt
+old_*.js
+works_backup.jsx
