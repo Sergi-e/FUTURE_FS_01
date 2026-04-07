@@ -15,6 +15,11 @@ app.use(express.json());
 // Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 
+// Quick health check (Render / uptime monitors)
+app.get('/api/health', (req, res) => {
+  res.json({ ok: true });
+});
+
 let db;
 
 // Basic auth middleware
@@ -135,13 +140,17 @@ app.put('/api/settings/resume', authenticate, async (req, res) => {
 
 async function startServer() {
   db = await setupDatabase();
-  app.listen(PORT, () => {
-    console.log(`Backend server running on http://localhost:${PORT}`);
-    
-    // Self-ping to keep Render free tier awake
-    setInterval(() => {
-      require('https').get('https://future-fs-01-huwr.onrender.com/api/projects');
-    }, 14 * 60 * 1000); // 14 minutes
+  // Render requires listening on 0.0.0.0 so public traffic reaches the process
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Backend server running on port ${PORT}`);
+
+    const base = process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, '');
+    const pingUrl = base ? `${base}/api/health` : null;
+    if (pingUrl) {
+      setInterval(() => {
+        require('https').get(pingUrl);
+      }, 14 * 60 * 1000);
+    }
   });
 }
 
