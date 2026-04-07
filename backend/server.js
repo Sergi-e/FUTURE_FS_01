@@ -10,19 +10,32 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
 
+app.set('trust proxy', 1);
+app.disable('x-powered-by');
 app.use(cors());
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
   next();
 });
+
+// Register JSON routes BEFORE static files so nothing intercepts /api/*
+app.get('/', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.status(200).json({
+    ok: true,
+    service: 'portfolio-api',
+    try: ['/api/health', '/api/projects', '/api/testimonials'],
+  });
+});
+
+app.get('/api/health', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.status(200).json({ ok: true });
+});
+
 // Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
-
-// Quick health check (Render / uptime monitors)
-app.get('/api/health', (req, res) => {
-  res.json({ ok: true });
-});
 
 let db;
 
@@ -142,6 +155,20 @@ app.put('/api/settings/resume', authenticate, async (req, res) => {
   res.json({ success: true, value });
 });
 
+app.use((req, res) => {
+  res.status(404).json({
+    error: 'not_found',
+    method: req.method,
+    path: req.path,
+    originalUrl: req.originalUrl,
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({ error: 'server_error', message: err.message || 'internal' });
+});
+
 async function startServer() {
   db = await setupDatabase();
   // Render requires listening on 0.0.0.0 so public traffic reaches the process
@@ -158,4 +185,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error('Fatal startup error:', err);
+  process.exit(1);
+});
