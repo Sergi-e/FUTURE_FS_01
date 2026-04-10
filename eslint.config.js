@@ -8,9 +8,6 @@ export default defineConfig([
   globalIgnores([
     'dist',
     'backend/**',
-    'get_covers.js',
-    'download_missing.js',
-    'download_books.js',
     'old_utf8.js',
     'old_hobbies.js',
     'works_backup.jsx',
