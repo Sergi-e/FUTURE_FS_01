@@ -1,4 +1,5 @@
 require('dotenv').config();
+const https = require('https');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -178,9 +179,18 @@ async function startServer() {
     const base = process.env.RENDER_EXTERNAL_URL?.replace(/\/$/, '');
     const pingUrl = base ? `${base}/api/health` : null;
     if (pingUrl) {
-      setInterval(() => {
-        require('https').get(pingUrl);
-      }, 14 * 60 * 1000);
+      const pingHealth = () => {
+        const req = https.get(pingUrl, (res) => {
+          res.resume();
+        });
+        req.on('error', (err) => {
+          console.warn('[health-ping]', err.message);
+        });
+        req.setTimeout(15000, () => {
+          req.destroy();
+        });
+      };
+      setInterval(pingHealth, 14 * 60 * 1000);
     }
   });
 }
