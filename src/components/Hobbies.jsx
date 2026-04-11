@@ -44,11 +44,10 @@ export default function Hobbies() {
         const text = row.querySelector('.hobby-name-big');
 
         if (image) {
-          gsap.set(image, { opacity: 0, y: 40 });
-
+          // Fade-in independently of the scrub
+          gsap.set(image, { opacity: 0 });
           gsap.to(image, {
             opacity: 1,
-            y: 0,
             duration: 0.8,
             ease: 'power2.out',
             scrollTrigger: {
@@ -58,33 +57,54 @@ export default function Hobbies() {
             },
           });
 
-          gsap.to(image, {
-            yPercent: -20,
-            rotation: 8,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: row,
-              start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
-              invalidateOnRefresh: true,
-            },
-          });
+          // The original massive scrubbed float (200px travel + 30deg rotation)
+          gsap.fromTo(
+            image,
+            { y: 100, rotation: -15 },
+            {
+              y: -100,
+              rotation: 15,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: row,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1.25,
+                fastScrollEnd: true,
+                invalidateOnRefresh: true,
+              },
+            }
+          );
         }
 
         if (text) {
+          // Fade-in independently
+          gsap.set(text, { opacity: 0 });
+          gsap.to(text, {
+            opacity: 0.12,
+            duration: 1,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: row,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
+          });
+
+          // Scrubbed slide
           gsap.fromTo(
             text,
-            { x: index % 2 === 0 ? -80 : 80, opacity: 0 },
+            { x: index % 2 === 0 ? -150 : 150 },
             {
               x: 0,
-              opacity: 0.12,
-              duration: 1,
-              ease: 'power2.out',
+              ease: 'none',
               scrollTrigger: {
                 trigger: row,
-                start: 'top 85%',
-                toggleActions: 'play none none none',
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1.25,
+                fastScrollEnd: true,
+                invalidateOnRefresh: true,
               },
             }
           );
