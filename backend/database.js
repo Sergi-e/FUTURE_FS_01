@@ -3,6 +3,94 @@ const { open } = require('sqlite');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
+/** Norf Cre8tions — restored from removed `backend/seed_testimonials.js` (commit 4dfb9a3). */
+const TESTIMONIAL_EMELY_MURENZI = {
+  name: 'Emely Murenzi',
+  role: 'Chief Technology Officer (CTO)',
+  location: 'Norf Cre8tions',
+  image: '/assets/Emery-prof-2-min.jpg.jpeg',
+  quote:
+    'Serge is a highly reliable and driven contributor on our team. He approached problems with clarity, delivered clean and scalable solutions, and consistently met expectations while maintaining strong collaboration across the team.',
+  tag: 'IMG_ID: 04',
+};
+
+const TESTIMONIAL_ERIC_KWIZERA = {
+  name: 'Eric Kwizera',
+  role: 'Software Developer',
+  location: 'Norf Cre8tions',
+  image: '/assets/Wizzy.jpeg',
+  quote:
+    'Working alongside Serge consistently improved the quality and speed of our delivery. He communicates clearly, writes clean and scalable code, and approaches problems with a strong focus on practical, client-ready solutions that perform reliably in real-world use.',
+  tag: 'IMG_ID: 05',
+};
+
+/**
+ * Ensures the two real portfolio testimonials (Emely Murenzi, Eric Kwizera) and their photo paths.
+ * If the DB already has exactly those two image paths, only normalizes name/role/quote/tag.
+ * Otherwise replaces rows when there are at most six (templates / experiments), so a bad seed
+ * self-heals on the next API start. Skips if you have more than six rows (treat as custom data).
+ */
+async function seedNorfCreationsTestimonials(db) {
+  const rows = await db.all('SELECT * FROM testimonials ORDER BY id ASC');
+  const images = new Set(rows.map((r) => String(r.image || '').trim()));
+
+  const hasEmelyPhoto = images.has(TESTIMONIAL_EMELY_MURENZI.image);
+  const hasEricPhoto = images.has(TESTIMONIAL_ERIC_KWIZERA.image);
+
+  if (rows.length === 2 && hasEmelyPhoto && hasEricPhoto) {
+    await db.run(
+      'UPDATE testimonials SET name = ?, role = ?, location = ?, quote = ?, tag = ? WHERE image = ?',
+      [
+        TESTIMONIAL_EMELY_MURENZI.name,
+        TESTIMONIAL_EMELY_MURENZI.role,
+        TESTIMONIAL_EMELY_MURENZI.location,
+        TESTIMONIAL_EMELY_MURENZI.quote,
+        TESTIMONIAL_EMELY_MURENZI.tag,
+        TESTIMONIAL_EMELY_MURENZI.image,
+      ]
+    );
+    await db.run(
+      'UPDATE testimonials SET name = ?, role = ?, location = ?, quote = ?, tag = ? WHERE image = ?',
+      [
+        TESTIMONIAL_ERIC_KWIZERA.name,
+        TESTIMONIAL_ERIC_KWIZERA.role,
+        TESTIMONIAL_ERIC_KWIZERA.location,
+        TESTIMONIAL_ERIC_KWIZERA.quote,
+        TESTIMONIAL_ERIC_KWIZERA.tag,
+        TESTIMONIAL_ERIC_KWIZERA.image,
+      ]
+    );
+    return;
+  }
+
+  if (rows.length > 6) return;
+
+  await db.run('DELETE FROM testimonials');
+
+  await db.run(
+    'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+    [
+      TESTIMONIAL_EMELY_MURENZI.name,
+      TESTIMONIAL_EMELY_MURENZI.role,
+      TESTIMONIAL_EMELY_MURENZI.location,
+      TESTIMONIAL_EMELY_MURENZI.image,
+      TESTIMONIAL_EMELY_MURENZI.quote,
+      TESTIMONIAL_EMELY_MURENZI.tag,
+    ]
+  );
+  await db.run(
+    'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
+    [
+      TESTIMONIAL_ERIC_KWIZERA.name,
+      TESTIMONIAL_ERIC_KWIZERA.role,
+      TESTIMONIAL_ERIC_KWIZERA.location,
+      TESTIMONIAL_ERIC_KWIZERA.image,
+      TESTIMONIAL_ERIC_KWIZERA.quote,
+      TESTIMONIAL_ERIC_KWIZERA.tag,
+    ]
+  );
+}
+
 /** One promise: open DB + schema + seeds. Avoids returning `open()` early while init is still running. */
 let initPromise = null;
 
@@ -76,22 +164,8 @@ async function setupDatabase() {
         );
       }
 
-      // Seed testimonials if empty
-      const testimonial = await db.get('SELECT * FROM testimonials');
-      if (!testimonial) {
-        await db.run(
-          'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
-          ['ALEX RIVERA', 'TECH ARCHITECT', 'SAN FRANCISCO, CA', '/assets/testimonial_1.png', 'Serge is a tech enthusiast whose work involves programming and data analysis, turning unstructured, real problems into systems that operate reliably.', 'IMG_ID: 01']
-        );
-        await db.run(
-          'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
-          ['SARAH CHEN', 'PROJECT MANAGER', 'LONDON, UK', '/assets/testimonial_2.png', 'Working with Serge was a game-changer. His ability to craft immersive digital experiences while maintaining clean, robust fullstack code is truly exceptional.', 'IMG_ID: 02']
-        );
-        await db.run(
-          'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
-          ['DAVID OKORO', 'PRODUCT DESIGNER', 'LAGOS, NIGERIA', '/assets/serge_portrait.png', 'Beyond the screen, Serge is a committed professional dedicated to protecting our environment. His passion for both tech and conservation is inspiring.', 'IMG_ID: 03']
-        );
-      }
+      // Emely Murenzi + Eric Kwizera (Norf Cre8tions) — canonical copy + photo paths
+      await seedNorfCreationsTestimonials(db);
 
       // Seed settings if empty
       const setting = await db.get('SELECT * FROM settings WHERE key = ?', ['resume_url']);
