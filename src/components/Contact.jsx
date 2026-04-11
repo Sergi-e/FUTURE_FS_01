@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL } from '../config/api';
+import { fetchJson } from '../lib/apiClient';
 import './Contact.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -79,20 +80,16 @@ export default function Contact() {
     e.preventDefault();
     setStatus('Sending...');
     try {
-      const res = await fetch(`${API_BASE_URL}/contact`, {
+      await fetchJson(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
-        setStatus('Message successfully sent!');
-        setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => { setShowForm(false); setStatus(''); }, 3000);
-      } else {
-        setStatus('Message failed. Try again.');
-      }
-    } catch {
-      setStatus('Error connecting to server.');
+      setStatus('Message successfully sent!');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => { setShowForm(false); setStatus(''); }, 3000);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Error connecting to server.');
     }
   };
 
