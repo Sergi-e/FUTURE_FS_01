@@ -214,6 +214,9 @@ export default function Works() {
           ) : (
             <div key={project.id} className="work-item work-item--static">
               {cardBody}
+              <span className="work-view-more work-view-more--static" aria-hidden="true">
+                VIEW MORE →
+              </span>
             </div>
           );
         })}
