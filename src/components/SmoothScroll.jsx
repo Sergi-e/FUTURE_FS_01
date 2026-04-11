@@ -13,6 +13,27 @@ export default function SmoothScroll({ children }) {
       smoothWheel: true,
     });
 
+    const scroller = document.documentElement;
+
+    // Lenis drives scroll programmatically; ScrollTrigger must read/write through Lenis or scrubbed
+    // timelines (e.g. Hobbies float) stay frozen at their start state.
+    ScrollTrigger.scrollerProxy(scroller, {
+      scrollTop(value) {
+        if (arguments.length) {
+          lenis.scrollTo(value, { immediate: true });
+        }
+        return lenis.scroll;
+      },
+      getBoundingClientRect() {
+        return {
+          top: 0,
+          left: 0,
+          width: window.innerWidth,
+          height: window.innerHeight,
+        };
+      },
+    });
+
     lenis.on("scroll", ScrollTrigger.update);
 
     const raf = (time) => {
@@ -32,6 +53,7 @@ export default function SmoothScroll({ children }) {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(raf);
       lenis.destroy();
+      ScrollTrigger.scrollerProxy(scroller, {});
       ScrollTrigger.refresh();
     };
   }, []);

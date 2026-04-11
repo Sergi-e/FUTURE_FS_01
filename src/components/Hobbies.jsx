@@ -36,6 +36,8 @@ export default function Hobbies() {
 
     const refreshST = () => ScrollTrigger.refresh();
 
+    const scroller = document.documentElement;
+
     const ctx = gsap.context(() => {
       const rows = root.querySelectorAll('.hobby-row-alt');
 
@@ -51,6 +53,7 @@ export default function Hobbies() {
             duration: 0.8,
             ease: 'power2.out',
             scrollTrigger: {
+              scroller,
               trigger: row,
               start: 'top 85%',
               toggleActions: 'play none none none',
@@ -66,6 +69,7 @@ export default function Hobbies() {
               rotation: 15,
               ease: 'none',
               scrollTrigger: {
+                scroller,
                 trigger: row,
                 start: 'top bottom',
                 end: 'bottom top',
@@ -85,6 +89,7 @@ export default function Hobbies() {
             duration: 1,
             ease: 'power2.out',
             scrollTrigger: {
+              scroller,
               trigger: row,
               start: 'top 85%',
               toggleActions: 'play none none none',
@@ -99,6 +104,7 @@ export default function Hobbies() {
               x: 0,
               ease: 'none',
               scrollTrigger: {
+                scroller,
                 trigger: row,
                 start: 'top bottom',
                 end: 'bottom top',
