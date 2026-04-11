@@ -79,7 +79,9 @@ npm install
 npm run dev
 ```
 
-Opens the Vite dev server (default port `5173`). API calls use `VITE_*` values or the default API URL.
+Opens the Vite dev server (default port `5173`). With no `VITE_API_BASE_URL` in `.env.local`, the app calls **`/api/...` on the same origin** and Vite **proxies** those requests to `http://127.0.0.1:5000`, so you must have the backend running for projects and testimonials to load.
+
+**One command for frontend + API:** from the repo root, `npm run dev:stack` (starts Express on `5000` and Vite on `5173`).
 
 ### Backend (optional)
 
@@ -98,10 +100,17 @@ Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static up
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Vite dev server |
+| `npm run dev` | Start Vite dev server (API must be on port 5000, or use `dev:stack`) |
+| `npm run dev:stack` | Start backend + Vite together for local full-stack |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Run ESLint on the frontend |
+
+### Before deploy (quick check)
+
+1. From repo root: `npm run lint` and `npm run build` (both should pass).
+2. Local full stack: `npm run dev:stack`, open `http://localhost:5173`, then scroll the full page: **Works** (pinned stack), **Hobbies** (horizontal books + parallax rows), **Ethos / Contact** (ScrollTrigger intros), **Navbar** section highlights. Confirm **testimonials** and **projects** load from the API (backend on port 5000).
+3. Commit and push; then deploy Netlify + Render using the steps below.
 
 ---
 
@@ -132,6 +141,8 @@ Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static up
    | `VITE_API_BASE_URL` | `https://your-api.onrender.com/api` |
 
 5. `netlify.toml` already SPA-rewrites `/*` → `/index.html` so `/admin` works.
+
+**Common mistake:** If the live site tries to load `http://localhost:5000/api/...`, Netlify (or a committed `.env`) has **`VITE_API_BASE_URL` set to localhost**. Browsers on your visitors’ machines cannot reach your laptop. Replace it with your Render URL (`https://…onrender.com/api`), save, and trigger a new deploy. The production build will fail fast if these variables still point at localhost.
 
 **3. Media (projects / testimonials)**
 
