@@ -147,15 +147,18 @@
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: black;
+  color: #050505;
   background-color: var(--accent-neon);
   border-radius: 50px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+/* Keep site accent on the pill when hovering anywhere on the project card */
 .work-item:hover .work-view-more {
   transform: translateY(-2px);
-  background-color: white;
+  color: #050505;
+  background-color: var(--accent-neon);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 768px) {
