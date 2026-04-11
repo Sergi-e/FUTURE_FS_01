@@ -1,20 +1,29 @@
 .works {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  min-height: 100dvh;
+  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   background-color: var(--bg-color);
   overflow: hidden;
   perspective: 1500px;
 }
 
 .works-header {
-  padding: 60px 5vw 40px;
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  padding: 60px 5vw 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  position: absolute;
-  top: 0;
-  width: 100%;
   z-index: 100;
   pointer-events: none;
+  background-color: var(--bg-color);
 }
 
 .works-header * {
@@ -31,8 +40,9 @@
 
 .works-wrapper {
   position: relative;
+  flex: 1;
+  min-height: 0;
   width: 100%;
-  height: 100vh;
 }
 
 .work-item {
@@ -40,17 +50,27 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 140px 5vw 40px;
-  text-decoration: none;
+  /* Top padding: navbar; title now lives in .works-header so less top overlap risk */
+  padding: 100px 5vw 40px;
   color: inherit;
   background-color: var(--bg-color);
   will-change: transform, opacity;
   transform-style: preserve-3d;
+}
+
+.work-item-card-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 1000px;
+  text-decoration: none;
+  color: inherit;
 }
 
 .work-item--static {
@@ -94,16 +114,19 @@
   transition: opacity 0.4s ease;
 }
 
-.work-item:hover .work-media-container {
+.work-item-card-link:hover .work-media-container,
+.work-item--static:hover .work-media-container {
   transform: translateY(-8px);
   box-shadow: 0 30px 60px rgba(0,0,0,0.8);
 }
 
-.work-item:hover .work-media-asset {
+.work-item-card-link:hover .work-media-asset,
+.work-item--static:hover .work-media-asset {
   transform: scale(1.05);
 }
 
-.work-item:hover .work-overlay {
+.work-item-card-link:hover .work-overlay,
+.work-item--static:hover .work-overlay {
   opacity: 1;
 }
 
@@ -138,7 +161,14 @@
   letter-spacing: 0.05em;
 }
 
-.work-view-more {
+/*
+  Pill is its own <a>. Lock colors hard: global * { transition: color, background }
+  plus WebKit link styles can otherwise read as “turning white”. No filter — brightness
+  washes cyan toward white.
+*/
+.work-view-more:any-link,
+.work-view-more:any-link:visited,
+.work-view-more:any-link:active {
   display: inline-block;
   margin-top: 1.5rem;
   padding: 10px 24px;
@@ -147,20 +177,59 @@
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  color: black;
-  background-color: var(--accent-neon);
+  text-decoration: none;
   border-radius: 50px;
-  transition: transform 0.3s ease, background-color 0.3s ease;
+  -webkit-tap-highlight-color: transparent;
+  color: #050505 !important;
+  background-color: var(--accent-neon) !important;
+  -webkit-text-fill-color: #050505;
+  box-shadow: none;
+  filter: none;
+  /* Do not animate fill colors — stops cross-fade glitches next to card motion */
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.work-item:hover .work-view-more {
+.work-view-more:hover {
+  color: #050505 !important;
+  background-color: var(--accent-neon) !important;
+  -webkit-text-fill-color: #050505;
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 26px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.work-view-more:focus-visible {
+  outline: 2px solid var(--accent-neon);
+  outline-offset: 3px;
+  color: #050505 !important;
+  background-color: var(--accent-neon) !important;
+  -webkit-text-fill-color: #050505;
   transform: translateY(-2px);
-  background-color: white;
+}
+
+/* While the project image/title link is hovered, keep the sibling pill visually frozen */
+.work-item:has(.work-item-card-link:hover) .work-view-more:any-link {
+  color: #050505 !important;
+  background-color: var(--accent-neon) !important;
+  -webkit-text-fill-color: #050505;
+  filter: none !important;
+  transform: none;
+  box-shadow: none;
 }
 
 @media (max-width: 768px) {
+  .works-header {
+    padding: 48px max(18px, env(safe-area-inset-right, 0px)) 20px max(18px, env(safe-area-inset-left, 0px));
+  }
+
+  .works-header h2 {
+    font-size: clamp(0.75rem, 2.8vw, 1.05rem);
+    letter-spacing: 0.18em;
+  }
+
   .work-item {
-    padding: 100px 5vw 40px;
+    padding: 72px 5vw 36px;
   }
   .work-media-container {
     margin-bottom: 1.5rem;

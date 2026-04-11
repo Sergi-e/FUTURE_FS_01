@@ -163,7 +163,7 @@ export default function Works() {
           const hasLink = Boolean(project.link && String(project.link).trim());
           const mediaKind = projectMediaType(project);
           const mediaSrc = resolveMediaUrl(project.mediaPath);
-          const inner = (
+          const cardBody = (
             <>
               <div className="work-media-container cursor-hover">
                 <ProjectMedia key={project.id} project={project} mediaKind={mediaKind} mediaSrc={mediaSrc} />
@@ -175,26 +175,33 @@ export default function Works() {
                   <span>{project.subtitle}</span>
                   <span>{project.year}</span>
                 </div>
-                {hasLink && (
-                  <span className="work-view-more">VIEW MORE →</span>
-                )}
               </div>
             </>
           );
 
           return hasLink ? (
-            <a
-              key={project.id}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="work-item"
-            >
-              {inner}
-            </a>
+            <div key={project.id} className="work-item">
+              <a
+                className="work-item-card-link"
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Open project: ${project.title}`}
+              >
+                {cardBody}
+              </a>
+              <a
+                className="work-view-more"
+                href={project.link}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                VIEW MORE →
+              </a>
+            </div>
           ) : (
             <div key={project.id} className="work-item work-item--static">
-              {inner}
+              {cardBody}
             </div>
           );
         })}
