@@ -2,22 +2,30 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
-import { API_BASE_URL } from '../config/api';
+import { getJson } from '../lib/apiClient';
 
 export default function Hero() {
   const container = useRef(null);
   const [resumeUrl, setResumeUrl] = useState('/Serge_Ishimwe_Resume.pdf');
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/settings/resume`)
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.value) setResumeUrl(data.value);
+    let cancelled = false;
+    getJson('/settings/resume')
+      .then((data) => {
+        if (!cancelled && data && data.value) setResumeUrl(data.value);
       })
-      .catch(err => console.error('Failed to fetch resume url', err));
-      
-    if (!container.current) return;
-    let ctx = gsap.context((self) => {
+      .catch(() => {
+        /* keep default PDF path when API unreachable or misconfigured */
+      });
+
+    const root = container.current;
+    if (!root) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const ctx = gsap.context((self) => {
       const otherElements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-subtitle, .hero-actions-minimal');
       
       // Reveal animation for non-title elements
@@ -71,9 +79,12 @@ export default function Hero() {
         yoyo: true,
         ease: 'sine.inOut'
       });
-    }, container.current);
+    }, root);
 
-    return () => ctx.revert();
+    return () => {
+      cancelled = true;
+      ctx.revert();
+    };
   }, []);
 
   const splitTextToSpans = (text) => {
