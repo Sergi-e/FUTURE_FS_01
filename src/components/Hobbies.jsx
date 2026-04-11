@@ -27,12 +27,11 @@ export default function Hobbies() {
   const sectionRef = useRef(null);
   const booksWrapperRef = useRef(null);
 
-  /* Scroll-scrubbed parallax (original feel) — uses documentElement scroller + Lenis proxy from SmoothScroll */
+  /* Scroll-scrubbed parallax — Lenis v1.3+ drives native scroll, ScrollTrigger picks it up automatically */
   useEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
 
-    const scroller = document.documentElement;
     let resizeObserver;
 
     const refreshST = () => ScrollTrigger.refresh();
@@ -55,7 +54,6 @@ export default function Hobbies() {
               ease: 'none',
               scrollTrigger: {
                 trigger: row,
-                scroller,
                 start: 'top bottom',
                 end: 'bottom top',
                 scrub: 1.25,
@@ -76,7 +74,6 @@ export default function Hobbies() {
               ease: 'none',
               scrollTrigger: {
                 trigger: row,
-                scroller,
                 start: 'top bottom',
                 end: 'bottom top',
                 scrub: 1.25,
