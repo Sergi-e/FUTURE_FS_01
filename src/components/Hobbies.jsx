@@ -44,53 +44,54 @@ export default function Hobbies() {
         const text = row.querySelector('.hobby-name-big');
 
         if (image) {
-          gsap.fromTo(
-            image,
-            { y: 100, rotation: -15, opacity: 0 },
-            {
-              y: -100,
-              rotation: 15,
-              opacity: 1,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: row,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 1.25,
-                fastScrollEnd: true,
-                invalidateOnRefresh: true,
-              },
-            }
-          );
+          gsap.set(image, { opacity: 0, y: 40 });
+
+          gsap.to(image, {
+            opacity: 1,
+            y: 0,
+            duration: 0.8,
+            ease: 'power2.out',
+            scrollTrigger: {
+              trigger: row,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+            },
+          });
+
+          gsap.to(image, {
+            yPercent: -20,
+            rotation: 8,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: row,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: true,
+              invalidateOnRefresh: true,
+            },
+          });
         }
 
         if (text) {
           gsap.fromTo(
             text,
-            { x: index % 2 === 0 ? -150 : 150, opacity: 0 },
+            { x: index % 2 === 0 ? -80 : 80, opacity: 0 },
             {
               x: 0,
               opacity: 0.12,
-              ease: 'none',
+              duration: 1,
+              ease: 'power2.out',
               scrollTrigger: {
                 trigger: row,
-                start: 'top bottom',
-                end: 'bottom top',
-                scrub: 1.25,
-                fastScrollEnd: true,
-                invalidateOnRefresh: true,
+                start: 'top 85%',
+                toggleActions: 'play none none none',
               },
             }
           );
         }
       });
-      requestAnimationFrame(() => {
-        refreshST();
-        requestAnimationFrame(() => {
-          refreshST();
-          requestAnimationFrame(refreshST);
-        });
-      });
+
+      requestAnimationFrame(refreshST);
     }, root);
 
     const hobbyImgs = root.querySelectorAll('.hobby-float-img');

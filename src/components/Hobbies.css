@@ -116,7 +116,7 @@
   position: relative;
   z-index: 2;
   filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5));
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 @media (max-width: 1024px) {
