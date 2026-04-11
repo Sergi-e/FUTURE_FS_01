@@ -6,16 +6,15 @@
 }
 
 .works-header {
-  padding: 100px 5vw 40px;
+  padding: 60px 5vw 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: absolute;
   top: 0;
   width: 100%;
-  z-index: 90;
+  z-index: 100;
   pointer-events: none;
-  mix-blend-mode: difference;
 }
 
 .works-header * {
@@ -46,7 +45,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 120px 5vw 40px;
+  padding: 140px 5vw 40px;
   text-decoration: none;
   color: inherit;
   background-color: var(--bg-color);
