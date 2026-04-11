@@ -26,6 +26,9 @@ out
 .env.development.local
 .env.test.local
 .env.production.local
+# Do not commit — Vite loads these for builds; localhost here breaks Netlify the same as wrong UI env.
+.env.production
+.env.development
 
 # SQLite / local databases (use seeds; persist on server volume in production)
 *.db
