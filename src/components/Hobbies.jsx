@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
@@ -87,7 +87,6 @@ export default function Hobbies() {
           );
         }
       });
-
       requestAnimationFrame(() => {
         refreshST();
         requestAnimationFrame(() => {

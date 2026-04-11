@@ -37,7 +37,6 @@ export default function Testimonials() {
     if (testimonials.length === 0) return;
     requestAnimationFrame(() => ScrollTrigger.refresh());
   }, [testimonials.length]);
-
   const nextTestimonial = () => {
     if (testimonials.length === 0) return;
     const nextIdx = (index + 1) % testimonials.length;

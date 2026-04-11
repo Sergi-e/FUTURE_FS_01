@@ -9,7 +9,6 @@ export function publicAssetPath(rootRelativePath) {
   ).replace(/\/$/, '');
   return `${base}${p}`;
 }
-
 /**
  * Turn DB media paths into a full URL for <img> / <video src>.
  * - Absolute http(s) URLs are unchanged.

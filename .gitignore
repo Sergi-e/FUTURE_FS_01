@@ -68,18 +68,22 @@ Desktop.ini
 # Local Netlify folder
 .netlify
 
-# Scratch, backups, and one-off exports (keep locally; not part of the app)
+# Scratch and Temp
 /tmp
 /temp
 *.tmp
 *.temp
 *.bak
+
+# AI/Agent folders
 /brain
 .agents/
 .agent/
 _agents/
 _agent/
 .gemini/
+
+# Scratch, backups, and one-off exports (keep locally; not part of the app)
 h_history.txt
 old_*.js
 works_backup.jsx
