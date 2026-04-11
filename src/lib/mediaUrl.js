@@ -1,5 +1,15 @@
 import { API_ORIGIN } from '../config/api';
 
+/** Root-relative path to a file in Vite `public/` (works with non-root BASE_URL). */
+export function publicAssetPath(rootRelativePath) {
+  const p = rootRelativePath.startsWith('/') ? rootRelativePath : `/${rootRelativePath}`;
+  const base = (typeof import.meta !== 'undefined' && import.meta.env?.BASE_URL
+    ? import.meta.env.BASE_URL
+    : '/'
+  ).replace(/\/$/, '');
+  return `${base}${p}`;
+}
+
 /**
  * Turn DB media paths into a full URL for <img> / <video src>.
  * - Absolute http(s) URLs are unchanged.
