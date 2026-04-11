@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
 import rubiksImg from '../assets/rubiks_cube_realistic.png';
 import gamepadImg from '../assets/gamepad_realistic.png';
+import { publicAssetPath } from '../lib/mediaUrl';
 import './Hobbies.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -15,11 +16,11 @@ const hobbiesData = [
 ];
 
 const booksData = [
-  { id: 'b1', title: 'The Pragmatic Programmer', image: 'https://covers.openlibrary.org/b/id/10143650-L.jpg' },
-  { id: 'b2', title: 'Think Like a Programmer', image: 'https://covers.openlibrary.org/b/id/11917842-L.jpg' },
-  { id: 'b3', title: '48 Laws of Power', image: 'https://covers.openlibrary.org/b/id/6424160-L.jpg' },
-  { id: 'b4', title: 'Laws of Human Nature', image: 'https://covers.openlibrary.org/b/id/10170095-L.jpg' },
-  { id: 'b5', title: 'Atomic Habits', image: 'https://covers.openlibrary.org/b/id/12539702-L.jpg' }
+  { id: 'b1', title: 'The Pragmatic Programmer', image: publicAssetPath('/assets/books/b1.jpg') },
+  { id: 'b2', title: 'Think Like a Programmer', image: publicAssetPath('/assets/books/b2.jpg') },
+  { id: 'b3', title: '48 Laws of Power', image: publicAssetPath('/assets/books/b3.jpg') },
+  { id: 'b4', title: 'Laws of Human Nature', image: publicAssetPath('/assets/books/b4.jpg') },
+  { id: 'b5', title: 'Atomic Habits', image: publicAssetPath('/assets/books/b5.jpg') }
 ];
 
 export default function Hobbies() {
@@ -27,7 +28,7 @@ export default function Hobbies() {
   const booksWrapperRef = useRef(null);
 
   /* Scroll-scrubbed parallax (original feel) — uses documentElement scroller + Lenis proxy from SmoothScroll */
-  useLayoutEffect(() => {
+  useEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
 
@@ -86,7 +87,6 @@ export default function Hobbies() {
           );
         }
       });
-
       requestAnimationFrame(() => {
         refreshST();
         requestAnimationFrame(() => {
@@ -109,7 +109,20 @@ export default function Hobbies() {
     queueMicrotask(refreshST);
     const refreshLater = window.setTimeout(refreshST, 120);
 
+    // One refresh when this block is about to enter view — fixes scrub start/end if layout
+    // above shifted (e.g. testimonials/projects loaded after first ScrollTrigger.measure).
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        requestAnimationFrame(() => ScrollTrigger.refresh());
+      },
+      { root: null, rootMargin: '180px 0px 0px 0px', threshold: 0 }
+    );
+    io.observe(root);
+
     return () => {
+      io.disconnect();
       window.clearTimeout(refreshLater);
       resizeObserver.disconnect();
       ctx.revert();

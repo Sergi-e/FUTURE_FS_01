@@ -110,3 +110,51 @@ html.lenis body {
 .lenis.lenis-smooth iframe {
   pointer-events: none;
 }
+
+/* ≤1024px: same section order as hamburger (Home → … → Contact); flush stack, no dead space between blocks */
+@media (max-width: 1024px) {
+  .app-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    row-gap: 0;
+  }
+
+  .app-main > section {
+    margin: 0;
+  }
+
+  section#approach.ethos {
+    min-height: unset;
+    padding: 28px max(16px, env(safe-area-inset-left, 0px)) 28px
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  section#skills.skills {
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  section#testimonials.testimonials {
+    min-height: unset;
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  section#hobbies.hobbies-innovative {
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  section#contact.contact {
+    min-height: unset;
+    padding: 24px max(16px, env(safe-area-inset-left, 0px)) max(28px, env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-right, 0px));
+  }
+
+  /* Projects: tighter header offset so stack sits flush under Skills */
+  section#projects.works .works-header {
+    padding-top: 72px;
+    padding-bottom: 16px;
+  }
+}

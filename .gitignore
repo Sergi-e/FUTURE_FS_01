@@ -9,7 +9,7 @@ lerna-debug.log*
 
 # Dependency directories
 node_modules
-/jspm_packages
+jspm_packages
 
 # Build artifacts
 dist
@@ -26,6 +26,15 @@ out
 .env.development.local
 .env.test.local
 .env.production.local
+# Do not commit — Vite loads these for builds; localhost here breaks Netlify the same as wrong UI env.
+.env.production
+.env.development
+
+# SQLite / local databases (use seeds; persist on server volume in production)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
 
 # Testing
 coverage
@@ -34,46 +43,39 @@ coverage
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-*.bak
-*.tmp
-*.temp
 
 # OS files
+.DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
 # Vite
-dist
-dist-ssr
 *.local
 
-# IDEs and Editors
-.vscode/*
-!.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/settings.json
-!.vscode/tasks.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Vercel CLI local project link
+.vercel
+
+# Local Netlify folder
+.netlify
 
 # Scratch and Temp
 /tmp
 /temp
 *.tmp
 *.temp
+*.bak
+
+# AI/Agent folders
 /brain
 .agents/
 .agent/
@@ -81,5 +83,7 @@ _agents/
 _agent/
 .gemini/
 
-# Local Netlify folder
-.netlify
+# Scratch, backups, and one-off exports (keep locally; not part of the app)
+h_history.txt
+old_*.js
+works_backup.jsx

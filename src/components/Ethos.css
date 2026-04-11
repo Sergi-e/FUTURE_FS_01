@@ -1,4 +1,7 @@
 .ethos {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
   min-height: 80vh;
   display: flex;
   align-items: center;
@@ -40,11 +43,11 @@
   letter-spacing: -0.01em;
   margin: 0;
   font-family: var(--font-sans);
-  
+
   /* Text reveal effect setup */
   background: linear-gradient(
-    to right, 
-    var(--text-primary) 50%, 
+    to right,
+    var(--text-primary) 50%,
     rgba(255, 255, 255, 0.1) 50%
   );
   background-size: 200% 100%;
@@ -52,4 +55,24 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+/* Narrow viewports: no pin/scrub (see Ethos.jsx); show copy without gradient mask */
+@media (max-width: 768px) {
+  .ethos-text-mask {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    color: var(--text-primary);
+  }
+
+  .ethos-sub {
+    margin-top: 1.75rem;
+  }
+
+  .ethos-sub-text {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
 }

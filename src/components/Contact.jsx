@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL } from '../config/api';
+import { fetchJson } from '../lib/apiClient';
 import './Contact.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -79,20 +80,16 @@ export default function Contact() {
     e.preventDefault();
     setStatus('Sending...');
     try {
-      const res = await fetch(`${API_BASE_URL}/contact`, {
+      await fetchJson(`${API_BASE_URL}/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
-        setStatus('Message successfully sent!');
-        setFormData({ name: '', email: '', message: '' });
-        setTimeout(() => { setShowForm(false); setStatus(''); }, 3000);
-      } else {
-        setStatus('Message failed. Try again.');
-      }
-    } catch {
-      setStatus('Error connecting to server.');
+      setStatus('Message successfully sent!');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => { setShowForm(false); setStatus(''); }, 3000);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : 'Error connecting to server.');
     }
   };
 
@@ -116,7 +113,7 @@ export default function Contact() {
           
           <div className="contact-methods-left" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <div className="magnetic-button-wrapper">
-              <a href="mailto:ishserge16@gmail.com" ref={buttonRef} className="magnetic-button gmail-link" style={{border: 'none', cursor: 'pointer', textDecoration: 'none'}}>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=ishserge16@gmail.com" target="_blank" rel="noopener noreferrer" ref={buttonRef} className="magnetic-button gmail-link" style={{border: 'none', cursor: 'pointer', textDecoration: 'none'}}>
                 <span ref={textRef} className="magnetic-text">EMAIL ME</span>
                 <div className="gmail-icon-hover">
                   <svg viewBox="0 0 24 24" width="45" height="45">

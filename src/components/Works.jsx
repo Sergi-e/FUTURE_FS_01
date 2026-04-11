@@ -1,7 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { API_BASE_URL } from '../config/api';
+import { API_BASE_URL, apiSetupHintParagraph } from '../config/api';
+import { getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './Works.css';
 
@@ -53,14 +54,29 @@ export default function Works() {
   const sectionRef = useRef(null);
   const wrapperRef = useRef(null);
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_BASE_URL}/projects`)
-      .then((res) => res.json())
+    let cancelled = false;
+    getJson('/projects')
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) setProjects(data);
+        if (cancelled) return;
+        setLoadError(null);
+        setProjects(Array.isArray(data) ? data : []);
       })
-      .catch(console.error);
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('Failed to fetch projects', `${API_BASE_URL}/projects`, err);
+        setProjects([]);
+        setLoadError(err.message || 'Request failed');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -120,7 +136,29 @@ export default function Works() {
       </div>
       
       <div className="works-wrapper" ref={wrapperRef}>
-        {projects.length === 0 && <div className="work-item"><h3 style={{color: 'white'}}>Loading Projects...</h3></div>}
+        {loading && projects.length === 0 && (
+          <div className="work-item">
+            <h3 style={{ color: 'white' }}>Loading projects…</h3>
+          </div>
+        )}
+        {!loading && loadError && (
+          <div className="work-item">
+            <h3 style={{ color: 'white' }}>Could not load projects</h3>
+            <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+              Request URL: <code style={{ color: 'inherit' }}>{`${API_BASE_URL}/projects`}</code>. {apiSetupHintParagraph()}
+            </p>
+          </div>
+        )}
+        {!loading && !loadError && projects.length === 0 && (
+          <div className="work-item">
+            <h3 style={{ color: 'white' }}>No projects yet</h3>
+            <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+              The API returned an empty list. If you use Render without a persistent disk, add projects again in the admin
+              dashboard after each redeploy, or set <code style={{ color: 'inherit' }}>PORTFOLIO_DB_PATH</code> on a
+              mounted volume.
+            </p>
+          </div>
+        )}
         {projects.map((project) => {
           const hasLink = Boolean(project.link && String(project.link).trim());
           const mediaKind = projectMediaType(project);

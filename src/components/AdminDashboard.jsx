@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react';
 import { API_BASE_URL } from '../config/api';
+import { fetchJson, fetchJsonWithStatus, getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './AdminDashboard.css';
 
@@ -24,26 +25,34 @@ export default function AdminDashboard() {
 
   const fetchData = useCallback(async () => {
     if (!token) return;
-    try {
-      const projRes = await fetch(`${API_BASE_URL}/projects`);
-      const projData = await projRes.json();
-      setProjects(Array.isArray(projData) ? projData : []);
-
-      const msgRes = await fetch(`${API_BASE_URL}/messages`, {
+    const [rProj, rMsg, rTest, rSet] = await Promise.allSettled([
+      getJson('/projects'),
+      fetchJson(`${API_BASE_URL}/messages`, {
         headers: { Authorization: `Bearer ${token}` }
-      });
-      const msgData = await msgRes.json();
-      setMessages(Array.isArray(msgData) ? msgData : []);
+      }),
+      getJson('/testimonials'),
+      getJson('/settings/resume')
+    ]);
 
-      const testRes = await fetch(`${API_BASE_URL}/testimonials`);
-      const testData = await testRes.json();
-      setTestimonials(Array.isArray(testData) ? testData : []);
-
-      const setRes = await fetch(`${API_BASE_URL}/settings/resume`);
-      const setData = await setRes.json();
-      if (setData && typeof setData.value === 'string') setResumeUrl(setData.value);
-    } catch {
-      console.error('Failed to fetch admin data');
+    if (rProj.status === 'fulfilled' && Array.isArray(rProj.value)) setProjects(rProj.value);
+    else {
+      setProjects([]);
+      if (rProj.status === 'rejected') console.error('Admin: projects', rProj.reason);
+    }
+    if (rMsg.status === 'fulfilled' && Array.isArray(rMsg.value)) setMessages(rMsg.value);
+    else {
+      setMessages([]);
+      if (rMsg.status === 'rejected') console.error('Admin: messages', rMsg.reason);
+    }
+    if (rTest.status === 'fulfilled' && Array.isArray(rTest.value)) setTestimonials(rTest.value);
+    else {
+      setTestimonials([]);
+      if (rTest.status === 'rejected') console.error('Admin: testimonials', rTest.reason);
+    }
+    if (rSet.status === 'fulfilled' && rSet.value && typeof rSet.value.value === 'string') {
+      setResumeUrl(rSet.value.value);
+    } else if (rSet.status === 'rejected') {
+      console.error('Admin: resume setting', rSet.reason);
     }
   }, [token]);
 
@@ -56,105 +65,108 @@ export default function AdminDashboard() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/login`, {
+      const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
       });
-      const data = await res.json();
-      if (res.ok) {
+      if (ok && data?.token) {
         setToken(data.token);
         localStorage.setItem('adminToken', data.token);
       } else {
-        alert(data.error);
+        alert(data?.error || 'Login failed');
       }
     } catch {
-      alert("Login failed");
+      alert('Login failed');
     }
   };
 
   const handleAddProject = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/projects`, {
+      await fetchJson(`${API_BASE_URL}/projects`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(newProject)
       });
-      if (res.ok) {
-        setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
-        fetchData();
-      }
+      setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+      fetchData();
     } catch {
-      alert("Failed to add project");
+      alert('Failed to add project');
     }
   };
 
   const handleDeleteProject = async (id) => {
-    await fetch(`${API_BASE_URL}/projects/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    try {
+      await fetchJson(`${API_BASE_URL}/projects/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch {
+      /* still refresh list */
+    }
     fetchData();
   };
 
   const handleDeleteMessage = async (id) => {
-    await fetch(`${API_BASE_URL}/messages/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    try {
+      await fetchJson(`${API_BASE_URL}/messages/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch {
+      /* still refresh */
+    }
     fetchData();
   };
 
   const handleAddTestimonial = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/testimonials`, {
+      await fetchJson(`${API_BASE_URL}/testimonials`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(newTestimonial)
       });
-      if (res.ok) {
-        setNewTestimonial({ name: '', role: '', location: '', image: '', quote: '', tag: '' });
-        fetchData();
-      }
+      setNewTestimonial({ name: '', role: '', location: '', image: '', quote: '', tag: '' });
+      fetchData();
     } catch {
-      alert("Failed to add testimonial");
+      alert('Failed to add testimonial');
     }
   };
 
   const handleDeleteTestimonial = async (id) => {
-    await fetch(`${API_BASE_URL}/testimonials/${id}`, {
-      method: 'DELETE',
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
+    try {
+      await fetchJson(`${API_BASE_URL}/testimonials/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch {
+      /* still refresh */
+    }
     fetchData();
   };
 
   const handleUpdateResume = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`${API_BASE_URL}/settings/resume`, {
+      await fetchJson(`${API_BASE_URL}/settings/resume`, {
         method: 'PUT',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ value: resumeUrl })
       });
-      if (res.ok) {
-        alert("Resume updated successfully!");
-      } else {
-        alert("Failed to update resume");
-      }
+      alert('Resume updated successfully!');
     } catch {
-      alert("Error updating resume");
+      alert('Error updating resume');
     }
   };
 

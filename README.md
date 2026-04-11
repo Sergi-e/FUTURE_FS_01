@@ -66,7 +66,7 @@ Copy `.env.example` to `.env` or `.env.local` and adjust if your API or asset ho
 | `VITE_API_ORIGIN` | API origin without `/api` (used with `API_ORIGIN` in code) |
 | `VITE_ASSET_ORIGIN` | Force media host for root-relative `/assets/...` paths when files are **not** on the same origin as the SPA |
 
-If unset, the app defaults to the bundled Render URL in `src/config/api.js` (update that constant for your own deployment).
+**Production:** set `VITE_API_BASE_URL` and `VITE_API_ORIGIN` on your static host (e.g. Netlify). If unset, production builds use relative `/api` (usually wrong for this split setup). Local dev defaults to `http://localhost:5000` when `import.meta.env.DEV` is true.
 
 ---
 
@@ -79,7 +79,9 @@ npm install
 npm run dev
 ```
 
-Opens the Vite dev server (default port `5173`). API calls use `VITE_*` values or the default API URL.
+Opens the Vite dev server (default port `5173`). With no `VITE_API_BASE_URL` in `.env.local`, the app calls **`/api/...` on the same origin** and Vite **proxies** those requests to `http://127.0.0.1:5000`, so you must have the backend running for projects and testimonials to load.
+
+**One command for frontend + API:** from the repo root, `npm run dev:stack` (starts Express on `5000` and Vite on `5173`).
 
 ### Backend (optional)
 
@@ -98,28 +100,70 @@ Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static up
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Vite dev server |
+| `npm run dev` | Start Vite dev server (API must be on port 5000, or use `dev:stack`) |
+| `npm run dev:stack` | Start backend + Vite together for local full-stack |
 | `npm run build` | Production build to `dist/` |
 | `npm run preview` | Preview the production build locally |
 | `npm run lint` | Run ESLint on the frontend |
+
+### Before deploy (quick check)
+
+1. From repo root: `npm run lint` and `npm run build` (both should pass).
+2. Local full stack: `npm run dev:stack`, open `http://localhost:5173`, then scroll the full page: **Works** (pinned stack), **Hobbies** (horizontal books + parallax rows), **Ethos / Contact** (ScrollTrigger intros), **Navbar** section highlights. Confirm **testimonials** and **projects** load from the API (backend on port 5000).
+3. Commit and push; then deploy Netlify + Render using the steps below.
 
 ---
 
 ## Deployment
 
-### Static frontend (Vercel / Netlify / similar)
+### Full stack (recommended): Netlify (frontend) + Render (API)
+
+**1. Backend on Render**
+
+1. New **Web Service** → connect this repo.
+2. **Root Directory:** `backend`
+3. **Build Command:** `npm install && npm rebuild sqlite3 --build-from-source` (same as `npm run render-build`).
+4. **Start Command:** `npm start`
+5. **Environment:** set **`JWT_SECRET`** to a long random string (required for admin login).
+6. After deploy, copy the service URL (e.g. `https://your-api.onrender.com`). Open `https://your-api.onrender.com/api/health` — you should see `{"ok":true}`. If you get `x-render-routing: no-server` or plain “Not Found”, the URL is wrong or the service failed to start (check Render logs).
+7. **SQLite persistence:** Render’s filesystem is ephemeral unless you add a **persistent disk**. Mount it (e.g. to `/data`) and set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** on the service. Without a disk, the DB resets when the instance restarts or redeploys.
+
+**2. Frontend on Netlify**
+
+1. New site from Git → same repo, **base directory empty** (repo root).
+2. **Build command:** `npm run build`
+3. **Publish directory:** `dist`
+4. **Environment variables** (Site settings → Environment variables), then trigger a new deploy (clear cache if you change them):
+
+   | Name | Example value |
+   |------|----------------|
+   | `VITE_API_ORIGIN` | `https://your-api.onrender.com` (no trailing slash) |
+   | `VITE_API_BASE_URL` | `https://your-api.onrender.com/api` |
+
+5. `netlify.toml` already SPA-rewrites `/*` → `/index.html` so `/admin` works.
+
+**Common mistake:** If the live site tries to load `http://localhost:5000/api/...`, Netlify (or a committed `.env`) has **`VITE_API_BASE_URL` set to localhost**. Browsers on your visitors’ machines cannot reach your laptop. Replace it with your Render URL (`https://…onrender.com/api`), save, and trigger a new deploy. The production build will fail fast if these variables still point at localhost.
+
+**3. Media (projects / testimonials)**
+
+- Easiest: keep files in **`public/assets/`** in this repo so Netlify serves them at `https://your-site.netlify.app/assets/...`. The app resolves `/assets/...` to the **same origin** as the site by default.
+- If media is only on the API, set **`VITE_ASSET_ORIGIN`** to your Render URL so `resolveMediaUrl` points `/assets/...` at the backend.
+
+**4. CORS**
+
+The API uses open `cors()` so the Netlify origin can call Render without extra config.
+
+---
+
+### Static frontend only (Vercel / Netlify / similar)
 
 1. Build command: `npm run build`
 2. Output directory: `dist`
-3. **SPA routing:** this repo includes `vercel.json` rewrites and `public/_redirects` (Netlify) so client routes like `/admin` resolve to `index.html`.
+3. **SPA routing:** `vercel.json` and `public/_redirects` / `netlify.toml` send client routes like `/admin` to `index.html`.
 
-### Media files
+### Backend elsewhere
 
-Place project/testimonial assets under **`public/assets/`** so URLs like `/assets/your-file.png` work on the same origin as the deployed site. Alternatively set `VITE_ASSET_ORIGIN` to a server that hosts those files.
-
-### Backend
-
-Deploy the `backend/` folder to your host (e.g. Render, Railway). Set **`JWT_SECRET`** to a strong value in production. Persist or back up `portfolio.db` if you rely on SQLite on disk.
+Deploy the `backend/` folder (Railway, Fly.io, VPS, etc.). Set **`JWT_SECRET`**. Use **`PORTFOLIO_DB_PATH`** when the SQLite file should live on a mounted volume.
 
 ---
 
