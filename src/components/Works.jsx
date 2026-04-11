@@ -8,18 +8,6 @@ import './Works.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
-function openProjectInNewTab(url) {
-  const href = String(url || '').trim();
-  if (!href) return;
-  const a = document.createElement('a');
-  a.href = href;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
 function ProjectMedia({ project, mediaKind, mediaSrc }) {
   const [failed, setFailed] = useState(false);
   const usePlaceholder = !mediaSrc || failed || mediaKind === 'placeholder';
@@ -175,7 +163,7 @@ export default function Works() {
           const hasLink = Boolean(project.link && String(project.link).trim());
           const mediaKind = projectMediaType(project);
           const mediaSrc = resolveMediaUrl(project.mediaPath);
-          const cardBody = (
+          const inner = (
             <>
               <div className="work-media-container cursor-hover">
                 <ProjectMedia key={project.id} project={project} mediaKind={mediaKind} mediaSrc={mediaSrc} />
@@ -187,36 +175,26 @@ export default function Works() {
                   <span>{project.subtitle}</span>
                   <span>{project.year}</span>
                 </div>
+                {hasLink && (
+                  <span className="work-view-more">VIEW MORE →</span>
+                )}
               </div>
             </>
           );
 
           return hasLink ? (
-            <div key={project.id} className="work-item">
-              <a
-                className="work-item-card-link"
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open project: ${project.title}`}
-              >
-                {cardBody}
-              </a>
-              <button
-                type="button"
-                className="work-view-more"
-                aria-label={`View more: ${project.title}`}
-                onClick={() => openProjectInNewTab(project.link)}
-              >
-                VIEW MORE →
-              </button>
-            </div>
+            <a
+              key={project.id}
+              href={project.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="work-item"
+            >
+              {inner}
+            </a>
           ) : (
             <div key={project.id} className="work-item work-item--static">
-              {cardBody}
-              <span className="work-view-more work-view-more--static" aria-hidden="true">
-                VIEW MORE →
-              </span>
+              {inner}
             </div>
           );
         })}

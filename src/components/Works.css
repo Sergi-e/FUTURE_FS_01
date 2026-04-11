@@ -1,31 +1,20 @@
 .works {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  min-height: 100svh;
-  min-height: 100dvh;
-  height: 100vh;
-  height: 100svh;
-  height: 100dvh;
   background-color: var(--bg-color);
-  /* Allow project meta + CTA below the image to paint past the box; hidden was clipping them */
-  overflow-x: hidden;
-  overflow-y: visible;
+  overflow: hidden;
   perspective: 1500px;
 }
 
 .works-header {
-  position: relative;
-  flex-shrink: 0;
-  width: 100%;
-  padding: 60px 5vw 28px;
+  padding: 60px 5vw 40px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: absolute;
+  top: 0;
+  width: 100%;
   z-index: 100;
   pointer-events: none;
-  background-color: var(--bg-color);
 }
 
 .works-header * {
@@ -42,9 +31,8 @@
 
 .works-wrapper {
   position: relative;
-  flex: 1;
-  min-height: 0;
   width: 100%;
+  height: 100vh;
 }
 
 .work-item {
@@ -52,30 +40,17 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  /* Top padding: navbar; title now lives in .works-header so less top overlap risk */
-  padding: 100px 5vw 40px;
+  padding: 140px 5vw 40px;
+  text-decoration: none;
   color: inherit;
   background-color: var(--bg-color);
   will-change: transform, opacity;
   transform-style: preserve-3d;
-  overflow-x: hidden;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.work-item-card-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  max-width: 1000px;
-  text-decoration: none;
-  color: inherit;
 }
 
 .work-item--static {
@@ -119,19 +94,16 @@
   transition: opacity 0.4s ease;
 }
 
-.work-item-card-link:hover .work-media-container,
-.work-item--static:hover .work-media-container {
+.work-item:hover .work-media-container {
   transform: translateY(-8px);
   box-shadow: 0 30px 60px rgba(0,0,0,0.8);
 }
 
-.work-item-card-link:hover .work-media-asset,
-.work-item--static:hover .work-media-asset {
+.work-item:hover .work-media-asset {
   transform: scale(1.05);
 }
 
-.work-item-card-link:hover .work-overlay,
-.work-item--static:hover .work-overlay {
+.work-item:hover .work-overlay {
   opacity: 1;
 }
 
@@ -166,87 +138,31 @@
   letter-spacing: 0.05em;
 }
 
-/*
-  Native <button> — not an <a>, so no :link/:visited/WebKit link coloring next to the card link.
-*/
 .work-view-more {
-  appearance: none;
-  -webkit-appearance: none;
   display: inline-block;
-  margin: 1.5rem 0 0;
+  margin-top: 1.5rem;
   padding: 10px 24px;
-  border: none;
   font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  text-align: center;
+  color: black;
+  background-color: var(--accent-neon);
   border-radius: 50px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  color: #050505;
-  background-color: var(--accent-neon);
-  box-shadow: none;
-  filter: none;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  transition: transform 0.3s ease, background-color 0.3s ease;
 }
 
-.work-view-more:hover {
-  color: #050505;
-  background-color: var(--accent-neon);
-  transform: translateY(-3px);
-  box-shadow:
-    0 8px 26px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.12);
-}
-
-.work-view-more:focus-visible {
-  outline: 2px solid var(--accent-neon);
-  outline-offset: 3px;
-  color: #050505;
-  background-color: var(--accent-neon);
+.work-item:hover .work-view-more {
   transform: translateY(-2px);
-}
-
-.work-view-more:active {
-  color: #050505;
-  background-color: var(--accent-neon);
-  transform: translateY(-1px);
-}
-
-.work-view-more--static {
-  cursor: default;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-/* While the image/title link is hovered, keep the sibling pill visually frozen */
-.work-item:has(.work-item-card-link:hover) .work-view-more {
-  color: #050505;
-  background-color: var(--accent-neon);
-  filter: none;
-  transform: none;
-  box-shadow: none;
+  background-color: white;
 }
 
 @media (max-width: 768px) {
-  .works-header {
-    padding: 48px max(18px, env(safe-area-inset-right, 0px)) 20px max(18px, env(safe-area-inset-left, 0px));
-  }
-
-  .works-header h2 {
-    font-size: clamp(0.75rem, 2.8vw, 1.05rem);
-    letter-spacing: 0.18em;
-  }
-
   .work-item {
-    padding: 72px 5vw 36px;
+    padding: 100px 5vw 40px;
   }
-
-  /* Short viewports: keep subtitle + CTA on-screen more often */
   .work-media-container {
-    max-height: 42dvh;
     margin-bottom: 1.5rem;
     border-radius: 8px;
   }
