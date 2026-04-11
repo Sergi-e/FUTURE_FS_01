@@ -162,37 +162,34 @@
 }
 
 /*
-  Pill is its own <a>. Lock colors hard: global * { transition: color, background }
-  plus WebKit link styles can otherwise read as “turning white”. No filter — brightness
-  washes cyan toward white.
+  Native <button> — not an <a>, so no :link/:visited/WebKit link coloring next to the card link.
 */
-.work-view-more:any-link,
-.work-view-more:any-link:visited,
-.work-view-more:any-link:active {
+.work-view-more {
+  appearance: none;
+  -webkit-appearance: none;
   display: inline-block;
-  margin-top: 1.5rem;
+  margin: 1.5rem 0 0;
   padding: 10px 24px;
+  border: none;
   font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.15em;
   text-transform: uppercase;
-  text-decoration: none;
+  text-align: center;
   border-radius: 50px;
+  cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  color: #050505 !important;
-  background-color: var(--accent-neon) !important;
-  -webkit-text-fill-color: #050505;
+  color: #050505;
+  background-color: var(--accent-neon);
   box-shadow: none;
   filter: none;
-  /* Do not animate fill colors — stops cross-fade glitches next to card motion */
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .work-view-more:hover {
-  color: #050505 !important;
-  background-color: var(--accent-neon) !important;
-  -webkit-text-fill-color: #050505;
+  color: #050505;
+  background-color: var(--accent-neon);
   transform: translateY(-3px);
   box-shadow:
     0 8px 26px rgba(0, 0, 0, 0.45),
@@ -202,18 +199,22 @@
 .work-view-more:focus-visible {
   outline: 2px solid var(--accent-neon);
   outline-offset: 3px;
-  color: #050505 !important;
-  background-color: var(--accent-neon) !important;
-  -webkit-text-fill-color: #050505;
+  color: #050505;
+  background-color: var(--accent-neon);
   transform: translateY(-2px);
 }
 
-/* While the project image/title link is hovered, keep the sibling pill visually frozen */
-.work-item:has(.work-item-card-link:hover) .work-view-more:any-link {
-  color: #050505 !important;
-  background-color: var(--accent-neon) !important;
-  -webkit-text-fill-color: #050505;
-  filter: none !important;
+.work-view-more:active {
+  color: #050505;
+  background-color: var(--accent-neon);
+  transform: translateY(-1px);
+}
+
+/* While the image/title link is hovered, keep the sibling pill visually frozen */
+.work-item:has(.work-item-card-link:hover) .work-view-more {
+  color: #050505;
+  background-color: var(--accent-neon);
+  filter: none;
   transform: none;
   box-shadow: none;
 }
