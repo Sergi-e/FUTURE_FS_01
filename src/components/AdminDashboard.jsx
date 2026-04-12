@@ -26,6 +26,9 @@ export default function AdminDashboard() {
   const [newProject, setNewProject] = useState({
     title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
   });
+  const [editProject, setEditProject] = useState({
+    title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
+  });
   const [editingProjectId, setEditingProjectId] = useState(null);
 
   const [newTestimonial, setNewTestimonial] = useState({
@@ -108,39 +111,46 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveProject = async (e) => {
+  const handleAddProject = async (e) => {
     e.preventDefault();
     try {
-      if (editingProjectId) {
-        await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(newProject)
-        });
-        setEditingProjectId(null);
-      } else {
-        await fetchJson(`${API_BASE_URL}/projects`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(newProject)
-        });
-      }
+      await fetchJson(`${API_BASE_URL}/projects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(newProject)
+      });
       setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
       fetchData();
     } catch {
-      alert(editingProjectId ? 'Failed to update project' : 'Failed to add project');
+      alert('Failed to add project');
+    }
+  };
+
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+    try {
+      await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(editProject)
+      });
+      setEditingProjectId(null);
+      setEditProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+      fetchData();
+    } catch {
+      alert('Failed to update project');
     }
   };
 
   const startEditProject = (p) => {
     setEditingProjectId(p.id);
-    setNewProject({
+    setEditProject({
       title: p.title || '',
       subtitle: p.subtitle || '',
       year: p.year || '',
@@ -153,7 +163,7 @@ export default function AdminDashboard() {
 
   const cancelEditProject = () => {
     setEditingProjectId(null);
-    setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+    setEditProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
   };
 
   const handleDeleteProject = async (id) => {
@@ -318,8 +328,29 @@ export default function AdminDashboard() {
         {activeTab === 'projects' && (
           <div className="admin-panel">
             <h2>Manage Projects</h2>
-            <form className="admin-form" onSubmit={handleSaveProject}>
-              <h3>{editingProjectId ? 'Edit Project' : 'Add New Project'}</h3>
+
+            {editingProjectId && (
+              <form className="admin-form" onSubmit={handleUpdateProject} style={{ border: '1px solid var(--accent-neon)', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
+                <h3 style={{ color: 'var(--accent-neon)' }}>Edit Project</h3>
+                <input type="text" placeholder="Title" value={editProject.title} onChange={e => setEditProject({...editProject, title: e.target.value})} required />
+                <input type="text" placeholder="Subtitle" value={editProject.subtitle} onChange={e => setEditProject({...editProject, subtitle: e.target.value})} required />
+                <input type="text" placeholder="Year" value={editProject.year} onChange={e => setEditProject({...editProject, year: e.target.value})} />
+                <input type="text" placeholder="Link URL" value={editProject.link} onChange={e => setEditProject({...editProject, link: e.target.value})} />
+                <select value={editProject.mediaType} onChange={e => setEditProject({...editProject, mediaType: e.target.value})}>
+                  <option value="image">Image</option>
+                  <option value="video">Video</option>
+                  <option value="placeholder">Placeholder</option>
+                </select>
+                <input type="text" placeholder="Media: /assets/name.png on API, or full https://… URL" value={editProject.mediaPath} onChange={e => setEditProject({...editProject, mediaPath: e.target.value})} />
+                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                  <button type="submit" style={{ flex: 1 }}>Update Project</button>
+                  <button type="button" onClick={cancelEditProject} style={{ flex: 1, backgroundColor: '#555' }}>Cancel Edit</button>
+                </div>
+              </form>
+            )}
+
+            <form className="admin-form" onSubmit={handleAddProject}>
+              <h3>Add New Project</h3>
               <input type="text" placeholder="Title" value={newProject.title} onChange={e => setNewProject({...newProject, title: e.target.value})} required />
               <input type="text" placeholder="Subtitle" value={newProject.subtitle} onChange={e => setNewProject({...newProject, subtitle: e.target.value})} required />
               <input type="text" placeholder="Year" value={newProject.year} onChange={e => setNewProject({...newProject, year: e.target.value})} />
@@ -330,12 +361,7 @@ export default function AdminDashboard() {
                 <option value="placeholder">Placeholder</option>
               </select>
               <input type="text" placeholder="Media: /assets/name.png on API, or full https://… URL" value={newProject.mediaPath} onChange={e => setNewProject({...newProject, mediaPath: e.target.value})} />
-              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                <button type="submit" style={{ flex: 1 }}>{editingProjectId ? 'Update Project' : 'Add Project'}</button>
-                {editingProjectId && (
-                  <button type="button" onClick={cancelEditProject} style={{ flex: 1, backgroundColor: '#555' }}>Cancel</button>
-                )}
-              </div>
+              <button type="submit">Add Project</button>
             </form>
 
             <div className="admin-list">
