@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react';
 import { API_BASE_URL } from '../config/api';
-import { fetchJson, fetchJsonWithStatus, getJson } from '../lib/apiClient';
+import { fetchJson, fetchJsonWithStatus, getJson, uploadAdminImage } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './AdminDashboard.css';
 
@@ -23,28 +23,28 @@ const EMPTY_TESTIMONIAL = {
 };
 
 const NAV = [
-  { id: 'projects', label: 'Projects', caption: 'Portfolio & media', icon: '◆' },
-  { id: 'messages', label: 'Messages', caption: 'Contact inbox', icon: '✉' },
-  { id: 'testimonials', label: 'Testimonials', caption: 'Quotes & photos', icon: '★' },
-  { id: 'settings', label: 'Settings', caption: 'Account & resume', icon: '⚙' },
+  { id: 'projects', label: 'Projects', title: 'Portfolio entries' },
+  { id: 'messages', label: 'Inbox', title: 'Contact form' },
+  { id: 'testimonials', label: 'Testimonials', title: 'Homepage quotes' },
+  { id: 'settings', label: 'Settings', title: 'Account & resume' },
 ];
 
 const PAGE_COPY = {
   projects: {
     title: 'Projects',
-    subtitle: 'Create, edit, or remove featured portfolio items. Media must live on your API server or as a public URL.',
+    subtitle: 'Add, edit, or remove portfolio items.',
   },
   messages: {
-    title: 'Contact messages',
-    subtitle: 'Messages sent from your site contact form.',
+    title: 'Inbox',
+    subtitle: 'Messages from your contact form.',
   },
   testimonials: {
     title: 'Testimonials',
-    subtitle: 'Manage quotes shown on the homepage.',
+    subtitle: 'Quotes and photos on the site.',
   },
   settings: {
     title: 'Settings',
-    subtitle: 'Account security and resume link.',
+    subtitle: 'Password, username, and resume link.',
   },
 };
 
@@ -56,6 +56,49 @@ function Field({ id, label, hint, className = '', children }) {
       </label>
       {hint ? <p className="admin-hint">{hint}</p> : null}
       {children}
+    </div>
+  );
+}
+
+/** Text field + local image upload; `setPath(value, { source: 'upload' })` after a successful upload. */
+function AdminImagePathInput({ id, value, setPath, token }) {
+  const [busy, setBusy] = useState(false);
+  const onText = (e) => setPath(e.target.value, { source: 'type' });
+  const onFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !token) return;
+    setBusy(true);
+    try {
+      const { path } = await uploadAdminImage(file, token);
+      setPath(path, { source: 'upload' });
+    } catch (err) {
+      alert(err.message || 'Upload failed');
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="admin-media-path-row">
+      <input
+        id={id}
+        className="admin-input admin-media-path-input"
+        type="text"
+        value={value}
+        onChange={onText}
+        placeholder="/assets/photo.jpg or https://…"
+        autoComplete="off"
+      />
+      <label className={`admin-btn-upload${busy ? ' is-busy' : ''}`}>
+        <input
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="admin-sr-file"
+          onChange={onFile}
+          disabled={busy}
+        />
+        {busy ? 'Uploading…' : 'Upload image'}
+      </label>
     </div>
   );
 }
@@ -79,8 +122,7 @@ export default function AdminDashboard() {
   const [userNew, setUserNew] = useState('');
   const [userCurrentPwd, setUserCurrentPwd] = useState('');
 
-  const [newProject, setNewProject] = useState({ ...EMPTY_PROJECT });
-  const [editProject, setEditProject] = useState({ ...EMPTY_PROJECT });
+  const [projectForm, setProjectForm] = useState({ ...EMPTY_PROJECT });
   const [editingProjectId, setEditingProjectId] = useState(null);
 
   const [newTestimonial, setNewTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
@@ -163,46 +205,39 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddProject = async (e) => {
+  const handleSaveProject = async (e) => {
     e.preventDefault();
     try {
-      await fetchJson(`${API_BASE_URL}/projects`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newProject),
-      });
-      setNewProject({ ...EMPTY_PROJECT });
+      if (editingProjectId) {
+        await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(projectForm),
+        });
+        setEditingProjectId(null);
+      } else {
+        await fetchJson(`${API_BASE_URL}/projects`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(projectForm),
+        });
+      }
+      setProjectForm({ ...EMPTY_PROJECT });
       fetchData();
     } catch {
-      alert('Failed to add project');
-    }
-  };
-
-  const handleUpdateProject = async (e) => {
-    e.preventDefault();
-    try {
-      await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(editProject),
-      });
-      setEditingProjectId(null);
-      setEditProject({ ...EMPTY_PROJECT });
-      fetchData();
-    } catch {
-      alert('Failed to update project');
+      alert(editingProjectId ? 'Failed to update project' : 'Failed to add project');
     }
   };
 
   const startEditProject = (p) => {
     setEditingProjectId(p.id);
-    setEditProject({
+    setProjectForm({
       title: p.title || '',
       subtitle: p.subtitle || '',
       year: p.year || '',
@@ -214,7 +249,7 @@ export default function AdminDashboard() {
 
   const cancelEditProject = () => {
     setEditingProjectId(null);
-    setEditProject({ ...EMPTY_PROJECT });
+    setProjectForm({ ...EMPTY_PROJECT });
   };
 
   const handleDeleteProject = (id, title) => {
@@ -450,24 +485,19 @@ export default function AdminDashboard() {
       <div className="admin-shell">
         <aside className="admin-nav" aria-label="Admin navigation">
           <div className="admin-nav-brand">
-            <strong>PORTFOLIO</strong>
-            <span>Content admin</span>
+            <span className="admin-nav-brand-mark">Admin</span>
+            <span className="admin-nav-brand-sub">Portfolio CMS</span>
           </div>
           <nav className="admin-nav-list">
             {NAV.map((item) => (
               <button
                 key={item.id}
                 type="button"
+                title={item.title}
                 className={`admin-nav-item ${activeTab === item.id ? 'is-active' : ''}`}
                 onClick={() => setActiveTab(item.id)}
               >
-                <span className="admin-nav-icon" aria-hidden>
-                  {item.icon}
-                </span>
-                <span>
-                  {item.label}
-                  <span className="admin-nav-item-sub">{item.caption}</span>
-                </span>
+                {item.label}
               </button>
             ))}
           </nav>
@@ -480,159 +510,83 @@ export default function AdminDashboard() {
 
         <div className="admin-main">
           <header className="admin-toolbar">
-            <div>
+            <div className="admin-toolbar-text">
               <h1>{page.title}</h1>
               <p>{page.subtitle}</p>
             </div>
-            <div className="admin-toolbar-actions">
-              <button type="button" className="admin-btn-ghost" onClick={() => fetchData()}>
-                Refresh data
-              </button>
-            </div>
+            <button type="button" className="admin-btn-ghost" onClick={() => fetchData()}>
+              Refresh
+            </button>
           </header>
 
           <div className="admin-scroll">
             <div className="admin-page">
               {activeTab === 'projects' && (
                 <>
-                  <p className="admin-callout">
-                    <strong>Media files:</strong> there is no browser upload in this build. Add images or videos under{' '}
-                    <code>backend/public/assets/</code> on your server (e.g. Render), then set path to{' '}
-                    <code>/assets/yourfile.jpg</code> or paste a full <code>https://</code> URL.
-                  </p>
+                  <details className="admin-help">
+                    <summary>How media and upload work</summary>
+                    <p>
+                      Use <strong>Upload image</strong> to send a JPEG, PNG, WebP, or GIF to the API (saved under{' '}
+                      <code>/assets/</code>). You can still type <code>/assets/…</code> or any <code>https://</code> link.
+                      On hosts without a persistent disk (e.g. Render free), uploads can be lost on redeploy — keep copies
+                      or use external URLs for production.
+                    </p>
+                  </details>
 
-                  <div className={`admin-split ${editingProjectId ? 'admin-split--two' : ''}`}>
-                    {editingProjectId ? (
-                      <div className="admin-card admin-card--accent">
-                        <div className="admin-card-header">
-                          <h2 className="admin-card-title">Edit project</h2>
-                          <span className="admin-badge">ID {editingProjectId}</span>
-                        </div>
-                        <form onSubmit={handleUpdateProject}>
-                          <div className="admin-form-grid">
-                            <Field id="ep-title" label="Title" className="admin-field--full">
-                              <input
-                                id="ep-title"
-                                className="admin-input"
-                                value={editProject.title}
-                                onChange={(e) => setEditProject({ ...editProject, title: e.target.value })}
-                                required
-                              />
-                            </Field>
-                            <Field id="ep-year" label="Year">
-                              <input
-                                id="ep-year"
-                                className="admin-input"
-                                value={editProject.year}
-                                onChange={(e) => setEditProject({ ...editProject, year: e.target.value })}
-                              />
-                            </Field>
-                            <Field id="ep-link" label="Project URL" className="admin-field--full">
-                              <input
-                                id="ep-link"
-                                className="admin-input"
-                                type="url"
-                                placeholder="https://…"
-                                value={editProject.link}
-                                onChange={(e) => setEditProject({ ...editProject, link: e.target.value })}
-                              />
-                            </Field>
-                            <Field id="ep-sub" label="Subtitle / description" className="admin-field--full">
-                              <input
-                                id="ep-sub"
-                                className="admin-input"
-                                value={editProject.subtitle}
-                                onChange={(e) => setEditProject({ ...editProject, subtitle: e.target.value })}
-                                required
-                              />
-                            </Field>
-                            <Field id="ep-type" label="Media type">
-                              <select
-                                id="ep-type"
-                                className="admin-select"
-                                value={editProject.mediaType}
-                                onChange={(e) => setEditProject({ ...editProject, mediaType: e.target.value })}
-                              >
-                                <option value="image">Image</option>
-                                <option value="video">Video</option>
-                                <option value="placeholder">Placeholder</option>
-                              </select>
-                            </Field>
-                            <Field
-                              id="ep-media"
-                              label="Media path or URL"
-                              hint="Example: /assets/cover.jpg or a full HTTPS link."
-                              className="admin-field--full"
-                            >
-                              <input
-                                id="ep-media"
-                                className="admin-input"
-                                value={editProject.mediaPath}
-                                onChange={(e) => setEditProject({ ...editProject, mediaPath: e.target.value })}
-                              />
-                            </Field>
-                          </div>
-                          <div className="admin-form-actions">
-                            <button type="submit" className="admin-btn-primary">
-                              Save changes
-                            </button>
-                            <button type="button" className="admin-btn-secondary" onClick={cancelEditProject}>
-                              Cancel
-                            </button>
-                          </div>
-                        </form>
-                      </div>
-                    ) : null}
-
-                    <div className="admin-card">
+                  <div className="admin-stack">
+                    <div className={`admin-card${editingProjectId ? ' admin-card--accent' : ''}`}>
                       <div className="admin-card-header">
-                        <h2 className="admin-card-title">Add project</h2>
-                        <span className="admin-badge admin-badge--muted">Create</span>
+                        <h2 className="admin-card-title">{editingProjectId ? 'Edit project' : 'New project'}</h2>
+                        {editingProjectId ? (
+                          <span className="admin-badge">ID {editingProjectId}</span>
+                        ) : (
+                          <span className="admin-badge admin-badge--muted">Create</span>
+                        )}
                       </div>
-                      <form onSubmit={handleAddProject}>
+                      <form onSubmit={handleSaveProject}>
                         <div className="admin-form-grid">
-                          <Field id="np-title" label="Title" className="admin-field--full">
+                          <Field id="pf-title" label="Title" className="admin-field--full">
                             <input
-                              id="np-title"
+                              id="pf-title"
                               className="admin-input"
-                              value={newProject.title}
-                              onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                              value={projectForm.title}
+                              onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })}
                               required
                             />
                           </Field>
-                          <Field id="np-year" label="Year">
+                          <Field id="pf-year" label="Year">
                             <input
-                              id="np-year"
+                              id="pf-year"
                               className="admin-input"
-                              value={newProject.year}
-                              onChange={(e) => setNewProject({ ...newProject, year: e.target.value })}
+                              value={projectForm.year}
+                              onChange={(e) => setProjectForm({ ...projectForm, year: e.target.value })}
                             />
                           </Field>
-                          <Field id="np-link" label="Project URL" className="admin-field--full">
+                          <Field id="pf-link" label="Project URL" className="admin-field--full">
                             <input
-                              id="np-link"
+                              id="pf-link"
                               className="admin-input"
                               type="url"
                               placeholder="https://…"
-                              value={newProject.link}
-                              onChange={(e) => setNewProject({ ...newProject, link: e.target.value })}
+                              value={projectForm.link}
+                              onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })}
                             />
                           </Field>
-                          <Field id="np-sub" label="Subtitle / description" className="admin-field--full">
+                          <Field id="pf-sub" label="Subtitle / description" className="admin-field--full">
                             <input
-                              id="np-sub"
+                              id="pf-sub"
                               className="admin-input"
-                              value={newProject.subtitle}
-                              onChange={(e) => setNewProject({ ...newProject, subtitle: e.target.value })}
+                              value={projectForm.subtitle}
+                              onChange={(e) => setProjectForm({ ...projectForm, subtitle: e.target.value })}
                               required
                             />
                           </Field>
-                          <Field id="np-type" label="Media type">
+                          <Field id="pf-type" label="Media type">
                             <select
-                              id="np-type"
+                              id="pf-type"
                               className="admin-select"
-                              value={newProject.mediaType}
-                              onChange={(e) => setNewProject({ ...newProject, mediaType: e.target.value })}
+                              value={projectForm.mediaType}
+                              onChange={(e) => setProjectForm({ ...projectForm, mediaType: e.target.value })}
                             >
                               <option value="image">Image</option>
                               <option value="video">Video</option>
@@ -640,30 +594,41 @@ export default function AdminDashboard() {
                             </select>
                           </Field>
                           <Field
-                            id="np-media"
+                            id="pf-media"
                             label="Media path or URL"
-                            hint="Same rules as edit — server path or https URL."
+                            hint="Type a path / URL or upload — files go to /assets on the API server; upload sets type to Image."
                             className="admin-field--full"
                           >
-                            <input
-                              id="np-media"
-                              className="admin-input"
-                              value={newProject.mediaPath}
-                              onChange={(e) => setNewProject({ ...newProject, mediaPath: e.target.value })}
+                            <AdminImagePathInput
+                              id="pf-media"
+                              value={projectForm.mediaPath}
+                              token={token}
+                              setPath={(path, meta) =>
+                                setProjectForm((p) => ({
+                                  ...p,
+                                  mediaPath: path,
+                                  ...(meta?.source === 'upload' ? { mediaType: 'image' } : {}),
+                                }))
+                              }
                             />
                           </Field>
                         </div>
                         <div className="admin-form-actions">
                           <button type="submit" className="admin-btn-primary">
-                            Add project
+                            {editingProjectId ? 'Save changes' : 'Add project'}
                           </button>
+                          {editingProjectId ? (
+                            <button type="button" className="admin-btn-secondary" onClick={cancelEditProject}>
+                              Cancel editing
+                            </button>
+                          ) : null}
                         </div>
                       </form>
                     </div>
                   </div>
 
-                  <h3 className="admin-section-title">All projects ({projects.length})</h3>
-                  <div className="admin-grid admin-grid--projects">
+                  <h3 className="admin-section-title">All projects · {projects.length}</h3>
+                  <div className="admin-list">
                     {projects.length === 0 ? (
                       <div className="admin-empty">No projects yet. Add one above.</div>
                     ) : (
@@ -704,7 +669,7 @@ export default function AdminDashboard() {
 
               {activeTab === 'messages' && (
                 <>
-                  <h3 className="admin-section-title">Inbox ({messages.length})</h3>
+                  <h3 className="admin-section-title">Messages · {messages.length}</h3>
                   {messages.length === 0 ? (
                     <div className="admin-empty">No messages yet.</div>
                   ) : (
@@ -727,11 +692,15 @@ export default function AdminDashboard() {
 
               {activeTab === 'testimonials' && (
                 <>
-                  <p className="admin-callout">
-                    Images use the same rule as projects: <code>/assets/…</code> on the API host or a public URL.
-                  </p>
+                  <details className="admin-help">
+                    <summary>Photos and upload</summary>
+                    <p>
+                      Same as projects: <strong>Upload image</strong> or enter <code>/assets/…</code> / a public{' '}
+                      <code>https://</code> URL.
+                    </p>
+                  </details>
 
-                  <div className={`admin-split ${editingTestimonialId ? 'admin-split--two' : ''}`}>
+                  <div className="admin-stack">
                     {editingTestimonialId ? (
                       <div className="admin-card admin-card--accent">
                         <div className="admin-card-header">
@@ -766,12 +735,17 @@ export default function AdminDashboard() {
                                 onChange={(e) => setEditTestimonial({ ...editTestimonial, location: e.target.value })}
                               />
                             </Field>
-                            <Field id="et-img" label="Image path or URL" className="admin-field--full">
-                              <input
+                            <Field
+                              id="et-img"
+                              label="Photo path or URL"
+                              hint="Type a path / URL or upload a headshot (JPEG, PNG, WebP, GIF)."
+                              className="admin-field--full"
+                            >
+                              <AdminImagePathInput
                                 id="et-img"
-                                className="admin-input"
                                 value={editTestimonial.image}
-                                onChange={(e) => setEditTestimonial({ ...editTestimonial, image: e.target.value })}
+                                token={token}
+                                setPath={(path) => setEditTestimonial((t) => ({ ...t, image: path }))}
                               />
                             </Field>
                             <Field id="et-tag" label="Tag (optional)">
@@ -837,12 +811,17 @@ export default function AdminDashboard() {
                               onChange={(e) => setNewTestimonial({ ...newTestimonial, location: e.target.value })}
                             />
                           </Field>
-                          <Field id="nt-img" label="Image path or URL" className="admin-field--full">
-                            <input
+                          <Field
+                            id="nt-img"
+                            label="Photo path or URL"
+                            hint="Type a path / URL or upload a headshot (JPEG, PNG, WebP, GIF)."
+                            className="admin-field--full"
+                          >
+                            <AdminImagePathInput
                               id="nt-img"
-                              className="admin-input"
                               value={newTestimonial.image}
-                              onChange={(e) => setNewTestimonial({ ...newTestimonial, image: e.target.value })}
+                              token={token}
+                              setPath={(path) => setNewTestimonial((t) => ({ ...t, image: path }))}
                             />
                           </Field>
                           <Field id="nt-tag" label="Tag (optional)">
@@ -872,8 +851,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  <h3 className="admin-section-title">All testimonials ({testimonials.length})</h3>
-                  <div className="admin-grid">
+                  <h3 className="admin-section-title">All testimonials · {testimonials.length}</h3>
+                  <div className="admin-list">
                     {testimonials.length === 0 ? (
                       <div className="admin-empty">No testimonials yet.</div>
                     ) : (
