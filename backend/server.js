@@ -235,6 +235,19 @@ app.post(
   })
 );
 
+app.put(
+  '/api/testimonials/:id',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const { name, role, location, image, quote, tag } = req.body;
+    await db.run(
+      'UPDATE testimonials SET name = ?, role = ?, location = ?, image = ?, quote = ?, tag = ? WHERE id = ?',
+      [name, role, location, image, quote, tag, req.params.id]
+    );
+    res.json({ success: true });
+  })
+);
+
 app.delete(
   '/api/testimonials/:id',
   authenticate,

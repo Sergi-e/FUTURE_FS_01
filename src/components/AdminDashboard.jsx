@@ -4,12 +4,68 @@ import { fetchJson, fetchJsonWithStatus, getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './AdminDashboard.css';
 
+const EMPTY_PROJECT = {
+  title: '',
+  subtitle: '',
+  year: '',
+  link: '',
+  mediaType: 'image',
+  mediaPath: '',
+};
+
+const EMPTY_TESTIMONIAL = {
+  name: '',
+  role: '',
+  location: '',
+  image: '',
+  quote: '',
+  tag: '',
+};
+
+const NAV = [
+  { id: 'projects', label: 'Projects', caption: 'Portfolio & media', icon: '◆' },
+  { id: 'messages', label: 'Messages', caption: 'Contact inbox', icon: '✉' },
+  { id: 'testimonials', label: 'Testimonials', caption: 'Quotes & photos', icon: '★' },
+  { id: 'settings', label: 'Settings', caption: 'Account & resume', icon: '⚙' },
+];
+
+const PAGE_COPY = {
+  projects: {
+    title: 'Projects',
+    subtitle: 'Create, edit, or remove featured portfolio items. Media must live on your API server or as a public URL.',
+  },
+  messages: {
+    title: 'Contact messages',
+    subtitle: 'Messages sent from your site contact form.',
+  },
+  testimonials: {
+    title: 'Testimonials',
+    subtitle: 'Manage quotes shown on the homepage.',
+  },
+  settings: {
+    title: 'Settings',
+    subtitle: 'Account security and resume link.',
+  },
+};
+
+function Field({ id, label, hint, className = '', children }) {
+  return (
+    <div className={`admin-field ${className}`.trim()}>
+      <label className="admin-label" htmlFor={id}>
+        {label}
+      </label>
+      {hint ? <p className="admin-hint">{hint}</p> : null}
+      {children}
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [token, setToken] = useState(localStorage.getItem('adminToken'));
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('projects');
-  
+
   const [projects, setProjects] = useState([]);
   const [messages, setMessages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
@@ -23,27 +79,23 @@ export default function AdminDashboard() {
   const [userNew, setUserNew] = useState('');
   const [userCurrentPwd, setUserCurrentPwd] = useState('');
 
-  const [newProject, setNewProject] = useState({
-    title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
-  });
-  const [editProject, setEditProject] = useState({
-    title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
-  });
+  const [newProject, setNewProject] = useState({ ...EMPTY_PROJECT });
+  const [editProject, setEditProject] = useState({ ...EMPTY_PROJECT });
   const [editingProjectId, setEditingProjectId] = useState(null);
 
-  const [newTestimonial, setNewTestimonial] = useState({
-    name: '', role: '', location: '', image: '', quote: '', tag: ''
-  });
+  const [newTestimonial, setNewTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
+  const [editTestimonial, setEditTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
+  const [editingTestimonialId, setEditingTestimonialId] = useState(null);
 
   const fetchData = useCallback(async () => {
     if (!token) return;
     const [rProj, rMsg, rTest, rSet] = await Promise.allSettled([
       getJson('/projects'),
       fetchJson(`${API_BASE_URL}/messages`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       }),
       getJson('/testimonials'),
-      getJson('/settings/resume')
+      getJson('/settings/resume'),
     ]);
 
     if (rProj.status === 'fulfilled' && Array.isArray(rProj.value)) setProjects(rProj.value);
@@ -98,7 +150,7 @@ export default function AdminDashboard() {
       const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
       });
       if (ok && data?.token) {
         setToken(data.token);
@@ -118,11 +170,11 @@ export default function AdminDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newProject)
+        body: JSON.stringify(newProject),
       });
-      setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+      setNewProject({ ...EMPTY_PROJECT });
       fetchData();
     } catch {
       alert('Failed to add project');
@@ -136,12 +188,12 @@ export default function AdminDashboard() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(editProject)
+        body: JSON.stringify(editProject),
       });
       setEditingProjectId(null);
-      setEditProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+      setEditProject({ ...EMPTY_PROJECT });
       fetchData();
     } catch {
       alert('Failed to update project');
@@ -156,38 +208,45 @@ export default function AdminDashboard() {
       year: p.year || '',
       link: p.link || '',
       mediaType: p.mediaType || 'image',
-      mediaPath: p.mediaPath || ''
+      mediaPath: p.mediaPath || '',
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const cancelEditProject = () => {
     setEditingProjectId(null);
-    setEditProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
+    setEditProject({ ...EMPTY_PROJECT });
   };
 
-  const handleDeleteProject = async (id) => {
-    try {
-      await fetchJson(`${API_BASE_URL}/projects/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch {
-      /* still refresh list */
-    }
-    fetchData();
+  const handleDeleteProject = (id, title) => {
+    const label = title ? `"${title}"` : 'this project';
+    if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+    void (async () => {
+      try {
+        await fetchJson(`${API_BASE_URL}/projects/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {
+        /* still refresh */
+      }
+      if (editingProjectId === id) cancelEditProject();
+      fetchData();
+    })();
   };
 
-  const handleDeleteMessage = async (id) => {
-    try {
-      await fetchJson(`${API_BASE_URL}/messages/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    } catch {
-      /* still refresh */
-    }
-    fetchData();
+  const handleDeleteMessage = (id, name) => {
+    if (!window.confirm(`Delete message from ${name || 'sender'}?`)) return;
+    void (async () => {
+      try {
+        await fetchJson(`${API_BASE_URL}/messages/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {
+        /* still refresh */
+      }
+      fetchData();
+    })();
   };
 
   const handleAddTestimonial = async (e) => {
@@ -197,27 +256,68 @@ export default function AdminDashboard() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newTestimonial)
+        body: JSON.stringify(newTestimonial),
       });
-      setNewTestimonial({ name: '', role: '', location: '', image: '', quote: '', tag: '' });
+      setNewTestimonial({ ...EMPTY_TESTIMONIAL });
       fetchData();
     } catch {
       alert('Failed to add testimonial');
     }
   };
 
-  const handleDeleteTestimonial = async (id) => {
+  const handleUpdateTestimonial = async (e) => {
+    e.preventDefault();
     try {
-      await fetchJson(`${API_BASE_URL}/testimonials/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
+      await fetchJson(`${API_BASE_URL}/testimonials/${editingTestimonialId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editTestimonial),
       });
+      setEditingTestimonialId(null);
+      setEditTestimonial({ ...EMPTY_TESTIMONIAL });
+      fetchData();
     } catch {
-      /* still refresh */
+      alert('Failed to update testimonial');
     }
-    fetchData();
+  };
+
+  const startEditTestimonial = (t) => {
+    setEditingTestimonialId(t.id);
+    setEditTestimonial({
+      name: t.name || '',
+      role: t.role || '',
+      location: t.location || '',
+      image: t.image || '',
+      quote: t.quote || '',
+      tag: t.tag || '',
+    });
+  };
+
+  const cancelEditTestimonial = () => {
+    setEditingTestimonialId(null);
+    setEditTestimonial({ ...EMPTY_TESTIMONIAL });
+  };
+
+  const handleDeleteTestimonial = (id, name) => {
+    const label = name ? `"${name}"` : 'this testimonial';
+    if (!window.confirm(`Delete ${label}?`)) return;
+    void (async () => {
+      try {
+        await fetchJson(`${API_BASE_URL}/testimonials/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch {
+        /* still refresh */
+      }
+      if (editingTestimonialId === id) cancelEditTestimonial();
+      fetchData();
+    })();
   };
 
   const handleUpdateResume = async (e) => {
@@ -227,9 +327,9 @@ export default function AdminDashboard() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ value: resumeUrl })
+        body: JSON.stringify({ value: resumeUrl }),
       });
       alert('Resume updated successfully!');
     } catch {
@@ -303,229 +403,624 @@ export default function AdminDashboard() {
 
   if (!token) {
     return (
-      <div className="admin-login-container">
-        <form className="admin-login-form" onSubmit={handleLogin}>
-          <h2>Admin Login</h2>
-          <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} required />
-          <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button type="submit">Login</button>
-        </form>
+      <div className="admin-app">
+        <div className="admin-login-container">
+          <div className="admin-login-card">
+            <h1>Admin</h1>
+            <p>Sign in to manage projects, testimonials, messages, and settings.</p>
+            <form className="admin-login-form" onSubmit={handleLogin}>
+              <Field id="login-user" label="Username">
+                <input
+                  id="login-user"
+                  className="admin-input"
+                  type="text"
+                  autoComplete="username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+              </Field>
+              <Field id="login-pass" label="Password">
+                <input
+                  id="login-pass"
+                  className="admin-input"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </Field>
+              <div className="admin-form-actions admin-form-actions--bare">
+                <button type="submit" className="admin-btn-primary">
+                  Sign in
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const page = PAGE_COPY[activeTab] || PAGE_COPY.projects;
+
   return (
-    <div className="admin-dashboard">
-      <div className="admin-sidebar">
-        <div className="admin-logo">SERGE ADMIN</div>
-        <button className={activeTab === 'projects' ? 'active' : ''} onClick={() => setActiveTab('projects')}>Projects</button>
-        <button className={activeTab === 'messages' ? 'active' : ''} onClick={() => setActiveTab('messages')}>Contact Messages</button>
-        <button className={activeTab === 'testimonials' ? 'active' : ''} onClick={() => setActiveTab('testimonials')}>Testimonials</button>
-        <button className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>Settings</button>
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
-      </div>
-      <div className="admin-content">
-        {activeTab === 'projects' && (
-          <div className="admin-panel">
-            <h2>Manage Projects</h2>
+    <div className="admin-app">
+      <div className="admin-shell">
+        <aside className="admin-nav" aria-label="Admin navigation">
+          <div className="admin-nav-brand">
+            <strong>PORTFOLIO</strong>
+            <span>Content admin</span>
+          </div>
+          <nav className="admin-nav-list">
+            {NAV.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={`admin-nav-item ${activeTab === item.id ? 'is-active' : ''}`}
+                onClick={() => setActiveTab(item.id)}
+              >
+                <span className="admin-nav-icon" aria-hidden>
+                  {item.icon}
+                </span>
+                <span>
+                  {item.label}
+                  <span className="admin-nav-item-sub">{item.caption}</span>
+                </span>
+              </button>
+            ))}
+          </nav>
+          <div className="admin-nav-footer">
+            <button type="button" className="admin-btn-logout" onClick={handleLogout}>
+              Log out
+            </button>
+          </div>
+        </aside>
 
-            {editingProjectId && (
-              <form className="admin-form" onSubmit={handleUpdateProject} style={{ border: '1px solid var(--accent-neon)', padding: '20px', borderRadius: '8px', marginBottom: '30px' }}>
-                <h3 style={{ color: 'var(--accent-neon)' }}>Edit Project</h3>
-                <input type="text" placeholder="Title" value={editProject.title} onChange={e => setEditProject({...editProject, title: e.target.value})} required />
-                <input type="text" placeholder="Subtitle" value={editProject.subtitle} onChange={e => setEditProject({...editProject, subtitle: e.target.value})} required />
-                <input type="text" placeholder="Year" value={editProject.year} onChange={e => setEditProject({...editProject, year: e.target.value})} />
-                <input type="text" placeholder="Link URL" value={editProject.link} onChange={e => setEditProject({...editProject, link: e.target.value})} />
-                <select value={editProject.mediaType} onChange={e => setEditProject({...editProject, mediaType: e.target.value})}>
-                  <option value="image">Image</option>
-                  <option value="video">Video</option>
-                  <option value="placeholder">Placeholder</option>
-                </select>
-                <input type="text" placeholder="Media: /assets/name.png on API, or full https://… URL" value={editProject.mediaPath} onChange={e => setEditProject({...editProject, mediaPath: e.target.value})} />
-                <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                  <button type="submit" style={{ flex: 1 }}>Update Project</button>
-                  <button type="button" onClick={cancelEditProject} style={{ flex: 1, backgroundColor: '#555' }}>Cancel Edit</button>
-                </div>
-              </form>
-            )}
+        <div className="admin-main">
+          <header className="admin-toolbar">
+            <div>
+              <h1>{page.title}</h1>
+              <p>{page.subtitle}</p>
+            </div>
+            <div className="admin-toolbar-actions">
+              <button type="button" className="admin-btn-ghost" onClick={() => fetchData()}>
+                Refresh data
+              </button>
+            </div>
+          </header>
 
-            <form className="admin-form" onSubmit={handleAddProject}>
-              <h3>Add New Project</h3>
-              <input type="text" placeholder="Title" value={newProject.title} onChange={e => setNewProject({...newProject, title: e.target.value})} required />
-              <input type="text" placeholder="Subtitle" value={newProject.subtitle} onChange={e => setNewProject({...newProject, subtitle: e.target.value})} required />
-              <input type="text" placeholder="Year" value={newProject.year} onChange={e => setNewProject({...newProject, year: e.target.value})} />
-              <input type="text" placeholder="Link URL" value={newProject.link} onChange={e => setNewProject({...newProject, link: e.target.value})} />
-              <select value={newProject.mediaType} onChange={e => setNewProject({...newProject, mediaType: e.target.value})}>
-                <option value="image">Image</option>
-                <option value="video">Video</option>
-                <option value="placeholder">Placeholder</option>
-              </select>
-              <input type="text" placeholder="Media: /assets/name.png on API, or full https://… URL" value={newProject.mediaPath} onChange={e => setNewProject({...newProject, mediaPath: e.target.value})} />
-              <button type="submit">Add Project</button>
-            </form>
+          <div className="admin-scroll">
+            <div className="admin-page">
+              {activeTab === 'projects' && (
+                <>
+                  <p className="admin-callout">
+                    <strong>Media files:</strong> there is no browser upload in this build. Add images or videos under{' '}
+                    <code>backend/public/assets/</code> on your server (e.g. Render), then set path to{' '}
+                    <code>/assets/yourfile.jpg</code> or paste a full <code>https://</code> URL.
+                  </p>
 
-            <div className="admin-list">
-              {projects.map((p) => (
-                <div key={p.id} className="admin-list-item">
-                  <div className="admin-list-item-main">
-                    {(p.mediaType === 'image' || p.mediaType === 'video') && p.mediaPath ? (
-                      <div className="admin-media-thumb-wrap">
-                        {p.mediaType === 'image' ? (
-                          <img src={resolveMediaUrl(p.mediaPath)} alt="" className="admin-media-thumb" />
-                        ) : (
-                          <video src={resolveMediaUrl(p.mediaPath)} muted playsInline className="admin-media-thumb" />
-                        )}
+                  <div className={`admin-split ${editingProjectId ? 'admin-split--two' : ''}`}>
+                    {editingProjectId ? (
+                      <div className="admin-card admin-card--accent">
+                        <div className="admin-card-header">
+                          <h2 className="admin-card-title">Edit project</h2>
+                          <span className="admin-badge">ID {editingProjectId}</span>
+                        </div>
+                        <form onSubmit={handleUpdateProject}>
+                          <div className="admin-form-grid">
+                            <Field id="ep-title" label="Title" className="admin-field--full">
+                              <input
+                                id="ep-title"
+                                className="admin-input"
+                                value={editProject.title}
+                                onChange={(e) => setEditProject({ ...editProject, title: e.target.value })}
+                                required
+                              />
+                            </Field>
+                            <Field id="ep-year" label="Year">
+                              <input
+                                id="ep-year"
+                                className="admin-input"
+                                value={editProject.year}
+                                onChange={(e) => setEditProject({ ...editProject, year: e.target.value })}
+                              />
+                            </Field>
+                            <Field id="ep-link" label="Project URL" className="admin-field--full">
+                              <input
+                                id="ep-link"
+                                className="admin-input"
+                                type="url"
+                                placeholder="https://…"
+                                value={editProject.link}
+                                onChange={(e) => setEditProject({ ...editProject, link: e.target.value })}
+                              />
+                            </Field>
+                            <Field id="ep-sub" label="Subtitle / description" className="admin-field--full">
+                              <input
+                                id="ep-sub"
+                                className="admin-input"
+                                value={editProject.subtitle}
+                                onChange={(e) => setEditProject({ ...editProject, subtitle: e.target.value })}
+                                required
+                              />
+                            </Field>
+                            <Field id="ep-type" label="Media type">
+                              <select
+                                id="ep-type"
+                                className="admin-select"
+                                value={editProject.mediaType}
+                                onChange={(e) => setEditProject({ ...editProject, mediaType: e.target.value })}
+                              >
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="placeholder">Placeholder</option>
+                              </select>
+                            </Field>
+                            <Field
+                              id="ep-media"
+                              label="Media path or URL"
+                              hint="Example: /assets/cover.jpg or a full HTTPS link."
+                              className="admin-field--full"
+                            >
+                              <input
+                                id="ep-media"
+                                className="admin-input"
+                                value={editProject.mediaPath}
+                                onChange={(e) => setEditProject({ ...editProject, mediaPath: e.target.value })}
+                              />
+                            </Field>
+                          </div>
+                          <div className="admin-form-actions">
+                            <button type="submit" className="admin-btn-primary">
+                              Save changes
+                            </button>
+                            <button type="button" className="admin-btn-secondary" onClick={cancelEditProject}>
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     ) : null}
-                    <div className="admin-list-text">
-                      <strong>{p.title}</strong> — {p.year}
-                      {p.subtitle ? <div className="admin-list-meta">{p.subtitle}</div> : null}
+
+                    <div className="admin-card">
+                      <div className="admin-card-header">
+                        <h2 className="admin-card-title">Add project</h2>
+                        <span className="admin-badge admin-badge--muted">Create</span>
+                      </div>
+                      <form onSubmit={handleAddProject}>
+                        <div className="admin-form-grid">
+                          <Field id="np-title" label="Title" className="admin-field--full">
+                            <input
+                              id="np-title"
+                              className="admin-input"
+                              value={newProject.title}
+                              onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+                              required
+                            />
+                          </Field>
+                          <Field id="np-year" label="Year">
+                            <input
+                              id="np-year"
+                              className="admin-input"
+                              value={newProject.year}
+                              onChange={(e) => setNewProject({ ...newProject, year: e.target.value })}
+                            />
+                          </Field>
+                          <Field id="np-link" label="Project URL" className="admin-field--full">
+                            <input
+                              id="np-link"
+                              className="admin-input"
+                              type="url"
+                              placeholder="https://…"
+                              value={newProject.link}
+                              onChange={(e) => setNewProject({ ...newProject, link: e.target.value })}
+                            />
+                          </Field>
+                          <Field id="np-sub" label="Subtitle / description" className="admin-field--full">
+                            <input
+                              id="np-sub"
+                              className="admin-input"
+                              value={newProject.subtitle}
+                              onChange={(e) => setNewProject({ ...newProject, subtitle: e.target.value })}
+                              required
+                            />
+                          </Field>
+                          <Field id="np-type" label="Media type">
+                            <select
+                              id="np-type"
+                              className="admin-select"
+                              value={newProject.mediaType}
+                              onChange={(e) => setNewProject({ ...newProject, mediaType: e.target.value })}
+                            >
+                              <option value="image">Image</option>
+                              <option value="video">Video</option>
+                              <option value="placeholder">Placeholder</option>
+                            </select>
+                          </Field>
+                          <Field
+                            id="np-media"
+                            label="Media path or URL"
+                            hint="Same rules as edit — server path or https URL."
+                            className="admin-field--full"
+                          >
+                            <input
+                              id="np-media"
+                              className="admin-input"
+                              value={newProject.mediaPath}
+                              onChange={(e) => setNewProject({ ...newProject, mediaPath: e.target.value })}
+                            />
+                          </Field>
+                        </div>
+                        <div className="admin-form-actions">
+                          <button type="submit" className="admin-btn-primary">
+                            Add project
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                    <button type="button" onClick={() => startEditProject(p)} style={{ backgroundColor: '#222' }}>Edit</button>
-                    <button type="button" onClick={() => handleDeleteProject(p.id)}>Delete</button>
+
+                  <h3 className="admin-section-title">All projects ({projects.length})</h3>
+                  <div className="admin-grid admin-grid--projects">
+                    {projects.length === 0 ? (
+                      <div className="admin-empty">No projects yet. Add one above.</div>
+                    ) : (
+                      projects.map((p) => (
+                        <div key={p.id} className="admin-row-card">
+                          {(p.mediaType === 'image' || p.mediaType === 'video') && p.mediaPath ? (
+                            <div className="admin-row-thumb">
+                              {p.mediaType === 'image' ? (
+                                <img src={resolveMediaUrl(p.mediaPath)} alt="" />
+                              ) : (
+                                <video src={resolveMediaUrl(p.mediaPath)} muted playsInline />
+                              )}
+                            </div>
+                          ) : (
+                            <div className="admin-row-thumb admin-thumb-placeholder">No media</div>
+                          )}
+                          <div className="admin-row-body">
+                            <p className="admin-row-title">{p.title}</p>
+                            <p className="admin-row-meta">
+                              {p.year ? `${p.year} · ` : ''}
+                              {p.subtitle || '—'}
+                            </p>
+                          </div>
+                          <div className="admin-row-actions">
+                            <button type="button" className="admin-btn-edit" onClick={() => startEditProject(p)}>
+                              Edit
+                            </button>
+                            <button type="button" className="admin-btn-delete" onClick={() => handleDeleteProject(p.id, p.title)}>
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                </>
+              )}
 
-        {activeTab === 'messages' && (
-          <div className="admin-panel">
-            <h2>Contact Messages</h2>
-            <div className="admin-messages-list">
-              {messages.length === 0 ? <p>No messages found.</p> : messages.map(m => (
-                <div key={m.id} className="message-card">
-                  <div className="msg-header">
-                    <strong>{m.name}</strong> ({m.email}) <span>{new Date(m.date).toLocaleString()}</span>
-                  </div>
-                  <p>{m.message}</p>
-                  <button onClick={() => handleDeleteMessage(m.id)}>Delete</button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+              {activeTab === 'messages' && (
+                <>
+                  <h3 className="admin-section-title">Inbox ({messages.length})</h3>
+                  {messages.length === 0 ? (
+                    <div className="admin-empty">No messages yet.</div>
+                  ) : (
+                    messages.map((m) => (
+                      <div key={m.id} className="admin-message-card">
+                        <div className="admin-message-head">
+                          <strong>{m.name}</strong>
+                          <span>{m.email}</span>
+                          <span>{m.date ? new Date(m.date).toLocaleString() : ''}</span>
+                        </div>
+                        <p className="admin-message-body">{m.message}</p>
+                        <button type="button" className="admin-btn-delete" onClick={() => handleDeleteMessage(m.id, m.name)}>
+                          Delete message
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </>
+              )}
 
-        {activeTab === 'testimonials' && (
-          <div className="admin-panel">
-            <h2>Manage Testimonials</h2>
-            <form className="admin-form" onSubmit={handleAddTestimonial}>
-              <h3>Add New Testimonial</h3>
-              <input type="text" placeholder="Name" value={newTestimonial.name} onChange={e => setNewTestimonial({...newTestimonial, name: e.target.value})} required />
-              <input type="text" placeholder="Role" value={newTestimonial.role} onChange={e => setNewTestimonial({...newTestimonial, role: e.target.value})} required />
-              <input type="text" placeholder="Location" value={newTestimonial.location} onChange={e => setNewTestimonial({...newTestimonial, location: e.target.value})} />
-              <input type="text" placeholder="Image: /assets/photo.png on API, or full https://… URL" value={newTestimonial.image} onChange={e => setNewTestimonial({...newTestimonial, image: e.target.value})} />
-              <textarea placeholder="Quote" value={newTestimonial.quote} onChange={e => setNewTestimonial({...newTestimonial, quote: e.target.value})} required />
-              <input type="text" placeholder="Tag (e.g. IMG_ID: 01)" value={newTestimonial.tag} onChange={e => setNewTestimonial({...newTestimonial, tag: e.target.value})} />
-              <button type="submit">Add Testimonial</button>
-            </form>
+              {activeTab === 'testimonials' && (
+                <>
+                  <p className="admin-callout">
+                    Images use the same rule as projects: <code>/assets/…</code> on the API host or a public URL.
+                  </p>
 
-            <div className="admin-list">
-              {testimonials.map((t) => (
-                <div key={t.id} className="admin-list-item">
-                  <div className="admin-list-item-main">
-                    {t.image ? (
-                      <div className="admin-media-thumb-wrap admin-media-thumb-round">
-                        <img src={resolveMediaUrl(t.image)} alt="" className="admin-media-thumb" />
+                  <div className={`admin-split ${editingTestimonialId ? 'admin-split--two' : ''}`}>
+                    {editingTestimonialId ? (
+                      <div className="admin-card admin-card--accent">
+                        <div className="admin-card-header">
+                          <h2 className="admin-card-title">Edit testimonial</h2>
+                          <span className="admin-badge">ID {editingTestimonialId}</span>
+                        </div>
+                        <form onSubmit={handleUpdateTestimonial}>
+                          <div className="admin-form-grid">
+                            <Field id="et-name" label="Name">
+                              <input
+                                id="et-name"
+                                className="admin-input"
+                                value={editTestimonial.name}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, name: e.target.value })}
+                                required
+                              />
+                            </Field>
+                            <Field id="et-role" label="Role">
+                              <input
+                                id="et-role"
+                                className="admin-input"
+                                value={editTestimonial.role}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, role: e.target.value })}
+                                required
+                              />
+                            </Field>
+                            <Field id="et-loc" label="Location" className="admin-field--full">
+                              <input
+                                id="et-loc"
+                                className="admin-input"
+                                value={editTestimonial.location}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, location: e.target.value })}
+                              />
+                            </Field>
+                            <Field id="et-img" label="Image path or URL" className="admin-field--full">
+                              <input
+                                id="et-img"
+                                className="admin-input"
+                                value={editTestimonial.image}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, image: e.target.value })}
+                              />
+                            </Field>
+                            <Field id="et-tag" label="Tag (optional)">
+                              <input
+                                id="et-tag"
+                                className="admin-input"
+                                value={editTestimonial.tag}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, tag: e.target.value })}
+                              />
+                            </Field>
+                            <Field id="et-quote" label="Quote" className="admin-field--full">
+                              <textarea
+                                id="et-quote"
+                                className="admin-textarea"
+                                value={editTestimonial.quote}
+                                onChange={(e) => setEditTestimonial({ ...editTestimonial, quote: e.target.value })}
+                                required
+                              />
+                            </Field>
+                          </div>
+                          <div className="admin-form-actions">
+                            <button type="submit" className="admin-btn-primary">
+                              Save testimonial
+                            </button>
+                            <button type="button" className="admin-btn-secondary" onClick={cancelEditTestimonial}>
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
                       </div>
                     ) : null}
-                    <div className="admin-list-text">
-                      <strong>{t.name}</strong> — {t.role}
+
+                    <div className="admin-card">
+                      <div className="admin-card-header">
+                        <h2 className="admin-card-title">Add testimonial</h2>
+                        <span className="admin-badge admin-badge--muted">Create</span>
+                      </div>
+                      <form onSubmit={handleAddTestimonial}>
+                        <div className="admin-form-grid">
+                          <Field id="nt-name" label="Name">
+                            <input
+                              id="nt-name"
+                              className="admin-input"
+                              value={newTestimonial.name}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, name: e.target.value })}
+                              required
+                            />
+                          </Field>
+                          <Field id="nt-role" label="Role">
+                            <input
+                              id="nt-role"
+                              className="admin-input"
+                              value={newTestimonial.role}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, role: e.target.value })}
+                              required
+                            />
+                          </Field>
+                          <Field id="nt-loc" label="Location" className="admin-field--full">
+                            <input
+                              id="nt-loc"
+                              className="admin-input"
+                              value={newTestimonial.location}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, location: e.target.value })}
+                            />
+                          </Field>
+                          <Field id="nt-img" label="Image path or URL" className="admin-field--full">
+                            <input
+                              id="nt-img"
+                              className="admin-input"
+                              value={newTestimonial.image}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, image: e.target.value })}
+                            />
+                          </Field>
+                          <Field id="nt-tag" label="Tag (optional)">
+                            <input
+                              id="nt-tag"
+                              className="admin-input"
+                              value={newTestimonial.tag}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, tag: e.target.value })}
+                            />
+                          </Field>
+                          <Field id="nt-quote" label="Quote" className="admin-field--full">
+                            <textarea
+                              id="nt-quote"
+                              className="admin-textarea"
+                              value={newTestimonial.quote}
+                              onChange={(e) => setNewTestimonial({ ...newTestimonial, quote: e.target.value })}
+                              required
+                            />
+                          </Field>
+                        </div>
+                        <div className="admin-form-actions">
+                          <button type="submit" className="admin-btn-primary">
+                            Add testimonial
+                          </button>
+                        </div>
+                      </form>
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleDeleteTestimonial(t.id)}>Delete</button>
+
+                  <h3 className="admin-section-title">All testimonials ({testimonials.length})</h3>
+                  <div className="admin-grid">
+                    {testimonials.length === 0 ? (
+                      <div className="admin-empty">No testimonials yet.</div>
+                    ) : (
+                      testimonials.map((t) => (
+                        <div key={t.id} className="admin-row-card">
+                          {t.image ? (
+                            <div className="admin-row-thumb admin-row-thumb--round">
+                              <img src={resolveMediaUrl(t.image)} alt="" />
+                            </div>
+                          ) : (
+                            <div className="admin-row-thumb admin-row-thumb--round admin-thumb-placeholder">—</div>
+                          )}
+                          <div className="admin-row-body">
+                            <p className="admin-row-title">{t.name}</p>
+                            <p className="admin-row-meta">{t.role}</p>
+                          </div>
+                          <div className="admin-row-actions">
+                            <button type="button" className="admin-btn-edit" onClick={() => startEditTestimonial(t)}>
+                              Edit
+                            </button>
+                            <button type="button" className="admin-btn-delete" onClick={() => handleDeleteTestimonial(t.id, t.name)}>
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'settings' && (
+                <div className="admin-settings-stack">
+                  <div className="admin-card">
+                    <div className="admin-card-header">
+                      <h2 className="admin-card-title">Account</h2>
+                    </div>
+                    <p className="admin-hint admin-hint--block">
+                      Signed in as <strong className="admin-hint-strong">{adminUsername || '—'}</strong>.
+                    </p>
+
+                    <form className="admin-form-grid admin-form-grid--spaced" onSubmit={handleChangeUsername}>
+                      <h3 className="admin-subcard-title admin-field--full">Change username</h3>
+                      <Field id="su-name" label="New username" className="admin-field--full">
+                        <input
+                          id="su-name"
+                          className="admin-input"
+                          autoComplete="username"
+                          value={userNew}
+                          onChange={(e) => setUserNew(e.target.value)}
+                          minLength={2}
+                          maxLength={64}
+                          required
+                        />
+                      </Field>
+                      <Field id="su-pwd" label="Current password" className="admin-field--full">
+                        <input
+                          id="su-pwd"
+                          className="admin-input"
+                          type="password"
+                          autoComplete="current-password"
+                          value={userCurrentPwd}
+                          onChange={(e) => setUserCurrentPwd(e.target.value)}
+                          required
+                        />
+                      </Field>
+                      <div className="admin-field admin-field--full">
+                        <button type="submit" className="admin-btn-primary">
+                          Update username
+                        </button>
+                      </div>
+                    </form>
+
+                    <form className="admin-form-grid" onSubmit={handleChangePassword}>
+                      <h3 className="admin-subcard-title admin-field--full">Change password</h3>
+                      <Field id="cp-cur" label="Current password" className="admin-field--full">
+                        <input
+                          id="cp-cur"
+                          className="admin-input"
+                          type="password"
+                          autoComplete="current-password"
+                          value={pwdCurrent}
+                          onChange={(e) => setPwdCurrent(e.target.value)}
+                          required
+                        />
+                      </Field>
+                      <Field id="cp-new" label="New password (min. 8)">
+                        <input
+                          id="cp-new"
+                          className="admin-input"
+                          type="password"
+                          autoComplete="new-password"
+                          value={pwdNew}
+                          onChange={(e) => setPwdNew(e.target.value)}
+                          minLength={8}
+                          required
+                        />
+                      </Field>
+                      <Field id="cp-conf" label="Confirm new password">
+                        <input
+                          id="cp-conf"
+                          className="admin-input"
+                          type="password"
+                          autoComplete="new-password"
+                          value={pwdConfirm}
+                          onChange={(e) => setPwdConfirm(e.target.value)}
+                          minLength={8}
+                          required
+                        />
+                      </Field>
+                      <div className="admin-field admin-field--full">
+                        <button type="submit" className="admin-btn-primary">
+                          Update password
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+
+                  <div className="admin-card">
+                    <div className="admin-card-header">
+                      <h2 className="admin-card-title">Resume link</h2>
+                    </div>
+                    <p className="admin-hint admin-hint--block">
+                      Path on the site (e.g. <code className="admin-inline-code">/Serge_Ishimwe_Resume.pdf</code>) or external URL.
+                    </p>
+                    <form onSubmit={handleUpdateResume}>
+                      <Field id="resume" label="Resume URL or path" className="admin-field--full">
+                        <input
+                          id="resume"
+                          className="admin-input"
+                          value={resumeUrl}
+                          onChange={(e) => setResumeUrl(e.target.value)}
+                          required
+                        />
+                      </Field>
+                      <div className="admin-form-actions admin-form-actions--bare">
+                        <button type="submit" className="admin-btn-primary">
+                          Save resume link
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="admin-panel">
-            <h2>Website Settings</h2>
-
-            <div className="admin-settings-section">
-              <h3>Account</h3>
-              <p className="admin-settings-hint">
-                Signed in as <strong>{adminUsername || '…'}</strong>. Change your username or password here; use a
-                strong password on any public site.
-              </p>
-
-              <form className="admin-form admin-form--compact" onSubmit={handleChangeUsername}>
-                <h4>Change username</h4>
-                <input
-                  type="text"
-                  autoComplete="username"
-                  placeholder="New username"
-                  value={userNew}
-                  onChange={(e) => setUserNew(e.target.value)}
-                  minLength={2}
-                  maxLength={64}
-                  required
-                />
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Current password (to confirm)"
-                  value={userCurrentPwd}
-                  onChange={(e) => setUserCurrentPwd(e.target.value)}
-                  required
-                />
-                <button type="submit">Update username</button>
-              </form>
-
-              <form className="admin-form admin-form--compact" onSubmit={handleChangePassword}>
-                <h4>Change password</h4>
-                <input
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="Current password"
-                  value={pwdCurrent}
-                  onChange={(e) => setPwdCurrent(e.target.value)}
-                  required
-                />
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="New password (min. 8 characters)"
-                  value={pwdNew}
-                  onChange={(e) => setPwdNew(e.target.value)}
-                  minLength={8}
-                  required
-                />
-                <input
-                  type="password"
-                  autoComplete="new-password"
-                  placeholder="Confirm new password"
-                  value={pwdConfirm}
-                  onChange={(e) => setPwdConfirm(e.target.value)}
-                  minLength={8}
-                  required
-                />
-                <button type="submit">Update password</button>
-              </form>
-            </div>
-
-            <form className="admin-form" onSubmit={handleUpdateResume}>
-              <h3>Resume Link</h3>
-              <p className="admin-settings-hint">
-                Update the link to your resume. This can be a file path (e.g.{' '}
-                <code>/Serge_Ishimwe_Resume.pdf</code>) or an external URL.
-              </p>
-              <input
-                type="text"
-                placeholder="Resume URL or Path"
-                value={resumeUrl}
-                onChange={(e) => setResumeUrl(e.target.value)}
-                required
-              />
-              <button type="submit">Update Resume</button>
-            </form>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
