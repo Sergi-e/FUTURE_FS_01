@@ -79,6 +79,64 @@ app.get('/api/verify', authenticate, (req, res) => {
   res.json({ valid: true, user: req.user });
 });
 
+app.get(
+  '/api/auth/me',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const row = await db.get('SELECT id, username FROM admin WHERE id = ?', [req.user.id]);
+    if (!row) return res.status(404).json({ error: 'Not found' });
+    res.json({ id: row.id, username: row.username });
+  })
+);
+
+app.put(
+  '/api/auth/password',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body || {};
+    if (!currentPassword || !newPassword || typeof newPassword !== 'string') {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+    const admin = await db.get('SELECT * FROM admin WHERE id = ?', [req.user.id]);
+    if (!admin) return res.status(404).json({ error: 'Account not found' });
+    if (!(await bcrypt.compare(currentPassword, admin.password))) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash(newPassword, salt);
+    await db.run('UPDATE admin SET password = ? WHERE id = ?', [hash, req.user.id]);
+    res.json({ success: true });
+  })
+);
+
+app.put(
+  '/api/auth/username',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    const { currentPassword, newUsername } = req.body || {};
+    const name = String(newUsername || '').trim();
+    if (!currentPassword || !name) {
+      return res.status(400).json({ error: 'Current password and new username are required' });
+    }
+    if (name.length < 2 || name.length > 64) {
+      return res.status(400).json({ error: 'Username must be between 2 and 64 characters' });
+    }
+    const admin = await db.get('SELECT * FROM admin WHERE id = ?', [req.user.id]);
+    if (!admin) return res.status(404).json({ error: 'Account not found' });
+    if (!(await bcrypt.compare(currentPassword, admin.password))) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    const taken = await db.get('SELECT id FROM admin WHERE username = ? AND id != ?', [name, req.user.id]);
+    if (taken) return res.status(409).json({ error: 'That username is already in use' });
+    await db.run('UPDATE admin SET username = ? WHERE id = ?', [name, req.user.id]);
+    const token = jwt.sign({ id: admin.id, username: name }, JWT_SECRET, { expiresIn: '12h' });
+    res.json({ success: true, token, username: name });
+  })
+);
+
 // --- Projects ---
 app.get(
   '/api/projects',

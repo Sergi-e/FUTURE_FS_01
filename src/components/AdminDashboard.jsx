@@ -14,7 +14,15 @@ export default function AdminDashboard() {
   const [messages, setMessages] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
   const [resumeUrl, setResumeUrl] = useState('');
-  
+  const [adminUsername, setAdminUsername] = useState('');
+
+  const [pwdCurrent, setPwdCurrent] = useState('');
+  const [pwdNew, setPwdNew] = useState('');
+  const [pwdConfirm, setPwdConfirm] = useState('');
+
+  const [userNew, setUserNew] = useState('');
+  const [userCurrentPwd, setUserCurrentPwd] = useState('');
+
   const [newProject, setNewProject] = useState({
     title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
   });
@@ -61,6 +69,24 @@ export default function AdminDashboard() {
       void fetchData();
     });
   }, [fetchData]);
+
+  const fetchAdminProfile = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await fetchJson(`${API_BASE_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (data?.username) setAdminUsername(data.username);
+    } catch {
+      setAdminUsername('');
+    }
+  }, [token]);
+
+  useEffect(() => {
+    startTransition(() => {
+      void fetchAdminProfile();
+    });
+  }, [fetchAdminProfile]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -173,6 +199,65 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     setToken(null);
     localStorage.removeItem('adminToken');
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwdNew !== pwdConfirm) {
+      alert('New password and confirmation do not match');
+      return;
+    }
+    try {
+      const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/password`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword: pwdCurrent, newPassword: pwdNew }),
+      });
+      if (ok) {
+        setPwdCurrent('');
+        setPwdNew('');
+        setPwdConfirm('');
+        alert('Password updated successfully.');
+      } else {
+        alert(data?.error || 'Could not update password');
+      }
+    } catch {
+      alert('Could not update password');
+    }
+  };
+
+  const handleChangeUsername = async (e) => {
+    e.preventDefault();
+    const name = userNew.trim();
+    if (!name) {
+      alert('Enter a new username');
+      return;
+    }
+    try {
+      const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/username`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ currentPassword: userCurrentPwd, newUsername: name }),
+      });
+      if (ok && data?.token) {
+        setToken(data.token);
+        localStorage.setItem('adminToken', data.token);
+        setAdminUsername(data.username || name);
+        setUserNew('');
+        setUserCurrentPwd('');
+        alert('Username updated. You stay signed in with a new session token.');
+      } else {
+        alert(data?.error || 'Could not update username');
+      }
+    } catch {
+      alert('Could not update username');
+    }
   };
 
   if (!token) {
@@ -296,15 +381,81 @@ export default function AdminDashboard() {
         {activeTab === 'settings' && (
           <div className="admin-panel">
             <h2>Website Settings</h2>
+
+            <div className="admin-settings-section">
+              <h3>Account</h3>
+              <p className="admin-settings-hint">
+                Signed in as <strong>{adminUsername || '…'}</strong>. Change your username or password here; use a
+                strong password on any public site.
+              </p>
+
+              <form className="admin-form admin-form--compact" onSubmit={handleChangeUsername}>
+                <h4>Change username</h4>
+                <input
+                  type="text"
+                  autoComplete="username"
+                  placeholder="New username"
+                  value={userNew}
+                  onChange={(e) => setUserNew(e.target.value)}
+                  minLength={2}
+                  maxLength={64}
+                  required
+                />
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Current password (to confirm)"
+                  value={userCurrentPwd}
+                  onChange={(e) => setUserCurrentPwd(e.target.value)}
+                  required
+                />
+                <button type="submit">Update username</button>
+              </form>
+
+              <form className="admin-form admin-form--compact" onSubmit={handleChangePassword}>
+                <h4>Change password</h4>
+                <input
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder="Current password"
+                  value={pwdCurrent}
+                  onChange={(e) => setPwdCurrent(e.target.value)}
+                  required
+                />
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="New password (min. 8 characters)"
+                  value={pwdNew}
+                  onChange={(e) => setPwdNew(e.target.value)}
+                  minLength={8}
+                  required
+                />
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Confirm new password"
+                  value={pwdConfirm}
+                  onChange={(e) => setPwdConfirm(e.target.value)}
+                  minLength={8}
+                  required
+                />
+                <button type="submit">Update password</button>
+              </form>
+            </div>
+
             <form className="admin-form" onSubmit={handleUpdateResume}>
               <h3>Resume Link</h3>
-              <p style={{marginBottom: '1rem', fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>Update the link to your resume. This can be a file path (e.g. <code>/Serge_Ishimwe_Resume.pdf</code>) or an external URL.</p>
-              <input 
-                type="text" 
-                placeholder="Resume URL or Path" 
-                value={resumeUrl} 
-                onChange={e => setResumeUrl(e.target.value)} 
-                required 
+              <p className="admin-settings-hint">
+                Update the link to your resume. This can be a file path (e.g.{' '}
+                <code>/Serge_Ishimwe_Resume.pdf</code>) or an external URL.
+              </p>
+              <input
+                type="text"
+                placeholder="Resume URL or Path"
+                value={resumeUrl}
+                onChange={(e) => setResumeUrl(e.target.value)}
+                required
               />
               <button type="submit">Update Resume</button>
             </form>
