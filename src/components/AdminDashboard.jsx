@@ -26,6 +26,7 @@ export default function AdminDashboard() {
   const [newProject, setNewProject] = useState({
     title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: ''
   });
+  const [editingProjectId, setEditingProjectId] = useState(null);
 
   const [newTestimonial, setNewTestimonial] = useState({
     name: '', role: '', location: '', image: '', quote: '', tag: ''
@@ -107,22 +108,52 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleAddProject = async (e) => {
+  const handleSaveProject = async (e) => {
     e.preventDefault();
     try {
-      await fetchJson(`${API_BASE_URL}/projects`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(newProject)
-      });
+      if (editingProjectId) {
+        await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(newProject)
+        });
+        setEditingProjectId(null);
+      } else {
+        await fetchJson(`${API_BASE_URL}/projects`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(newProject)
+        });
+      }
       setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
       fetchData();
     } catch {
-      alert('Failed to add project');
+      alert(editingProjectId ? 'Failed to update project' : 'Failed to add project');
     }
+  };
+
+  const startEditProject = (p) => {
+    setEditingProjectId(p.id);
+    setNewProject({
+      title: p.title || '',
+      subtitle: p.subtitle || '',
+      year: p.year || '',
+      link: p.link || '',
+      mediaType: p.mediaType || 'image',
+      mediaPath: p.mediaPath || ''
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEditProject = () => {
+    setEditingProjectId(null);
+    setNewProject({ title: '', subtitle: '', year: '', link: '', mediaType: 'image', mediaPath: '' });
   };
 
   const handleDeleteProject = async (id) => {
@@ -287,8 +318,8 @@ export default function AdminDashboard() {
         {activeTab === 'projects' && (
           <div className="admin-panel">
             <h2>Manage Projects</h2>
-            <form className="admin-form" onSubmit={handleAddProject}>
-              <h3>Add New Project</h3>
+            <form className="admin-form" onSubmit={handleSaveProject}>
+              <h3>{editingProjectId ? 'Edit Project' : 'Add New Project'}</h3>
               <input type="text" placeholder="Title" value={newProject.title} onChange={e => setNewProject({...newProject, title: e.target.value})} required />
               <input type="text" placeholder="Subtitle" value={newProject.subtitle} onChange={e => setNewProject({...newProject, subtitle: e.target.value})} required />
               <input type="text" placeholder="Year" value={newProject.year} onChange={e => setNewProject({...newProject, year: e.target.value})} />
@@ -299,7 +330,12 @@ export default function AdminDashboard() {
                 <option value="placeholder">Placeholder</option>
               </select>
               <input type="text" placeholder="Media: /assets/name.png on API, or full https://… URL" value={newProject.mediaPath} onChange={e => setNewProject({...newProject, mediaPath: e.target.value})} />
-              <button type="submit">Add Project</button>
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button type="submit" style={{ flex: 1 }}>{editingProjectId ? 'Update Project' : 'Add Project'}</button>
+                {editingProjectId && (
+                  <button type="button" onClick={cancelEditProject} style={{ flex: 1, backgroundColor: '#555' }}>Cancel</button>
+                )}
+              </div>
             </form>
 
             <div className="admin-list">
@@ -320,7 +356,10 @@ export default function AdminDashboard() {
                       {p.subtitle ? <div className="admin-list-meta">{p.subtitle}</div> : null}
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleDeleteProject(p.id)}>Delete</button>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <button type="button" onClick={() => startEditProject(p)} style={{ backgroundColor: '#222' }}>Edit</button>
+                    <button type="button" onClick={() => handleDeleteProject(p.id)}>Delete</button>
+                  </div>
                 </div>
               ))}
             </div>
