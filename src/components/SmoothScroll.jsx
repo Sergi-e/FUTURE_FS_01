@@ -15,8 +15,10 @@ export default function SmoothScroll({ children }) {
 
     const scroller = document.documentElement;
 
-    // Lenis drives scroll programmatically; ScrollTrigger must read/write through Lenis or scrubbed
-    // timelines (e.g. Hobbies float) stay frozen at their start state.
+    // Drop any stale viewport proxy (e.g. React StrictMode). Passing `{}` is truthy and would
+    // register a broken proxy — use the one-arg form to remove only.
+    ScrollTrigger.scrollerProxy(scroller);
+
     ScrollTrigger.scrollerProxy(scroller, {
       scrollTop(value) {
         if (arguments.length) {
@@ -24,6 +26,7 @@ export default function SmoothScroll({ children }) {
         }
         return lenis.scroll;
       },
+      scrollHeight: () => scroller.scrollHeight,
       getBoundingClientRect() {
         return {
           top: 0,
@@ -32,6 +35,7 @@ export default function SmoothScroll({ children }) {
           height: window.innerHeight,
         };
       },
+      pinType: "fixed",
     });
 
     lenis.on("scroll", ScrollTrigger.update);
@@ -47,13 +51,13 @@ export default function SmoothScroll({ children }) {
       ScrollTrigger.refresh();
     };
     window.addEventListener("resize", onResize);
-    ScrollTrigger.refresh();
+    requestAnimationFrame(() => ScrollTrigger.refresh());
 
     return () => {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(raf);
       lenis.destroy();
-      ScrollTrigger.scrollerProxy(scroller, {});
+      ScrollTrigger.scrollerProxy(scroller);
       ScrollTrigger.refresh();
     };
   }, []);

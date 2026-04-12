@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import basketballImg from '../assets/basketball_realistic.png';
@@ -28,7 +28,7 @@ export default function Hobbies() {
   const booksWrapperRef = useRef(null);
 
   /* Scroll-scrubbed parallax — Lenis v1.3+ drives native scroll, ScrollTrigger picks it up automatically */
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = sectionRef.current;
     if (!root) return;
 
