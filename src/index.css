@@ -17,7 +17,8 @@
 @property --accent-neon {
   syntax: '<color>';
   inherits: true;
-  initial-value: #ccff00;
+  /* Match :root cyber accent so transitions / fallbacks stay consistent */
+  initial-value: #00f2ff;
 }
 
 body {

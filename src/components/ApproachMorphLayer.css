@@ -48,7 +48,7 @@ html.approach-morph-active #approach.ethos::before {
 /* Panel phase: match real Approach ambient (no giant SVG text) */
 .approach-morph-layer[data-panel='1'] {
   background:
-    radial-gradient(120% 80% at 50% 0%, rgba(204, 255, 0, 0.045) 0%, transparent 55%),
+    radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--accent-neon) 12%, transparent) 0%, transparent 55%),
     var(--c-ethos);
 }
 
@@ -65,7 +65,7 @@ html.approach-morph-active #approach.ethos::before {
   display: block;
   transform: scale(1);
   transform-origin: center center;
-  filter: drop-shadow(0 0 14px rgba(204, 255, 0, 0.12));
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--accent-neon) 22%, transparent));
   transition: opacity 0.2s ease-out, visibility 0.2s ease-out;
 }
 

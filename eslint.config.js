@@ -15,6 +15,9 @@ export default defineConfig([
     'old_hobbies.js',
     'works_backup.jsx',
     'src/components/Hero_old.jsx',
+    'check.js',
+    'evaluate.js',
+    '*.cjs',
   ]),
   {
     files: ['**/*.{js,jsx}'],

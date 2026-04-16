@@ -45,7 +45,9 @@ const SLOT_RESYNC_PROGRESS = 0.09;
 
 export default function ApproachMorphLayer({ slotRef }) {
   const layerRef = useRef(null);
-  const [mountNode, setMountNode] = useState(null);
+  const [mountNode] = useState(() =>
+    typeof document !== 'undefined' ? document.body : null
+  );
   const [enabled, setEnabled] = useState(() => {
     if (typeof window === 'undefined') return false;
     return (
@@ -53,10 +55,6 @@ export default function ApproachMorphLayer({ slotRef }) {
       !window.matchMedia('(prefers-reduced-motion: reduce)').matches
     );
   });
-
-  useLayoutEffect(() => {
-    setMountNode(document.body);
-  }, []);
 
   useLayoutEffect(() => {
     const mqNarrow = window.matchMedia('(max-width: 768px)');
@@ -154,8 +152,8 @@ export default function ApproachMorphLayer({ slotRef }) {
         opacity: morphOpacity,
         boxShadow:
           moveT > 0.88 || !showBadge
-            ? '0 0 0 1px rgba(204, 255, 0, 0.06)'
-            : '0 0 0 1px rgba(204, 255, 0, 0.14), 0 28px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
+            ? '0 0 0 1px rgba(0, 242, 255, 0.12)'
+            : '0 0 0 1px rgba(0, 242, 255, 0.22), 0 28px 90px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.04)',
       });
     };
 

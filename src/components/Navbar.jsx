@@ -69,14 +69,14 @@ export default function Navbar() {
     isOpenRef.current = isOpen;
   }, [isOpen]);
 
-  useEffect(() => {
-    if (isOpen) setQuickJumpOpen(false);
-  }, [isOpen]);
-
   const toggleMenu = () => {
-    setIsOpen((prev) => {
-      if (!prev) setNavHidden(false);
-      return !prev;
+    setIsOpen((wasOpen) => {
+      if (!wasOpen) {
+        setNavHidden(false);
+        setQuickJumpOpen(false);
+        return true;
+      }
+      return false;
     });
   };
 

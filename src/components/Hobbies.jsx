@@ -255,7 +255,7 @@ export default function Hobbies() {
       const trackWidth = track.clientWidth;
       const trackCenter = trackWidth / 2;
 
-      cardRefs.current.forEach((card, index) => {
+      cardRefs.current.forEach((card) => {
         if (!card) return;
         
         const cardCenter = card.offsetLeft + card.offsetWidth / 2 - track.scrollLeft;
