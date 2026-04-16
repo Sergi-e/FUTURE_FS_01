@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, startTransition } from 'react';
 import { API_BASE_URL } from '../config/api';
-import { fetchJson, fetchJsonWithStatus, getJson, uploadAdminImage } from '../lib/apiClient';
+import { fetchJson, fetchJsonWithStatus, getJson, getJsonAuth, uploadAdminImage } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 import './AdminDashboard.css';
 
@@ -66,6 +66,36 @@ function Field({ id, label, hint, className = '', children }) {
   );
 }
 
+function AdminPasswordInput({ id, label, value, onChange, autoComplete, required, className = '', minLength }) {
+  const [show, setShow] = useState(false);
+  return (
+    <Field id={id} label={label} className={className}>
+      <div className="admin-password-field">
+        <input
+          id={id}
+          className="admin-input admin-password-field__input"
+          type={show ? 'text' : 'password'}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={onChange}
+          required={required}
+          minLength={minLength}
+          spellCheck={false}
+        />
+        <button
+          type="button"
+          className="admin-password-field__toggle"
+          onClick={() => setShow((v) => !v)}
+          aria-pressed={show}
+          aria-label={show ? 'Hide password' : 'Show password'}
+        >
+          {show ? 'Hide' : 'Show'}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 /** Text field + local image upload; `setPath(value, { source: 'upload' })` after a successful upload. */
 function AdminImagePathInput({ id, value, setPath, token, onAuthError }) {
   const [busy, setBusy] = useState(false);
@@ -121,6 +151,7 @@ export default function AdminDashboard() {
 
   const [projects, setProjects] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [messagesLoadError, setMessagesLoadError] = useState(null);
   const [testimonials, setTestimonials] = useState([]);
   const [resumeUrl, setResumeUrl] = useState('');
   const [adminUsername, setAdminUsername] = useState('');
@@ -162,9 +193,7 @@ export default function AdminDashboard() {
     if (!token) return;
     const [rProj, rMsg, rTest, rSet] = await Promise.allSettled([
       getJson('/projects'),
-      fetchJson(`${API_BASE_URL}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+      getJsonAuth('/messages', token),
       getJson('/testimonials'),
       getJson('/settings/resume'),
     ]);
@@ -179,10 +208,16 @@ export default function AdminDashboard() {
       setProjects([]);
       if (rProj.status === 'rejected') console.error('Admin: projects', rProj.reason);
     }
-    if (rMsg.status === 'fulfilled' && Array.isArray(rMsg.value)) setMessages(rMsg.value);
-    else {
+    if (rMsg.status === 'fulfilled' && Array.isArray(rMsg.value)) {
+      setMessages(rMsg.value);
+      setMessagesLoadError(null);
+    } else {
       setMessages([]);
-      if (rMsg.status === 'rejected') console.error('Admin: messages', rMsg.reason);
+      if (rMsg.status === 'rejected') {
+        const msg = rMsg.reason instanceof Error ? rMsg.reason.message : String(rMsg.reason);
+        setMessagesLoadError(msg);
+        console.error('Admin: messages', rMsg.reason);
+      }
     }
     if (rTest.status === 'fulfilled' && Array.isArray(rTest.value)) setTestimonials(rTest.value);
     else {
@@ -201,6 +236,25 @@ export default function AdminDashboard() {
       void fetchData();
     });
   }, [fetchData]);
+
+  useEffect(() => {
+    if (!token || activeTab !== 'messages') return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await fetchJson(`${API_BASE_URL}/messages/mark-read`, {
+          method: 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!cancelled) await fetchData();
+      } catch (err) {
+        if (!cancelled && isApiAuthFailure(err)) consumeAuthFailure(err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, activeTab, fetchData, consumeAuthFailure]);
 
   const fetchAdminProfile = useCallback(async () => {
     if (!token) return;
@@ -316,7 +370,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`Delete message from ${name || 'sender'}?`)) return;
     void (async () => {
       try {
-        await fetchJson(`${API_BASE_URL}/messages/${id}`, {
+        await fetchJson(`${API_BASE_URL}/messages/${encodeURIComponent(String(id))}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -513,17 +567,14 @@ export default function AdminDashboard() {
                   required
                 />
               </Field>
-              <Field id="login-pass" label="Password">
-                <input
-                  id="login-pass"
-                  className="admin-input"
-                  type="password"
-                  autoComplete="current-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </Field>
+              <AdminPasswordInput
+                id="login-pass"
+                label="Password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
               <div className="admin-form-actions admin-form-actions--bare">
                 <button type="submit" className="admin-btn-primary">
                   Sign in
@@ -537,6 +588,7 @@ export default function AdminDashboard() {
   }
 
   const page = PAGE_COPY[activeTab] || PAGE_COPY.projects;
+  const inboxUnreadCount = messages.filter((m) => !Number(m.is_read)).length;
 
   return (
     <div className="admin-app">
@@ -728,6 +780,12 @@ export default function AdminDashboard() {
 
               {activeTab === 'messages' && (
                 <>
+                  {messagesLoadError ? (
+                    <div className="admin-banner admin-banner--error" role="alert">
+                      <strong>Inbox could not be loaded.</strong> {messagesLoadError} Use Refresh after fixing API
+                      settings, or check the browser network tab for <code className="admin-inline-code">/messages</code>.
+                    </div>
+                  ) : null}
                   <h3 className="admin-section-title">Messages · {messages.length}</h3>
                   {messages.length === 0 ? (
                     <div className="admin-empty">No messages yet.</div>
@@ -969,17 +1027,15 @@ export default function AdminDashboard() {
                           required
                         />
                       </Field>
-                      <Field id="su-pwd" label="Current password" className="admin-field--full">
-                        <input
-                          id="su-pwd"
-                          className="admin-input"
-                          type="password"
-                          autoComplete="current-password"
-                          value={userCurrentPwd}
-                          onChange={(e) => setUserCurrentPwd(e.target.value)}
-                          required
-                        />
-                      </Field>
+                      <AdminPasswordInput
+                        id="su-pwd"
+                        label="Current password"
+                        className="admin-field--full"
+                        autoComplete="current-password"
+                        value={userCurrentPwd}
+                        onChange={(e) => setUserCurrentPwd(e.target.value)}
+                        required
+                      />
                       <div className="admin-field admin-field--full">
                         <button type="submit" className="admin-btn-primary">
                           Update username
@@ -989,41 +1045,33 @@ export default function AdminDashboard() {
 
                     <form className="admin-form-grid" onSubmit={handleChangePassword}>
                       <h3 className="admin-subcard-title admin-field--full">Change password</h3>
-                      <Field id="cp-cur" label="Current password" className="admin-field--full">
-                        <input
-                          id="cp-cur"
-                          className="admin-input"
-                          type="password"
-                          autoComplete="current-password"
-                          value={pwdCurrent}
-                          onChange={(e) => setPwdCurrent(e.target.value)}
-                          required
-                        />
-                      </Field>
-                      <Field id="cp-new" label="New password (min. 8)">
-                        <input
-                          id="cp-new"
-                          className="admin-input"
-                          type="password"
-                          autoComplete="new-password"
-                          value={pwdNew}
-                          onChange={(e) => setPwdNew(e.target.value)}
-                          minLength={8}
-                          required
-                        />
-                      </Field>
-                      <Field id="cp-conf" label="Confirm new password">
-                        <input
-                          id="cp-conf"
-                          className="admin-input"
-                          type="password"
-                          autoComplete="new-password"
-                          value={pwdConfirm}
-                          onChange={(e) => setPwdConfirm(e.target.value)}
-                          minLength={8}
-                          required
-                        />
-                      </Field>
+                      <AdminPasswordInput
+                        id="cp-cur"
+                        label="Current password"
+                        className="admin-field--full"
+                        autoComplete="current-password"
+                        value={pwdCurrent}
+                        onChange={(e) => setPwdCurrent(e.target.value)}
+                        required
+                      />
+                      <AdminPasswordInput
+                        id="cp-new"
+                        label="New password (min. 8)"
+                        autoComplete="new-password"
+                        value={pwdNew}
+                        onChange={(e) => setPwdNew(e.target.value)}
+                        minLength={8}
+                        required
+                      />
+                      <AdminPasswordInput
+                        id="cp-conf"
+                        label="Confirm new password"
+                        autoComplete="new-password"
+                        value={pwdConfirm}
+                        onChange={(e) => setPwdConfirm(e.target.value)}
+                        minLength={8}
+                        required
+                      />
                       <div className="admin-field admin-field--full">
                         <button type="submit" className="admin-btn-primary">
                           Update password

@@ -234,13 +234,29 @@ app.put(
 );
 
 // --- Contact / Messages ---
+const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 app.post(
   '/api/contact',
   asyncHandler(async (req, res) => {
-    const { name, email, message } = req.body;
+    const name = String(req.body?.name ?? '').trim();
+    const email = String(req.body?.email ?? '').trim();
+    const message = String(req.body?.message ?? '').trim();
+    if (!name || !email || !message) {
+      return res.status(400).json({ error: 'Name, email, and message are required.' });
+    }
+    if (!EMAIL_FORMAT.test(email)) {
+      return res.status(400).json({ error: 'Please enter a valid email address (e.g. name@example.com).' });
+    }
+    if (name.length > 200) {
+      return res.status(400).json({ error: 'Name is too long.' });
+    }
+    if (message.length > 20000) {
+      return res.status(400).json({ error: 'Message is too long (max 20,000 characters).' });
+    }
     const date = new Date().toISOString();
     await db.run(
-      'INSERT INTO messages (name, email, message, date) VALUES (?, ?, ?, ?)',
+      'INSERT INTO messages (name, email, message, date, is_read) VALUES (?, ?, ?, ?, 0)',
       [name, email, message, date]
     );
     res.json({ success: true });
@@ -256,11 +272,27 @@ app.get(
   })
 );
 
+app.put(
+  '/api/messages/mark-read',
+  authenticate,
+  asyncHandler(async (req, res) => {
+    await db.run('UPDATE messages SET is_read = 1 WHERE is_read = 0');
+    res.json({ success: true });
+  })
+);
+
 app.delete(
   '/api/messages/:id',
   authenticate,
   asyncHandler(async (req, res) => {
-    await db.run('DELETE FROM messages WHERE id = ?', [req.params.id]);
+    const id = Number.parseInt(String(req.params.id), 10);
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(400).json({ error: 'Invalid message id' });
+    }
+    const result = await db.run('DELETE FROM messages WHERE id = ?', [id]);
+    if (!result.changes) {
+      return res.status(404).json({ error: 'Message not found' });
+    }
     res.json({ success: true });
   })
 );

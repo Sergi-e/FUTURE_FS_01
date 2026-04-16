@@ -120,6 +120,10 @@
 }
 
 .admin-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
   width: 100%;
   text-align: left;
   padding: 0.55rem 0.65rem;
@@ -131,6 +135,77 @@
   font-weight: 500;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
+}
+
+.admin-nav-item-label {
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+}
+
+.admin-nav-badge {
+  flex-shrink: 0;
+  min-width: 1.35rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--a-danger);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.admin-password-field {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.admin-password-field__input {
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--a-radius-sm) 0 0 var(--a-radius-sm) !important;
+}
+
+.admin-password-field__toggle {
+  flex-shrink: 0;
+  padding: 0 0.75rem;
+  border: 1px solid var(--a-border-strong);
+  border-left: none;
+  border-radius: 0 var(--a-radius-sm) var(--a-radius-sm) 0;
+  background: var(--a-elevated);
+  color: var(--a-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.admin-password-field__toggle:hover {
+  background: var(--a-border);
+  color: var(--a-text);
+}
+
+.admin-banner {
+  padding: 0.85rem 1rem;
+  border-radius: var(--a-radius-sm);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.admin-banner--error {
+  background: var(--a-danger-bg);
+  border: 1px solid rgba(251, 113, 133, 0.35);
+  color: var(--a-text);
+}
+
+.admin-banner--error strong {
+  display: block;
+  margin-bottom: 0.25rem;
 }
 
 .admin-nav-item:hover {
@@ -722,9 +797,16 @@
   .admin-nav-item {
     flex: 1 1 auto;
     min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
     text-align: center;
     padding: 0.45rem 0.35rem;
     font-size: 0.8rem;
+  }
+
+  .admin-nav-item-label {
+    text-align: center;
   }
 
   .admin-nav-footer {

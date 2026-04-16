@@ -53,6 +53,30 @@ export async function getJson(path) {
   return fetchJson(url);
 }
 
+/** GET with Bearer token (admin routes). */
+export async function getJsonAuth(path, token) {
+  const base = API_BASE_URL.replace(/\/$/, '');
+  const suffix = path.startsWith('/') ? path : `/${path}`;
+  const url = `${base}${suffix}`;
+  return fetchJson(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+/** POST JSON to API path under API_BASE_URL (e.g. `/contact`). */
+export async function postJson(path, body, init = {}) {
+  const { headers: extraHeaders, ...rest } = init;
+  const base = API_BASE_URL.replace(/\/$/, '');
+  const suffix = path.startsWith('/') ? path : `/${path}`;
+  const url = `${base}${suffix}`;
+  return fetchJson(url, {
+    ...rest,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...(extraHeaders || {}) },
+    body: JSON.stringify(body),
+  });
+}
+
 /**
  * POST multipart image to /api/upload (admin JWT). Returns { path: '/assets/...' }.
  */

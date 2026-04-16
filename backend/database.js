@@ -143,6 +143,12 @@ async function setupDatabase() {
         );
       `);
 
+      const msgCols = await db.all(`PRAGMA table_info(messages)`);
+      if (!msgCols.some((c) => c.name === 'is_read')) {
+        await db.run(`ALTER TABLE messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0`);
+        await db.run(`UPDATE messages SET is_read = 1`);
+      }
+
       // Seed admin user if not exists (password: admin123)
       const admin = await db.get('SELECT * FROM admin WHERE username = ?', ['admin']);
       if (!admin) {

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { API_BASE_URL } from '../config/api';
-import { fetchJson } from '../lib/apiClient';
+import { postJson } from '../lib/apiClient';
+import { isValidEmailFormat } from '../lib/emailValidation';
 import './Contact.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -78,13 +78,16 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const email = formData.email.trim();
+    const name = formData.name.trim();
+    const message = formData.message.trim();
+    if (!isValidEmailFormat(email)) {
+      setStatus('Please enter a valid email address (e.g. name@example.com).');
+      return;
+    }
     setStatus('Sending...');
     try {
-      await fetchJson(`${API_BASE_URL}/contact`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
+      await postJson('/contact', { name, email, message });
       setStatus('Message successfully sent!');
       setFormData({ name: '', email: '', message: '' });
       setTimeout(() => { setShowForm(false); setStatus(''); }, 3000);
@@ -167,10 +170,10 @@ export default function Contact() {
 
           {showForm && (
             <div className="contact-form-right" style={{ flex: '1', minWidth: '350px', maxWidth: '500px', animation: 'fadeInRight 0.5s ease forwards' }}>
-              <form onSubmit={handleSubmit} className="inpage-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px', background: '#111', padding: '30px', borderRadius: '12px', width: '100%', textAlign: 'left' }}>
+              <form noValidate onSubmit={handleSubmit} className="inpage-contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '15px', background: '#111', padding: '30px', borderRadius: '12px', width: '100%', textAlign: 'left' }}>
                 <h3 style={{fontFamily: 'var(--font-display)', color: 'var(--accent-neon)', marginBottom: '10px'}}>SEND A MESSAGE / FREELANCING DEALS</h3>
                 <input type="text" placeholder="Your Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)'}}/>
-                <input type="email" placeholder="Your Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)'}}/>
+                <input type="email" inputMode="email" autoComplete="email" placeholder="Your Email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)'}}/>
                 <textarea placeholder="Your Message" rows="5" value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} required style={{padding: '12px', border: '1px solid #333', borderRadius: '6px', background: '#0a0a0a', color: 'white', fontFamily: 'var(--font-sans)', resize: 'vertical'}}/>
                 
                 <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
