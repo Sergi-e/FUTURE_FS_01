@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap");
 
 :root {
-  --bg-color: #050505;
+  --bg-color: #000000;
   --text-primary: #f8f8f8;
   --text-secondary: #c0c0c0;
   --accent-neon: #00f2ff; /* Cyber Theme */
@@ -10,8 +10,8 @@
   --transition-speed: 0.5s;
   --transition-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: "Outfit", sans-serif;
+  --font-sans: "switzervariable", Arial, sans-serif;
+  --font-display: "donner", Arial, sans-serif;
 }
 
 @property --accent-neon {
@@ -89,6 +89,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-display);
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: -0.02em;
 }
@@ -125,7 +126,6 @@ html.lenis body {
   }
 
   section#approach.ethos {
-    min-height: unset;
     padding: 28px max(16px, env(safe-area-inset-left, 0px)) 28px
       max(16px, env(safe-area-inset-right, 0px));
   }
@@ -156,5 +156,12 @@ html.lenis body {
   section#projects.works .works-header {
     padding-top: 72px;
     padding-bottom: 16px;
+  }
+}
+
+/* Ethos: no pin on small viewports — drop forced viewport height */
+@media (max-width: 768px) {
+  section#approach.ethos {
+    min-height: unset;
   }
 }
