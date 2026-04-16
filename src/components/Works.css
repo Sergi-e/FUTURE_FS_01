@@ -1,181 +1,233 @@
-.works {
+.works-split {
   position: relative;
-  background-color: var(--bg-color);
-  overflow: hidden;
-  perspective: 1500px;
-}
-
-.works-header {
-  padding: 60px 5vw 40px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: absolute;
-  top: 0;
   width: 100%;
-  z-index: 100;
-  pointer-events: none;
+  background-color: transparent;
 }
 
-.works-header * {
-  pointer-events: auto;
-}
-
-.works-header h2 {
-  font-size: 1.4rem;
-  color: var(--text-primary);
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  opacity: 0.9;
-}
-
-.works-wrapper {
+.works-split-container {
   position: relative;
   width: 100%;
   height: 100vh;
+  overflow: hidden;
 }
 
-.work-item {
+.works-step-mobile {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 140px 5vw 40px;
-  text-decoration: none;
-  color: inherit;
-  background-color: var(--bg-color);
-  will-change: transform, opacity;
-  transform-style: preserve-3d;
+  height: 100%;
 }
 
-.work-item--static {
-  cursor: default;
-}
-
-.work-media-container {
-  display: block;
-  margin-bottom: 2rem;
-  position: relative;
-  width: 100%;
-  max-width: 1000px;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
+/* Left Panel */
+.works-left-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1), box-shadow 0.4s ease;
-  background-color: #111;
+  background-color: transparent; /* fallback dark bg */
 }
 
-.work-media-asset {
+.asset-container {
+  position: absolute;
+  top: -20%;
+  left: 0;
+  width: 100%;
+  height: 140%;
+  will-change: transform;
+}
+
+.asset-container .work-media-asset,
+.asset-container .work-image-placeholder,
+.asset-container video {
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
-  transition: transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+  display: block;
 }
 
 .work-image-placeholder {
-  width: 100%;
-  height: 100%;
-  background-image: linear-gradient(45deg, #111, #050505);
+  background-image: none;
 }
 
-.work-overlay {
+/* Right Panel */
+.works-right-item {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background-color: transparent;
+  z-index: 10;
+  /* we will control autoAlpha via GSAP on this container */
+}
+
+.works-right-content {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 50%, rgba(0,0,0,0.6) 100%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 60px 4vw;
+  will-change: transform, opacity;
 }
 
-.work-item:hover .work-media-container {
-  transform: translateY(-8px);
-  box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+.works-top-bar {
+  position: absolute;
+  top: 60px;
+  left: 4vw;
+  right: 4vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
-.work-item:hover .work-media-asset {
-  transform: scale(1.05);
+.works-top-title,
+.works-top-number {
+  font-family: var(--font-display);
+  font-size: 21.4062px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-transform: none;
 }
 
-.work-item:hover .work-overlay {
-  opacity: 1;
+.works-project-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  gap: 2rem;
+  padding-right: 5%;
 }
 
-.work-meta {
-  width: 100%;
-  max-width: 1000px;
-  text-align: center;
+.works-project-description {
+  font-family: var(--font-sans);
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0;
+  font-weight: 400;
+}
+
+.works-project-link {
+  position: absolute;
+  bottom: 60px;
+  right: 4vw;
+  display: inline-flex;
+  align-items: center;
+  font-family: monospace;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.15em;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.works-project-link:hover {
+  opacity: 0.7;
+  transform: translateY(-2px);
+}
+
+/* API Info / Empty State */
+.works-empty-state {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.work-meta h3 {
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  margin-bottom: 0.8rem;
-  color: white;
-  line-height: 1.1;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-family: var(--font-display);
-  letter-spacing: -0.01em;
-}
-
-.work-details {
-  display: flex;
   justify-content: center;
-  gap: 20px;
-  align-items: center;
-  color: rgba(255, 255, 255, 0.6);
+  padding: 2rem;
+  text-align: center;
+  z-index: 20;
+}
+
+.works-empty-state h3 {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.works-empty-state p {
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
   font-size: 0.95rem;
-  font-family: var(--font-sans);
-  letter-spacing: 0.05em;
+  max-width: 500px;
+  line-height: 1.5;
 }
 
-.work-view-more {
-  display: inline-block;
-  margin-top: 1.5rem;
-  padding: 10px 24px;
-  font-family: var(--font-sans);
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #050505;
-  background-color: var(--accent-neon);
-  border-radius: 50px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-/* Keep site accent on the pill when hovering anywhere on the project card */
-.work-item:hover .work-view-more {
-  transform: translateY(-2px);
-  color: #050505;
-  background-color: var(--accent-neon);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
-}
-
-@media (max-width: 768px) {
-  .work-item {
-    padding: 100px 5vw 40px;
+/* Mobile Responsive overrides */
+@media (max-width: 1024px) {
+  .works-split-container {
+    height: auto;
+    overflow: visible;
   }
-  .work-media-container {
-    margin-bottom: 1.5rem;
-    border-radius: 8px;
-  }
-  .work-meta h3 {
-    font-size: clamp(1.5rem, 6vw, 2rem);
-    margin-bottom: 0.6rem;
-  }
-  .work-details {
+  
+  .works-step-mobile {
+    position: relative;
+    display: flex;
     flex-direction: column;
-    gap: 4px;
-    font-size: 0.85rem;
+    min-height: 100vh;
+  }
+
+  .works-left-item {
+    position: relative;
+    width: 100%;
+    height: 50vh;
+    flex-shrink: 0;
+  }
+
+  .asset-container {
+    top: 0;
+    height: 100%;
+  }
+
+  .works-right-item {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    z-index: auto;
+  }
+
+  .works-right-content {
+    position: relative;
+    padding: 60px 5vw;
+    justify-content: flex-start;
+  }
+
+  .works-top-bar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    margin-bottom: 3rem;
+  }
+
+  .works-top-title,
+  .works-top-number {
+    font-size: 18px;
+  }
+
+  .works-project-description {
+    font-size: 1rem;
+  }
+
+  .works-project-info {
+    gap: 1.5rem;
+    padding-right: 0;
+  }
+
+  .works-project-link {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 1.5rem;
   }
 }
