@@ -14,7 +14,7 @@ const { chromium } = require('playwright');
     // Get all background colors in the hierarchy leading to .hobbies-innovative
     
     // Check specific elements in the image
-    const readingListText = document.querySelector('.books-section-title');
+    const readingListText = document.querySelector('.books-section-intro');
     let node = readingListText;
     let backgrounds = [];
     while (node && node !== document.body) {

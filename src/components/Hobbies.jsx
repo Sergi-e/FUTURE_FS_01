@@ -56,11 +56,36 @@ function BookCoverImg({ sources, alt, className }) {
 
 /** Single carousel: Rubik & Gaming on the sides; middle three between them */
 const hobbiesData = [
-  { id: '02', name: 'RUBIK\'S CUBE', image: rubiksImg, desc: 'Algorithmic beauty in the palm of my hand. Solving the complex through logical progression.' },
-  { id: '01', name: 'BASKETBALL', image: basketballImg, desc: 'The rhythm of the court, the precision of the shot. A game of strategy and split-second decisions.' },
-  { id: '03', name: 'SOUND & SOUL', image: headphonesImg, desc: 'From lo-fi late nights to concert adrenaline — music is the constant in everything I do.' },
-  { id: '05', name: 'THE BEAUTIFUL GAME', image: footballImg, desc: 'Camp Nou or the Emirates — football is religion.' },
-  { id: '04', name: 'GAMING', image: gamepadImg, desc: 'Immersive worlds and tactical depth. Exploring digital frontiers and competitive strategy.' },
+  {
+    id: '02',
+    name: 'RUBIK\'S CUBE',
+    image: rubiksImg,
+    desc: "Every scramble is a puzzle with a solution. I just have to find the path.",
+  },
+  {
+    id: '01',
+    name: 'BASKETBALL',
+    image: basketballImg,
+    desc: 'On the court is where I learned to think fast, adapt faster, and never overthink the shot.',
+  },
+  {
+    id: '03',
+    name: 'MUSIC AND SOUNDS',
+    image: headphonesImg,
+    desc: "Lo-fi when I'm building, loud when I'm not. Music sets the pace.",
+  },
+  {
+    id: '05',
+    name: 'THE BEAUTIFUL GAME',
+    image: footballImg,
+    desc: 'I play it, I watch it, I live it. Blaugrana or Gunner.',
+  },
+  {
+    id: '04',
+    name: 'GAMING',
+    image: gamepadImg,
+    desc: 'Still learning the maps, but I never quit a game.',
+  },
 ];
 
 /** Prefer bundled public files when present; Open Library /b/id/ and ISBN fallbacks if missing or blocked. */
@@ -430,9 +455,11 @@ export default function Hobbies() {
       </div>
 
       <div className="books-section">
-        <div className="hobbies-header-alt">
+        <div className="hobbies-header-alt books-section-header">
           <span className="hobbies-tag-alt">READING LIST</span>
-          <h2 className="hobbies-main-title books-section-title">BOOKS I READ</h2>
+          <p className="books-section-intro">
+            Code isn&apos;t the only thing I study. These are the books that shaped how I think.
+          </p>
         </div>
         <div className="books-marquee-container">
           <button type="button" className="book-scroll-btn left" onClick={scrollLeftBook} aria-label="Scroll left">

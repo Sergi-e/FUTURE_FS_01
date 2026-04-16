@@ -128,7 +128,7 @@ export default function Skills() {
       <div className="skills-container">
         <header className="skills-header">
           <span className="skills-tag">EXPERTISE & TOOLS</span>
-          <h2 className="skills-title">TECHNICAL TOOLS I USE</h2>
+          <h2 className="skills-title">Languages and Frameworks</h2>
         </header>
 
         <div className="tech-ecosystem">
