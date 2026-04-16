@@ -62,15 +62,10 @@ export default function Ethos() {
         <h2 className="ethos-title">Approach</h2>
         <div className="ethos-text-container">
           <p className="ethos-text-mask">
-            I am a tech enthusiast whose work involves programming and data analysis,
-            turning unstructured, real problems into systems that operate reliably.
-          </p>
-        </div>
-
-        <div className="ethos-sub">
-          <p className="ethos-sub-text">
-            Beyond the screen, I am a committed environmental conservationist,
-            dedicated to protecting our water bodies and marine life.
+            I take unstructured, real-world problems and work backwards from the outcome, combining
+            software engineering and data thinking to build systems that hold up under pressure.
+            Beyond the screen, I&apos;m a committed environmental conservationist dedicated to
+            protecting water bodies and marine life.
           </p>
         </div>
       </div>

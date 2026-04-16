@@ -67,14 +67,4 @@
     background-clip: unset;
     color: var(--text-primary);
   }
-
-  .ethos-sub {
-    margin-top: 1.75rem;
-  }
-
-  .ethos-sub-text {
-    font-size: 1.05rem;
-    line-height: 1.65;
-    color: var(--text-secondary);
-  }
 }
