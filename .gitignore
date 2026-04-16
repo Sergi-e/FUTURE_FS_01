@@ -87,3 +87,6 @@ _agent/
 h_history.txt
 old_*.js
 works_backup.jsx
+
+# Admin API uploads (local / ephemeral; do not commit)
+backend/public/assets/upload-*
