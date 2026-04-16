@@ -38,6 +38,9 @@ export default function SmoothScroll({ children }) {
       pinType: "fixed",
     });
 
+    /* Lenis drives scroll on <html>; ScrollTriggers must use this scroller or progress stays wrong (e.g. hero → Approach morph). */
+    ScrollTrigger.defaults({ scroller });
+
     lenis.on("scroll", ScrollTrigger.update);
 
     const raf = (time) => {
@@ -57,6 +60,7 @@ export default function SmoothScroll({ children }) {
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(raf);
       lenis.destroy();
+      ScrollTrigger.defaults({ scroller: window });
       ScrollTrigger.scrollerProxy(scroller);
       ScrollTrigger.refresh();
     };
