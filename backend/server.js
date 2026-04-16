@@ -15,7 +15,13 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.url}`);
@@ -192,7 +198,14 @@ app.delete(
   '/api/projects/:id',
   authenticate,
   asyncHandler(async (req, res) => {
-    await db.run('DELETE FROM projects WHERE id = ?', [req.params.id]);
+    const id = Number.parseInt(String(req.params.id), 10);
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(400).json({ error: 'Invalid project id' });
+    }
+    const result = await db.run('DELETE FROM projects WHERE id = ?', [id]);
+    if (!result.changes) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
     res.json({ success: true });
   })
 );

@@ -3,6 +3,19 @@ html.approach-morph-revealing #approach.ethos {
   background-color: transparent !important;
 }
 
+/*
+ * section-ambient paints #approach.ethos::before (hero black → --c-ethos). Ethos stacks above the
+ * morph layer (z-index 5 vs 4), so that strip draws on top of the chip/panel and looks like a bar.
+ * The morph already handles the visual handoff — hide the blend pseudo for this transition.
+ */
+html.approach-morph-active #approach.ethos::before {
+  opacity: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  background: none !important;
+  pointer-events: none;
+}
+
 .approach-morph-layer {
   position: fixed;
   left: 0;

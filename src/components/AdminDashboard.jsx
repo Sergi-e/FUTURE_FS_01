@@ -255,17 +255,23 @@ export default function AdminDashboard() {
   const handleDeleteProject = (id, title) => {
     const label = title ? `"${title}"` : 'this project';
     if (!window.confirm(`Delete ${label}? This cannot be undone.`)) return;
+    const rawId = id == null ? '' : String(id).trim();
+    if (!rawId) {
+      alert('Cannot delete: missing project id.');
+      return;
+    }
     void (async () => {
       try {
-        await fetchJson(`${API_BASE_URL}/projects/${id}`, {
+        await fetchJson(`${API_BASE_URL}/projects/${encodeURIComponent(rawId)}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch {
-        /* still refresh */
+        if (editingProjectId === id || String(editingProjectId) === rawId) cancelEditProject();
+        await fetchData();
+      } catch (err) {
+        alert(err instanceof Error ? err.message : 'Failed to delete project');
+        await fetchData();
       }
-      if (editingProjectId === id) cancelEditProject();
-      fetchData();
     })();
   };
 
