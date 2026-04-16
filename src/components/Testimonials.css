@@ -31,7 +31,8 @@
   gap: 3rem;
   width: 100%;
   max-width: 1200px;
-  align-items: center;
+  /* Top-align so quote block lines up with the image; avoids vertical “float” vs image+nav stack */
+  align-items: start;
 }
 
 .testimonials-visual {
@@ -48,7 +49,7 @@
   background: transparent;
   overflow: hidden;
   border: none;
-  border-radius: 2px;
+  border-radius: 10px;
 }
 
 .testimonials-image {
@@ -56,6 +57,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: inherit;
 }
 
 .testimonials-nav {
@@ -100,6 +102,8 @@
 
 .testimonials-info {
   padding-left: 2rem;
+  /* Slight lift so the text block optically balances image + nav height */
+  transform: translateY(-0.85rem);
 }
 
 .quote-icon {
@@ -165,6 +169,7 @@
   }
   .testimonials-info {
     padding-left: 0;
+    transform: none;
   }
   .testimonials-visual {
     margin-top: 0.75rem;

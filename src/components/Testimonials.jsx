@@ -8,6 +8,13 @@ import './Testimonials.css';
 
 gsap.registerPlugin(ScrollTrigger);
 
+/** Warm browser cache for testimonial photos so NEXT/PREV swaps don’t wait on the network. */
+function prefetchImageSrc(url) {
+  if (!url || typeof url !== 'string') return;
+  const img = new Image();
+  img.src = url;
+}
+
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
   const [testimonials, setTestimonials] = useState([]);
@@ -37,6 +44,20 @@ export default function Testimonials() {
     if (testimonials.length === 0) return;
     requestAnimationFrame(() => ScrollTrigger.refresh());
   }, [testimonials.length]);
+
+  useEffect(() => {
+    if (testimonials.length === 0) return;
+    testimonials.forEach((t) => prefetchImageSrc(resolveMediaUrl(t.image)));
+  }, [testimonials]);
+
+  useEffect(() => {
+    if (testimonials.length === 0) return;
+    const n = testimonials.length;
+    const prevIdx = (index - 1 + n) % n;
+    const nextIdx = (index + 1) % n;
+    prefetchImageSrc(resolveMediaUrl(testimonials[prevIdx].image));
+    prefetchImageSrc(resolveMediaUrl(testimonials[nextIdx].image));
+  }, [testimonials, index]);
   const nextTestimonial = () => {
     if (testimonials.length === 0) return;
     const nextIdx = (index + 1) % testimonials.length;
@@ -94,6 +115,8 @@ export default function Testimonials() {
               alt={current.name}
               className="testimonials-image"
               ref={imageRef}
+              decoding="async"
+              fetchPriority="high"
               onLoad={() => requestAnimationFrame(() => ScrollTrigger.refresh())}
             />
           </div>
