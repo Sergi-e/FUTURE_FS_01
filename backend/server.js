@@ -1,7 +1,9 @@
 require('dotenv').config();
+const fs = require('fs');
 const https = require('https');
 const path = require('path');
 const express = require('express');
+const multer = require('multer');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -37,6 +39,33 @@ app.get('/api/health', (req, res) => {
 
 // Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
+
+const ASSETS_UPLOAD_DIR = path.join(__dirname, 'public', 'assets');
+function ensureAssetsUploadDir() {
+  fs.mkdirSync(ASSETS_UPLOAD_DIR, { recursive: true });
+}
+
+const uploadImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    ensureAssetsUploadDir();
+    cb(null, ASSETS_UPLOAD_DIR);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
+    const safeExt = allowed.includes(ext) ? ext : '.jpg';
+    cb(null, `upload-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${safeExt}`);
+  },
+});
+
+const uploadImage = multer({
+  storage: uploadImageStorage,
+  limits: { fileSize: 8 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype)) return cb(null, true);
+    cb(new Error('Only JPEG, PNG, WebP, or GIF images are allowed'));
+  },
+});
 
 let db;
 
@@ -257,6 +286,17 @@ app.delete(
   })
 );
 
+// --- Admin image upload (saved under /assets, same origin as API) ---
+app.post(
+  '/api/upload',
+  authenticate,
+  uploadImage.single('file'),
+  asyncHandler(async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    res.json({ path: `/assets/${req.file.filename}`, filename: req.file.filename });
+  })
+);
+
 // --- Settings ---
 app.get(
   '/api/settings/resume',
@@ -292,6 +332,16 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ error: 'file_too_large', message: 'Image must be 8MB or smaller' });
+  }
+  if (err.name === 'MulterError') {
+    return res.status(400).json({ error: 'upload_error', message: err.message || 'Upload failed' });
+  }
+  const msg = err.message || '';
+  if (/Only JPEG|image|multer/i.test(msg) && msg.length < 200) {
+    return res.status(400).json({ error: 'invalid_file', message: msg });
+  }
   res.status(500).json({ error: 'server_error', message: err.message || 'internal' });
 });
 
