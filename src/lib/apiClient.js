@@ -49,3 +49,28 @@ export async function getJson(path) {
   const url = `${base}${suffix}`;
   return fetchJson(url);
 }
+
+/**
+ * POST multipart image to /api/upload (admin JWT). Returns { path: '/assets/...' }.
+ */
+export async function uploadAdminImage(file, token) {
+  const base = API_BASE_URL.replace(/\/$/, '');
+  const url = `${base}/upload`;
+  const body = new FormData();
+  body.append('file', file);
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body,
+  });
+  const text = await res.text();
+  const data = parseJsonBody(text, url);
+  if (!res.ok) {
+    const msg = data && typeof data === 'object' && (data.error || data.message);
+    throw new Error(typeof msg === 'string' ? msg : `HTTP ${res.status}`);
+  }
+  if (!data || typeof data.path !== 'string') {
+    throw new Error('Upload response missing path');
+  }
+  return data;
+}
