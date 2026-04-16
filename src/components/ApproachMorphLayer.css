@@ -4,9 +4,9 @@ html.approach-morph-revealing #approach.ethos {
 }
 
 /*
- * section-ambient paints #approach.ethos::before (hero black → --c-ethos). Ethos stacks above the
- * morph layer (z-index 5 vs 4), so that strip draws on top of the chip/panel and looks like a bar.
- * The morph already handles the visual handoff — hide the blend pseudo for this transition.
+ * Ethos stacks above the morph (z-index 5 vs 4), so #approach::before would paint on top of the
+ * morph. We hide that strip on desktop morph; the edge blend is drawn on .approach-morph-layer::after
+ * during scroll (see data-edge-blend) so the gradient still appears while animating.
  */
 html.approach-morph-active #approach.ethos::before {
   opacity: 0 !important;
@@ -24,6 +24,25 @@ html.approach-morph-active #approach.ethos::before {
   z-index: 4;
   overflow: hidden;
   will-change: width, height, left, top, border-radius, opacity, box-shadow;
+}
+
+/* Matches section-ambient hero → Approach blend, but lives on the morph so it stays visible */
+.approach-morph-layer::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--ambient-blend, clamp(72px, 12vh, 168px));
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(180deg, var(--bg-color) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.approach-morph-layer[data-edge-blend='1']::after {
+  opacity: 1;
 }
 
 /* Panel phase: match real Approach ambient (no giant SVG text) */

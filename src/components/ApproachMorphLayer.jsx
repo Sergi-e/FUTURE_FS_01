@@ -140,6 +140,11 @@ export default function ApproachMorphLayer({ slotRef }) {
       layer.dataset.badge = showBadge ? '1' : '0';
       layer.dataset.panel = showBadge ? '0' : '1';
 
+      /* Hero → Approach ambient blend (normally on #approach::before) — paint on morph so it isn’t covered by section stacking */
+      const showEdgeBlend =
+        progress > 0.05 && progress < 0.93 && morphOpacity > 0.22;
+      layer.dataset.edgeBlend = showEdgeBlend ? '1' : '0';
+
       gsap.set(layer, {
         left,
         top,
