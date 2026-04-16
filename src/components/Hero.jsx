@@ -120,7 +120,7 @@ export default function Hero({ approachSlotRef }) {
               <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="8s" repeatCount="indefinite" />
             </svg>
           </span>
-          <span className="hero-freelance-label">OPEN TO FREELANCE</span>
+          <span className="hero-freelance-label">OPEN TO WORK</span>
         </a>
       </div>
 
@@ -166,8 +166,8 @@ export default function Hero({ approachSlotRef }) {
         </div>
         
         <p className="hero-subtitle">
-          I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
-          products that are reliable by design and useful by intention.
+          Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
+          products that are reliable by design and useful by intention. Welcome to my portfolio.
         </p>
 
         <div className="hero-actions-minimal">
