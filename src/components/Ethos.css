@@ -1,12 +1,14 @@
 .ethos {
   position: relative;
-  z-index: 1;
+  z-index: 5;
   isolation: isolate;
-  min-height: 80vh;
+  /* Full viewport height while pinned (desktop) so body black never shows under the section */
+  min-height: 100dvh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--bg-color);
+  background-color: transparent;
   padding: 60px 5vw;
 }
 
