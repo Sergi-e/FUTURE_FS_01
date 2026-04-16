@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
+import approachBadge from '../assets/approach-badge.svg';
 import { getJson } from '../lib/apiClient';
 
-export default function Hero() {
+export default function Hero({ approachSlotRef }) {
   const container = useRef(null);
   const [resumeUrl, setResumeUrl] = useState('/Serge_Ishimwe_Resume.pdf');
 
@@ -147,7 +148,20 @@ export default function Hero() {
             <span className="title-word">{splitTextToSpans("STACK")}</span>
           </div>
           <div className="title-row title-row-bottom">
-            <span className="title-word accent-text">{splitTextToSpans("DEVELOPER")}</span>
+            <span className="title-word accent-text">{splitTextToSpans('DEV ')}</span>
+            <span
+              ref={approachSlotRef}
+              className="title-approach-slot"
+              aria-hidden="true"
+            >
+              <img
+                src={approachBadge}
+                alt=""
+                className="title-approach-badge-img"
+                draggable={false}
+              />
+            </span>
+            <span className="title-word accent-text">{splitTextToSpans(' AI/ML')}</span>
           </div>
         </div>
         
