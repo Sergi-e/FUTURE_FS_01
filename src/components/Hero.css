@@ -179,6 +179,33 @@
   transition: color 0.8s ease;
 }
 
+.title-approach-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  /* Match visual weight of the old “+” at headline scale (parent row has no title font-size) */
+  width: clamp(2.5rem, 7.5vw, 4.75rem);
+  height: clamp(2.5rem, 7.5vw, 4.75rem);
+  margin: 0 clamp(0.15rem, 0.5vw, 0.35rem);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.title-approach-badge-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+@media (min-width: 769px) {
+  html.approach-morph-active .title-approach-badge-img {
+    visibility: hidden;
+  }
+}
+
 /* Subtitle */
 .hero-subtitle {
   font-family: var(--font-sans);
