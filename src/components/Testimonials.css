@@ -5,7 +5,7 @@
   align-items: center;
   justify-content: center;
   padding: 40px 5vw;
-  background-color: var(--bg-color);
+  background-color: transparent;
   position: relative;
   overflow: hidden;
 }
@@ -45,7 +45,7 @@
   aspect-ratio: 1/1;
   max-width: 400px;
   margin: 0 auto;
-  background: #111;
+  background: transparent;
   overflow: hidden;
   border: none;
   border-radius: 2px;
