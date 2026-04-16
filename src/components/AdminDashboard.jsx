@@ -170,6 +170,8 @@ export default function AdminDashboard() {
   const [editTestimonial, setEditTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
   const [editingTestimonialId, setEditingTestimonialId] = useState(null);
 
+  const [dbEphemeralWarning, setDbEphemeralWarning] = useState(null);
+
   const clearAdminSession = useCallback(() => {
     setToken(null);
     localStorage.removeItem('adminToken');
@@ -230,6 +232,22 @@ export default function AdminDashboard() {
       console.error('Admin: resume setting', rSet.reason);
     }
   }, [token, consumeAuthFailure]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getJson('/health')
+      .then((data) => {
+        if (cancelled || !data || typeof data !== 'object') return;
+        const w = data.db?.ephemeralWarning;
+        setDbEphemeralWarning(typeof w === 'string' && w.trim() ? w.trim() : null);
+      })
+      .catch(() => {
+        if (!cancelled) setDbEphemeralWarning(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     startTransition(() => {
@@ -551,6 +569,12 @@ export default function AdminDashboard() {
   if (!token) {
     return (
       <div className="admin-app">
+        {dbEphemeralWarning ? (
+          <div className="admin-banner admin-banner--warn admin-banner--sticky" role="alert">
+            <strong>Your API may be losing data on every deploy</strong>
+            <p>{dbEphemeralWarning}</p>
+          </div>
+        ) : null}
         <div className="admin-login-container">
           <div className="admin-login-card">
             <h1>Admin</h1>
@@ -592,6 +616,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="admin-app">
+      {dbEphemeralWarning ? (
+        <div className="admin-banner admin-banner--warn admin-banner--sticky" role="alert">
+          <strong>Your API may be losing data on every deploy</strong>
+          <p>{dbEphemeralWarning}</p>
+        </div>
+      ) : null}
       <div className="admin-shell">
         <aside className="admin-nav" aria-label="Admin navigation">
           <div className="admin-nav-brand">
@@ -640,6 +670,13 @@ export default function AdminDashboard() {
                       <code>/assets/</code>). You can still type <code>/assets/…</code> or any <code>https://</code> link.
                       On hosts without a persistent disk (e.g. Render free), uploads can be lost on redeploy — keep copies
                       or use external URLs for production.
+                    </p>
+                    <p>
+                      <strong>Projects disappearing?</strong> The CMS stores everything in SQLite. On Render (and similar),
+                      set <code className="admin-inline-code">PORTFOLIO_DB_PATH</code> to a file on a{' '}
+                      <strong>mounted persistent disk</strong> (e.g. <code className="admin-inline-code">/data/portfolio.db</code>
+                      ) so rows survive redeploys. Check your API logs for <code className="admin-inline-code">[portfolio-db]</code> to
+                      confirm which file is in use.
                     </p>
                   </details>
 

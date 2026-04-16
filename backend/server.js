@@ -40,7 +40,25 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'no-store');
-  res.status(200).json({ ok: true });
+  const persistentPathConfigured = Boolean(process.env.PORTFOLIO_DB_PATH);
+  const onPaaS =
+    process.env.RENDER === 'true' ||
+    process.env.RENDER === '1' ||
+    Boolean(process.env.RAILWAY_ENVIRONMENT) ||
+    Boolean(process.env.FLY_APP_NAME) ||
+    Boolean(process.env.DYNO);
+  let ephemeralWarning;
+  if (!persistentPathConfigured && onPaaS) {
+    ephemeralWarning =
+      'SQLite is using the default path on this host, which is usually not persistent. Projects, messages, and other CMS data can disappear after a redeploy or instance restart. Fix: attach a persistent disk and set PORTFOLIO_DB_PATH to a file on that disk (e.g. /data/portfolio.db on Render), then redeploy.';
+  }
+  res.status(200).json({
+    ok: true,
+    db: {
+      persistentPathConfigured,
+      ...(ephemeralWarning ? { ephemeralWarning } : {}),
+    },
+  });
 });
 
 // Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
@@ -186,6 +204,7 @@ app.put(
 app.get(
   '/api/projects',
   asyncHandler(async (req, res) => {
+    res.set('Cache-Control', 'no-store');
     const projects = await db.all('SELECT * FROM projects ORDER BY id DESC');
     res.json(projects);
   })
@@ -224,11 +243,18 @@ app.put(
   '/api/projects/:id',
   authenticate,
   asyncHandler(async (req, res) => {
+    const id = Number.parseInt(String(req.params.id), 10);
+    if (!Number.isInteger(id) || id < 1) {
+      return res.status(400).json({ error: 'Invalid project id' });
+    }
     const { title, subtitle, year, link, mediaType, mediaPath } = req.body;
-    await db.run(
+    const result = await db.run(
       'UPDATE projects SET title = ?, subtitle = ?, year = ?, link = ?, mediaType = ?, mediaPath = ? WHERE id = ?',
-      [title, subtitle, year, link, mediaType, mediaPath, req.params.id]
+      [title, subtitle, year, link, mediaType, mediaPath, id]
     );
+    if (!result.changes) {
+      return res.status(404).json({ error: 'Project not found' });
+    }
     res.json({ success: true });
   })
 );
@@ -301,6 +327,7 @@ app.delete(
 app.get(
   '/api/testimonials',
   asyncHandler(async (req, res) => {
+    res.set('Cache-Control', 'no-store');
     const testimonials = await db.all('SELECT * FROM testimonials ORDER BY id ASC');
     res.json(testimonials);
   })

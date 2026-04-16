@@ -104,6 +104,7 @@ async function setupDatabase() {
         filename: dbFile,
         driver: sqlite3.Database
       });
+      console.log(`[portfolio-db] ${dbFile}`);
 
       // Create tables
       await db.exec(`
