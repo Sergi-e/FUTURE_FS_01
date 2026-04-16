@@ -29,6 +29,12 @@ const NAV = [
   { id: 'settings', label: 'Settings', title: 'Account & resume' },
 ];
 
+/** API returned 401/403 — bad or expired JWT (or wrong JWT_SECRET on server vs token age). */
+function isApiAuthFailure(err) {
+  const s = err && typeof err === 'object' ? err.status : undefined;
+  return typeof s === 'number' && (s === 401 || s === 403);
+}
+
 const PAGE_COPY = {
   projects: {
     title: 'Projects',
@@ -61,7 +67,7 @@ function Field({ id, label, hint, className = '', children }) {
 }
 
 /** Text field + local image upload; `setPath(value, { source: 'upload' })` after a successful upload. */
-function AdminImagePathInput({ id, value, setPath, token }) {
+function AdminImagePathInput({ id, value, setPath, token, onAuthError }) {
   const [busy, setBusy] = useState(false);
   const onText = (e) => setPath(e.target.value, { source: 'type' });
   const onFile = async (e) => {
@@ -73,7 +79,11 @@ function AdminImagePathInput({ id, value, setPath, token }) {
       const { path } = await uploadAdminImage(file, token);
       setPath(path, { source: 'upload' });
     } catch (err) {
-      alert(err.message || 'Upload failed');
+      if (typeof onAuthError === 'function' && isApiAuthFailure(err)) {
+        onAuthError(err);
+        return;
+      }
+      alert(err instanceof Error ? err.message : 'Upload failed');
     } finally {
       setBusy(false);
     }
@@ -129,6 +139,25 @@ export default function AdminDashboard() {
   const [editTestimonial, setEditTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
   const [editingTestimonialId, setEditingTestimonialId] = useState(null);
 
+  const clearAdminSession = useCallback(() => {
+    setToken(null);
+    localStorage.removeItem('adminToken');
+  }, []);
+
+  const consumeAuthFailure = useCallback(
+    (err) => {
+      if (!isApiAuthFailure(err)) return false;
+      clearAdminSession();
+      const msg =
+        err instanceof Error && err.message
+          ? err.message
+          : 'Session invalid. Please log in again.';
+      alert(msg);
+      return true;
+    },
+    [clearAdminSession]
+  );
+
   const fetchData = useCallback(async () => {
     if (!token) return;
     const [rProj, rMsg, rTest, rSet] = await Promise.allSettled([
@@ -139,6 +168,11 @@ export default function AdminDashboard() {
       getJson('/testimonials'),
       getJson('/settings/resume'),
     ]);
+
+    if (rMsg.status === 'rejected' && isApiAuthFailure(rMsg.reason)) {
+      consumeAuthFailure(rMsg.reason);
+      return;
+    }
 
     if (rProj.status === 'fulfilled' && Array.isArray(rProj.value)) setProjects(rProj.value);
     else {
@@ -160,7 +194,7 @@ export default function AdminDashboard() {
     } else if (rSet.status === 'rejected') {
       console.error('Admin: resume setting', rSet.reason);
     }
-  }, [token]);
+  }, [token, consumeAuthFailure]);
 
   useEffect(() => {
     startTransition(() => {
@@ -175,10 +209,11 @@ export default function AdminDashboard() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (data?.username) setAdminUsername(data.username);
-    } catch {
+    } catch (err) {
       setAdminUsername('');
+      if (isApiAuthFailure(err)) consumeAuthFailure(err);
     }
-  }, [token]);
+  }, [token, consumeAuthFailure]);
 
   useEffect(() => {
     startTransition(() => {
@@ -230,7 +265,8 @@ export default function AdminDashboard() {
       }
       setProjectForm({ ...EMPTY_PROJECT });
       fetchData();
-    } catch {
+    } catch (err) {
+      if (consumeAuthFailure(err)) return;
       alert(editingProjectId ? 'Failed to update project' : 'Failed to add project');
     }
   };
@@ -269,6 +305,7 @@ export default function AdminDashboard() {
         if (editingProjectId === id || String(editingProjectId) === rawId) cancelEditProject();
         await fetchData();
       } catch (err) {
+        if (consumeAuthFailure(err)) return;
         alert(err instanceof Error ? err.message : 'Failed to delete project');
         await fetchData();
       }
@@ -283,8 +320,10 @@ export default function AdminDashboard() {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch {
-        /* still refresh */
+      } catch (err) {
+        if (!consumeAuthFailure(err)) {
+          /* still refresh */
+        }
       }
       fetchData();
     })();
@@ -303,7 +342,8 @@ export default function AdminDashboard() {
       });
       setNewTestimonial({ ...EMPTY_TESTIMONIAL });
       fetchData();
-    } catch {
+    } catch (err) {
+      if (consumeAuthFailure(err)) return;
       alert('Failed to add testimonial');
     }
   };
@@ -322,7 +362,8 @@ export default function AdminDashboard() {
       setEditingTestimonialId(null);
       setEditTestimonial({ ...EMPTY_TESTIMONIAL });
       fetchData();
-    } catch {
+    } catch (err) {
+      if (consumeAuthFailure(err)) return;
       alert('Failed to update testimonial');
     }
   };
@@ -353,8 +394,10 @@ export default function AdminDashboard() {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` },
         });
-      } catch {
-        /* still refresh */
+      } catch (err) {
+        if (!consumeAuthFailure(err)) {
+          /* still refresh */
+        }
       }
       if (editingTestimonialId === id) cancelEditTestimonial();
       fetchData();
@@ -373,7 +416,8 @@ export default function AdminDashboard() {
         body: JSON.stringify({ value: resumeUrl }),
       });
       alert('Resume updated successfully!');
-    } catch {
+    } catch (err) {
+      if (consumeAuthFailure(err)) return;
       alert('Error updating resume');
     }
   };
@@ -390,7 +434,7 @@ export default function AdminDashboard() {
       return;
     }
     try {
-      const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/password`, {
+      const { ok, data, status } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/password`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -403,6 +447,10 @@ export default function AdminDashboard() {
         setPwdNew('');
         setPwdConfirm('');
         alert('Password updated successfully.');
+      } else if (status === 401 || status === 403) {
+        const err = new Error(typeof data?.error === 'string' ? data.error : 'Unauthorized');
+        err.status = status;
+        consumeAuthFailure(err);
       } else {
         alert(data?.error || 'Could not update password');
       }
@@ -419,7 +467,7 @@ export default function AdminDashboard() {
       return;
     }
     try {
-      const { ok, data } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/username`, {
+      const { ok, data, status } = await fetchJsonWithStatus(`${API_BASE_URL}/auth/username`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -434,6 +482,10 @@ export default function AdminDashboard() {
         setUserNew('');
         setUserCurrentPwd('');
         alert('Username updated. You stay signed in with a new session token.');
+      } else if (status === 401 || status === 403) {
+        const err = new Error(typeof data?.error === 'string' ? data.error : 'Unauthorized');
+        err.status = status;
+        consumeAuthFailure(err);
       } else {
         alert(data?.error || 'Could not update username');
       }
@@ -609,6 +661,7 @@ export default function AdminDashboard() {
                               id="pf-media"
                               value={projectForm.mediaPath}
                               token={token}
+                              onAuthError={consumeAuthFailure}
                               setPath={(path, meta) =>
                                 setProjectForm((p) => ({
                                   ...p,
@@ -751,6 +804,7 @@ export default function AdminDashboard() {
                                 id="et-img"
                                 value={editTestimonial.image}
                                 token={token}
+                                onAuthError={consumeAuthFailure}
                                 setPath={(path) => setEditTestimonial((t) => ({ ...t, image: path }))}
                               />
                             </Field>
@@ -827,6 +881,7 @@ export default function AdminDashboard() {
                               id="nt-img"
                               value={newTestimonial.image}
                               token={token}
+                              onAuthError={consumeAuthFailure}
                               setPath={(path) => setNewTestimonial((t) => ({ ...t, image: path }))}
                             />
                           </Field>

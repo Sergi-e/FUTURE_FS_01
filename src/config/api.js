@@ -65,11 +65,26 @@ function resolvedApiBaseUrl() {
   return `${defaultOrigin}/api`.replace(/\/$/, '');
 }
 
+/** When VITE_API_ORIGIN is omitted but VITE_API_BASE_URL is an absolute URL, derive origin for /assets/ etc. */
+function originFromApiBaseUrl() {
+  const raw = viteApiBaseUrl();
+  if (!raw || !/^https?:\/\//i.test(raw)) return '';
+  try {
+    return new URL(raw).origin.replace(/\/$/, '');
+  } catch {
+    return '';
+  }
+}
+
 /** Backend API (JSON). Set VITE_API_BASE_URL on Netlify (e.g. https://YOUR-SERVICE.onrender.com/api). */
 export const API_BASE_URL = resolvedApiBaseUrl();
 
 /** Origin of the API server (no /api). Used for root-relative media paths stored in the DB. */
-export const API_ORIGIN = (viteApiOrigin() || defaultOrigin).replace(/\/$/, '');
+export const API_ORIGIN = (
+  viteApiOrigin() ||
+  originFromApiBaseUrl() ||
+  defaultOrigin
+).replace(/\/$/, '');
 
 /** Raw env as baked at build time (still "localhost" even if we strip it for API_BASE_URL in prod). */
 function rawViteApiBaseUrl() {

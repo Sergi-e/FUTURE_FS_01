@@ -25,7 +25,10 @@ export async function fetchJson(url, init = {}) {
   const data = parseJsonBody(text, url);
   if (!res.ok) {
     const msg = data && typeof data === 'object' && (data.error || data.message);
-    throw new Error(msg || `HTTP ${res.status}`);
+    const err = new Error(typeof msg === 'string' ? msg : `HTTP ${res.status}`);
+    err.status = res.status;
+    if (data && typeof data === 'object' && typeof data.code === 'string') err.code = data.code;
+    throw err;
   }
   return data;
 }
@@ -67,7 +70,10 @@ export async function uploadAdminImage(file, token) {
   const data = parseJsonBody(text, url);
   if (!res.ok) {
     const msg = data && typeof data === 'object' && (data.error || data.message);
-    throw new Error(typeof msg === 'string' ? msg : `HTTP ${res.status}`);
+    const err = new Error(typeof msg === 'string' ? msg : `HTTP ${res.status}`);
+    err.status = res.status;
+    if (data && typeof data === 'object' && typeof data.code === 'string') err.code = data.code;
+    throw err;
   }
   if (!data || typeof data.path !== 'string') {
     throw new Error('Upload response missing path');

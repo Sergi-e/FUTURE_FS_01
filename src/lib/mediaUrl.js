@@ -37,6 +37,10 @@ export function resolveMediaUrl(path) {
     if (envOrigin) return `${envOrigin}${p}`;
 
     const apiOrigin = API_ORIGIN.replace(/\/$/, '');
+    if (apiOrigin && /^\/assets\//i.test(p)) {
+      return `${apiOrigin}${p}`;
+    }
+
     if (
       typeof window !== 'undefined' &&
       window.location?.origin &&

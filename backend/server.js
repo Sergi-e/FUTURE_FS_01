@@ -84,11 +84,21 @@ function asyncHandler(fn) {
 
 // Basic auth middleware
 const authenticate = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  const raw = req.headers.authorization;
+  const token =
+    typeof raw === 'string' && raw.startsWith('Bearer ')
+      ? raw.slice(7).trim()
+      : raw?.split(' ')[1];
+  if (!token) return res.status(401).json({ error: 'Unauthorized', code: 'no_token' });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Forbidden' });
+    if (err) {
+      const expired = err.name === 'TokenExpiredError';
+      return res.status(401).json({
+        error: expired ? 'Session expired. Please log in again.' : 'Invalid session. Please log in again.',
+        code: expired ? 'token_expired' : 'token_invalid',
+      });
+    }
     req.user = user;
     next();
   });
