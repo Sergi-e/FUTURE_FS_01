@@ -40,6 +40,8 @@ const REVEAL_PROGRESS = 0.22;
 const BADGE_HIDE_MOVE_T = 0.44;
 const MORPH_FADE_START = 0.68;
 const MORPH_FADE_END = 0.88;
+/** While scroll progress is below this, re-measure the hero slot (title chars animate; scroll idle won’t fire onUpdate). */
+const SLOT_RESYNC_PROGRESS = 0.09;
 
 export default function ApproachMorphLayer({ slotRef }) {
   const layerRef = useRef(null);
@@ -97,6 +99,9 @@ export default function ApproachMorphLayer({ slotRef }) {
 
     const applyFrame = (rawProgress) => {
       const progress = gsap.utils.clamp(0, 1, rawProgress);
+      if (progress < SLOT_RESYNC_PROGRESS) {
+        captureFrom();
+      }
       const moveT = smoothstep(progress);
 
       let morphOpacity = 1;
@@ -152,7 +157,16 @@ export default function ApproachMorphLayer({ slotRef }) {
     captureFrom();
     applyFrame(0);
 
-    const homeSt = ScrollTrigger.create({
+    let homeSt;
+    const syncSlotWhileNearHero = () => {
+      if (document.visibilityState === 'hidden') return;
+      if (!homeSt || homeSt.progress >= SLOT_RESYNC_PROGRESS) return;
+      captureFrom();
+      applyFrame(homeSt.progress);
+    };
+    gsap.ticker.add(syncSlotWhileNearHero);
+
+    homeSt = ScrollTrigger.create({
       trigger: '#home',
       start: 'top top',
       endTrigger: '#approach',
@@ -193,6 +207,7 @@ export default function ApproachMorphLayer({ slotRef }) {
     });
 
     return () => {
+      gsap.ticker.remove(syncSlotWhileNearHero);
       window.removeEventListener('resize', onResize);
       approachWatcher.kill();
       homeSt.kill();
