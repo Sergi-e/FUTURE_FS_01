@@ -19,7 +19,7 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
     return (
       <img
         src={mediaSrc}
-        alt={project.title}
+        alt={project?.title || 'Project Image'}
         className="work-media-asset"
         onError={() => setFailed(true)}
       />
@@ -52,7 +52,7 @@ function projectMediaType(project) {
 
 export default function Works() {
   const sectionRef = useRef(null);
-  const wrapperRef = useRef(null);
+  const containerRef = useRef(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -80,46 +80,101 @@ export default function Works() {
   }, []);
 
   useEffect(() => {
-    if (projects.length === 0) return;
+    if (projects.length === 0 || loading) return;
 
     let ctx = gsap.context(() => {
-      const workItems = gsap.utils.toArray('.work-item');
-      
-      // Initial positioning: Stack items on top of each other
-      gsap.set(workItems, { zIndex: (i) => workItems.length - i });
+      let mm = gsap.matchMedia();
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: () => `+=${window.innerHeight * workItems.length * 1.5}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-        }
-      });
+      // Desktop Animation: Pinned split screen with parallax vertical wipe
+      mm.add("(min-width: 1025px)", () => {
+        const steps = gsap.utils.toArray('.works-step-mobile');
+        if (steps.length === 0) return;
 
-      // Pause at the start to let user read the first project
-      tl.to({}, { duration: 1 });
+        const leftItems = gsap.utils.toArray('.works-left-item');
+        const rightItems = gsap.utils.toArray('.works-right-item');
+        const leftAssets = gsap.utils.toArray('.works-left-item .asset-container');
+        const rightContents = gsap.utils.toArray('.works-right-content');
 
-      // Diagonal Slide-away transition (Bottom-Left)
-      workItems.forEach((item, i) => {
-        if (i === workItems.length - 1) return; // Last item doesn't slide away
-        
-        tl.to(item, {
-          xPercent: -100,
-          yPercent: 100,
-          rotate: -15,
-          scale: 0.8,
-          opacity: 0,
-          ease: "none",
-          duration: 1
+        // Set initial states
+        leftItems.forEach((item, i) => {
+          if (i !== 0) {
+            gsap.set(item, { yPercent: 100 });
+            gsap.set(rightItems[i], { autoAlpha: 0 }); // autoAlpha manages opacity & visibility
+            gsap.set(rightContents[i], { y: 30, opacity: 0 });
+          } else {
+            gsap.set(item, { yPercent: 0 });
+            gsap.set(rightItems[i], { autoAlpha: 1 });
+            gsap.set(rightContents[i], { y: 0, opacity: 1 });
+          }
         });
-        
-        // Pause to let user read the NEXT project 
-        tl.to({}, { duration: 1 });
+
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: "top top",
+            // Pin for 100vh per project transition
+            end: () => `+=${window.innerHeight * steps.length}`,
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+          }
+        });
+
+        // Small pause at the beginning so the first project is readable
+        tl.to({}, { duration: 0.2 });
+
+        steps.forEach((step, i) => {
+          if (i > 0) {
+            const transTl = gsap.timeline();
+
+            // 1. Left image container wiping up
+            transTl.to(leftItems[i - 1], { yPercent: -100, ease: "none" }, 0);
+            transTl.fromTo(leftItems[i], { yPercent: 100 }, { yPercent: 0, ease: "none" }, 0);
+
+            // 2. Subtle internal parallax inside the left container
+            if (leftAssets[i - 1]) transTl.to(leftAssets[i - 1], { yPercent: 20, ease: "none" }, 0);
+            if (leftAssets[i]) transTl.fromTo(leftAssets[i], { yPercent: -20 }, { yPercent: 0, ease: "none" }, 0);
+
+            // 3. Right panel content transition
+            // Outgoing
+            transTl.to(rightContents[i - 1], { y: -30, opacity: 0, ease: "power2.inOut" }, 0);
+            transTl.set(rightItems[i - 1], { autoAlpha: 0 }, 1); 
+
+            // Incoming
+            transTl.set(rightItems[i], { autoAlpha: 1 }, 0);
+            transTl.to(rightContents[i], { y: 0, opacity: 1, ease: "power2.inOut" }, 0);
+
+            tl.add(transTl);
+          }
+
+          // Pause after each transition to let the user read
+          tl.to({}, { duration: 0.5 });
+        });
       });
-      
+
+      // Mobile Animation: Simple scroll-triggered fade in
+      mm.add("(max-width: 1024px)", () => {
+        const steps = gsap.utils.toArray('.works-step-mobile');
+        steps.forEach((step) => {
+          const content = step.querySelector('.works-right-content');
+
+          if (content) {
+            gsap.fromTo(content, 
+              { y: 30, opacity: 0 },
+              { 
+                y: 0, opacity: 1, 
+                duration: 0.8, 
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: step,
+                  start: "top 70%",
+                }
+              }
+            );
+          }
+        });
+      });
+
     }, sectionRef);
 
     requestAnimationFrame(() => ScrollTrigger.refresh());
@@ -127,77 +182,84 @@ export default function Works() {
     return () => {
       ctx.revert();
     };
-  }, [projects]);
+  }, [projects, loading]);
 
   return (
-    <section className="works" id="projects" ref={sectionRef}>
-      <div className="works-header">
-        <h2>FEATURED PROJECTS</h2>
-      </div>
-      
-      <div className="works-wrapper" ref={wrapperRef}>
+    <section className="works-split" id="projects" ref={sectionRef}>
+      <div className="works-split-container" ref={containerRef}>
+        
         {loading && projects.length === 0 && (
-          <div className="work-item">
-            <h3 style={{ color: 'white' }}>Loading projects…</h3>
+          <div className="works-empty-state">
+            <h3>Loading projects…</h3>
           </div>
         )}
+
         {!loading && loadError && (
-          <div className="work-item">
-            <h3 style={{ color: 'white' }}>Could not load projects</h3>
-            <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
-              Request URL: <code style={{ color: 'inherit' }}>{`${API_BASE_URL}/projects`}</code>. {apiSetupHintParagraph()}
-            </p>
+          <div className="works-empty-state">
+            <h3>Could not load projects</h3>
+            <p>Request URL: <code>{`${API_BASE_URL}/projects`}</code>. {apiSetupHintParagraph()}</p>
           </div>
         )}
+
         {!loading && !loadError && projects.length === 0 && (
-          <div className="work-item">
-            <h3 style={{ color: 'white' }}>No projects yet</h3>
-            <p style={{ color: 'rgba(255,255,255,0.75)', marginTop: '0.5rem', fontSize: '0.9rem' }}>
+          <div className="works-empty-state">
+            <h3>No projects yet</h3>
+            <p>
               The API returned an empty list. If you use Render without a persistent disk, add projects again in the admin
-              dashboard after each redeploy, or set <code style={{ color: 'inherit' }}>PORTFOLIO_DB_PATH</code> on a
-              mounted volume.
+              dashboard after each redeploy, or set <code>PORTFOLIO_DB_PATH</code> on a mounted volume.
             </p>
           </div>
         )}
-        {projects.map((project) => {
-          const hasLink = Boolean(project.link && String(project.link).trim());
+
+        {projects.map((project, i) => {
           const mediaKind = projectMediaType(project);
           const mediaSrc = resolveMediaUrl(project.mediaPath);
-          const inner = (
-            <>
-              <div className="work-media-container cursor-hover">
-                <ProjectMedia key={project.id} project={project} mediaKind={mediaKind} mediaSrc={mediaSrc} />
-                <div className="work-overlay"></div>
-              </div>
-              <div className="work-meta">
-                <h3>{project.title}</h3>
-                <div className="work-details">
-                  <span>{project.subtitle}</span>
-                  <span>{project.year}</span>
-                </div>
-                {hasLink && (
-                  <span className="work-view-more">VIEW MORE →</span>
-                )}
-              </div>
-            </>
-          );
+          const hasLink = Boolean(project.link && String(project.link).trim());
+          const stepNumber = String(i + 1).padStart(2, '0');
 
-          return hasLink ? (
-            <a
-              key={project.id}
-              href={project.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="work-item"
-            >
-              {inner}
-            </a>
-          ) : (
-            <div key={project.id} className="work-item work-item--static">
-              {inner}
+          return (
+            <div key={project.id} className="works-step-mobile">
+              
+              {/* Left Panel: Background Media */}
+              <div className="works-left-item">
+                <div className="asset-container">
+                  <ProjectMedia project={project} mediaKind={mediaKind} mediaSrc={mediaSrc} />
+                </div>
+              </div>
+
+              {/* Right Panel: Content */}
+              <div className="works-right-item">
+                <div className="works-right-content">
+                  
+                  <div className="works-top-bar">
+                    <h2 className="works-top-title">{project.title}</h2>
+                    <span className="works-top-number">{stepNumber}</span>
+                  </div>
+
+                  <div className="works-project-info">
+                    <p className="works-project-description">
+                      {project.subtitle || 'A featured project in my portfolio.'}
+                    </p>
+                  </div>
+
+                  {hasLink && (
+                    <a 
+                      href={project.link} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="works-project-link"
+                    >
+                      (&nbsp;&nbsp;&nbsp;VISIT SITE ↗&nbsp;&nbsp;&nbsp;)
+                    </a>
+                  )}
+
+                </div>
+              </div>
+
             </div>
           );
         })}
+
       </div>
     </section>
   );
