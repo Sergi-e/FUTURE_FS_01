@@ -1,0 +1,125 @@
+/**
+ * Post-hero section backgrounds (Hero / #home unchanged).
+ *
+ * Each block uses a nearly flat fill (--c-*). Where two sections meet, the lower
+ * section paints a short ::before strip: linear-gradient(previous → current) so the
+ * two fills merge instead of a hard edge. Body / hero end use var(--bg-color).
+ */
+
+:root {
+  --ambient-blend: clamp(72px, 12vh, 168px);
+  /* Same lightness (~9%), low saturation; tiny hue shifts so reads as “almost same” */
+  --c-ethos: hsl(38 9% 9.4%);
+  --c-skills: hsl(212 10% 9.1%);
+  --c-works: hsl(27 10% 9.5%);
+  --c-testimonials: hsl(265 8% 9.2%);
+  /* Rose / creative — reads warmer vs contact */
+  --c-hobbies: hsl(328 12% 9.6%);
+  /* Cool teal — clearly distinct from hobbies */
+  --c-contact: hsl(192 14% 9.2%);
+}
+
+#approach.ethos,
+#skills.skills,
+#projects.works-split,
+#testimonials.testimonials,
+#hobbies.hobbies-innovative,
+#contact.contact {
+  position: relative;
+}
+
+#approach.ethos {
+  background-color: var(--c-ethos);
+}
+
+#skills.skills {
+  background-color: var(--c-skills);
+}
+
+#projects.works-split {
+  background-color: var(--c-works);
+}
+
+#testimonials.testimonials {
+  background-color: var(--c-testimonials);
+}
+
+#hobbies.hobbies-innovative {
+  background-color: var(--c-hobbies) !important;
+  background: var(--c-hobbies) !important;
+}
+
+#contact.contact {
+  background-color: var(--c-contact);
+}
+
+#approach.ethos::before,
+#skills.skills::before,
+#projects.works-split::before,
+#testimonials.testimonials::before,
+#hobbies.hobbies-innovative::before,
+#contact.contact::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: var(--ambient-blend);
+  pointer-events: none;
+  z-index: 0;
+  will-change: background;
+}
+
+/* Hero / body → About */
+#approach.ethos::before {
+  background: linear-gradient(180deg, var(--bg-color) 0%, var(--c-ethos) 100%);
+}
+
+/* DOM order: Ethos → Works → Skills → Testimonials → … */
+#projects.works-split::before {
+  background: linear-gradient(180deg, var(--c-ethos) 0%, var(--c-works) 100%);
+  background: linear-gradient(to bottom in oklab, var(--c-ethos), var(--c-works));
+}
+
+#skills.skills::before {
+  background: linear-gradient(180deg, var(--c-works) 0%, var(--c-skills) 100%);
+  background: linear-gradient(to bottom in oklab, var(--c-works), var(--c-skills));
+}
+
+#testimonials.testimonials::before {
+  background: linear-gradient(180deg, var(--c-skills) 0%, var(--c-testimonials) 100%);
+  background: linear-gradient(to bottom in oklab, var(--c-skills), var(--c-testimonials));
+}
+
+#hobbies.hobbies-innovative::before {
+  background: linear-gradient(180deg, var(--c-testimonials) 0%, var(--c-hobbies) 100%);
+}
+
+#contact.contact::before {
+  background: linear-gradient(180deg, var(--c-hobbies) 0%, var(--c-contact) 100%);
+}
+
+#approach.ethos > *,
+#skills.skills > *,
+#projects.works-split > *,
+#testimonials.testimonials > *,
+#hobbies.hobbies-innovative > *,
+#contact.contact > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --c-ethos: hsl(38 8% 97.2%);
+    --c-skills: hsl(212 9% 97%);
+    --c-works: hsl(27 9% 97.3%);
+    --c-testimonials: hsl(265 7% 97.1%);
+    --c-hobbies: hsl(328 8% 97.3%);
+    --c-contact: hsl(192 9% 97%);
+  }
+
+  #approach.ethos::before {
+    background: linear-gradient(180deg, var(--bg-color) 0%, var(--c-ethos) 100%);
+  }
+}
