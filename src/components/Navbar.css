@@ -5,14 +5,22 @@
   width: 100%;
   padding: 25px 5vw;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
   z-index: 1000;
   transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.4s ease,
     padding 0.4s ease;
   pointer-events: none;
   transform: translateY(0);
+}
+
+.navbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-shrink: 0;
 }
 
 .navbar.navbar--hidden:not(.menu-open) {
@@ -23,11 +31,43 @@
   background-color: transparent !important;
 }
 
+.navbar.menu-open .nav-menu {
+  z-index: 1100;
+}
+
 .navbar.scrolled {
-  background-color: var(--bg-color, #0a0a0a);
+  /* Tint follows active section (see data-section + rules below); matches section-ambient --c-* */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.35);
   padding: 12px 5vw;
+}
+
+.navbar.scrolled[data-section='#home'] {
+  background-color: #0c0c0c;
+}
+
+.navbar.scrolled[data-section='#approach'] {
+  background-color: var(--c-ethos);
+}
+
+.navbar.scrolled[data-section='#projects'] {
+  background-color: var(--c-works);
+}
+
+.navbar.scrolled[data-section='#skills'] {
+  background-color: var(--c-skills);
+}
+
+.navbar.scrolled[data-section='#testimonials'] {
+  background-color: var(--c-testimonials);
+}
+
+.navbar.scrolled[data-section='#hobbies'] {
+  background-color: var(--c-hobbies);
+}
+
+.navbar.scrolled[data-section='#contact'] {
+  background-color: var(--c-contact);
 }
 
 .nav-left {
@@ -42,7 +82,179 @@
   position: relative;
   display: flex;
   align-items: center;
-  gap: 35px;
+  gap: clamp(12px, 2vw, 20px);
+}
+
+/* Touch / coarse pointer: explicit Jump control (hover opens panel on desktop) */
+.nav-quick-jump-toggle {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.88);
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .nav-quick-jump-toggle {
+    display: inline-flex;
+  }
+}
+
+.nav-quick-jump-toggle:hover,
+.nav-quick-jump-toggle:focus-visible {
+  border-color: rgba(204, 255, 0, 0.35);
+  color: var(--accent-neon);
+  background: rgba(204, 255, 0, 0.07);
+  box-shadow: 0 0 20px rgba(204, 255, 0, 0.08);
+  outline: none;
+}
+
+.nav-quick-jump-toggle.is-active {
+  border-color: rgba(204, 255, 0, 0.45);
+  color: var(--accent-neon);
+  background: rgba(204, 255, 0, 0.09);
+}
+
+.nav-quick-jump-toggle-icon {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  width: 15px;
+  height: 15px;
+}
+
+.nav-quick-jump-toggle-icon span {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0.9;
+}
+
+/* Drops under Jump + hamburger; tint follows .navbar[data-section] (same as bar) */
+.nav-quick-jump {
+  position: absolute;
+  right: 0;
+  left: auto;
+  top: calc(100% + 8px);
+  width: max-content;
+  max-width: min(380px, calc(100vw - max(24px, 8vw)));
+  min-width: 268px;
+  padding: 14px 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  box-shadow: 0 22px 48px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 1002;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition: opacity 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.26s cubic-bezier(0.4, 0, 0.2, 1),
+    visibility 0.26s,
+    background-color 0.4s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+  pointer-events: none;
+  background-color: var(--bg-color);
+}
+
+.navbar.scrolled[data-section='#home'] .nav-quick-jump {
+  background-color: #0c0c0c;
+}
+
+.navbar.scrolled[data-section='#approach'] .nav-quick-jump {
+  background-color: var(--c-ethos);
+}
+
+.navbar.scrolled[data-section='#projects'] .nav-quick-jump {
+  background-color: var(--c-works);
+}
+
+.navbar.scrolled[data-section='#skills'] .nav-quick-jump {
+  background-color: var(--c-skills);
+}
+
+.navbar.scrolled[data-section='#testimonials'] .nav-quick-jump {
+  background-color: var(--c-testimonials);
+}
+
+.navbar.scrolled[data-section='#hobbies'] .nav-quick-jump {
+  background-color: var(--c-hobbies);
+}
+
+.navbar.scrolled[data-section='#contact'] .nav-quick-jump {
+  background-color: var(--c-contact);
+}
+
+.nav-quick-jump--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.nav-quick-jump-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--accent-neon);
+  opacity: 0.8;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.nav-quick-jump-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+@media (max-width: 520px) {
+  .nav-quick-jump-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nav-quick-jump-link {
+  font-family: var(--font-display);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.52);
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.nav-quick-jump-link:hover,
+.nav-quick-jump-link:focus-visible {
+  color: var(--accent-neon);
+  background: rgba(204, 255, 0, 0.07);
+  border-color: rgba(204, 255, 0, 0.15);
+  outline: none;
+}
+
+.nav-quick-jump-link--active {
+  color: var(--accent-neon);
+  background: rgba(204, 255, 0, 0.09);
+  border-color: rgba(204, 255, 0, 0.12);
 }
 
 .nav-logo {
@@ -106,7 +318,7 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  background-color: #050505;
+  background-color: #000000;
   background-image: radial-gradient(circle at 95% 5%, rgba(204, 255, 0, 0.05) 0%, transparent 50%);
   display: flex;
   flex-direction: column;
