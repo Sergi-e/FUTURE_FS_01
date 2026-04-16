@@ -157,7 +157,8 @@ export default function ApproachMorphLayer({ slotRef }) {
       start: 'top top',
       endTrigger: '#approach',
       end: 'top top',
-      scrub: 0.42,
+      /* Tied directly to scroll position so scrolling up reverses the morph (no smoothing lag). */
+      scrub: true,
       invalidateOnRefresh: true,
       onRefresh(self) {
         captureFrom();

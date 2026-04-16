@@ -31,7 +31,8 @@ export default function Ethos() {
             end: '+=150%',
             pin: true,
             pinSpacing: true,
-            scrub: 1,
+            /* Progress tracks scroll 1:1 so scrolling up reverses the pinned reveal. */
+            scrub: true,
             anticipatePin: 1,
             invalidateOnRefresh: true,
           },
@@ -58,7 +59,7 @@ export default function Ethos() {
   return (
     <section className="ethos" id="approach" ref={sectionRef}>
       <div className="ethos-content" ref={textRef}>
-        <h2 className="ethos-title">MY APPROACH</h2>
+        <h2 className="ethos-title">Approach</h2>
         <div className="ethos-text-container">
           <p className="ethos-text-mask">
             I am a tech enthusiast whose work involves programming and data analysis,
