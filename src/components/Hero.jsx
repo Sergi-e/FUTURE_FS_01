@@ -167,7 +167,7 @@ export default function Hero({ approachSlotRef }) {
         
         <p className="hero-subtitle">
           Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
-          products that are reliable by design and useful by intention. Welcome to my portfolio.
+          products that are reliable by design and useful by intention. Welcome to my portfolio!
         </p>
 
         <div className="hero-actions-minimal">
