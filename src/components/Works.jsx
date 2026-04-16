@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL, apiSetupHintParagraph } from '../config/api';
@@ -10,7 +10,51 @@ gsap.registerPlugin(ScrollTrigger);
 
 function ProjectMedia({ project, mediaKind, mediaSrc }) {
   const [failed, setFailed] = useState(false);
+  const videoRef = useRef(null);
   const usePlaceholder = !mediaSrc || failed || mediaKind === 'placeholder';
+
+  const tryPlayVideo = useCallback(() => {
+    const el = videoRef.current;
+    if (!el || mediaKind !== 'video') return;
+    el.muted = true;
+    const p = el.play();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  }, [mediaKind]);
+
+  useEffect(() => {
+    if (mediaKind !== 'video' || !mediaSrc) return;
+    const el = videoRef.current;
+    if (!el) return;
+
+    tryPlayVideo();
+
+    const onVis = () => {
+      if (document.visibilityState === 'visible') tryPlayVideo();
+    };
+    document.addEventListener('visibilitychange', onVis);
+
+    const onCanPlay = () => tryPlayVideo();
+    el.addEventListener('loadeddata', onCanPlay);
+    el.addEventListener('canplay', onCanPlay);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) tryPlayVideo();
+          else el.pause();
+        });
+      },
+      { threshold: 0.08, rootMargin: '40px 0px' }
+    );
+    io.observe(el);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVis);
+      el.removeEventListener('loadeddata', onCanPlay);
+      el.removeEventListener('canplay', onCanPlay);
+      io.disconnect();
+    };
+  }, [mediaKind, mediaSrc, tryPlayVideo]);
 
   if (usePlaceholder) {
     return <div className="work-image-placeholder" />;
@@ -28,12 +72,15 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
   if (mediaKind === 'video') {
     return (
       <video
+        ref={videoRef}
+        key={mediaSrc}
         src={mediaSrc}
         autoPlay
         muted
         loop
         playsInline
-        className="work-media-asset"
+        preload="auto"
+        className="work-media-asset work-media-video"
         onError={() => setFailed(true)}
       />
     );
@@ -42,7 +89,8 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
 }
 
 function projectMediaType(project) {
-  const t = project?.mediaType;
+  const raw = project?.mediaType;
+  const t = typeof raw === 'string' ? raw.trim().toLowerCase() : raw;
   if (t === 'image' || t === 'video' || t === 'placeholder') return t;
   const p = String(project?.mediaPath ?? '').trim().toLowerCase();
   if (!p) return 'placeholder';

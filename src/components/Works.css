@@ -36,7 +36,7 @@
   left: 0;
   width: 100%;
   height: 140%;
-  will-change: transform;
+  /* Permanent will-change + GSAP parallax often makes <video> look soft; GSAP still animates this node. */
 }
 
 .asset-container .work-media-asset,
@@ -45,7 +45,15 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center;
   display: block;
+}
+
+/* Own compositor layer for video: clearer frames while the panel parallax runs */
+.asset-container video.work-media-video {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .work-image-placeholder {
