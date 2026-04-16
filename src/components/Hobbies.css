@@ -1,22 +1,24 @@
 .hobbies-innovative {
-  padding: 80px 10%;
-  background-color: var(--color-bg, #0a0a0a);
+  padding: 80px 0 36px;
+  /* Fill comes from section-ambient (#hobbies.hobbies-innovative) */
   overflow-x: hidden;
   overflow-y: visible;
   position: relative;
 }
 
 .hobbies-header-alt {
-  margin-bottom: 10vw;
+  margin-bottom: 5vw;
   position: relative;
   z-index: 10;
+  padding: 0 10%;
+  background: transparent;
 }
 
 .hobbies-tag-alt {
   font-family: var(--font-sans);
   font-size: 1.4rem;
   letter-spacing: 0.25em;
-  color: var(--accent-neon, #ccff00);
+  color: var(--accent-neon);
   opacity: 0.6;
   text-transform: uppercase;
   display: block;
@@ -34,139 +36,204 @@
   letter-spacing: -2px;
 }
 
-.hobbies-list-alt {
-  display: flex;
-  flex-direction: column;
-  gap: 3vw;
-}
-
-.hobby-row-alt {
-  display: flex;
-  justify-content: center;
-  gap: 2vw;
-  align-items: center;
+/* CAROUSEL LAYOUT */
+.hobbies-carousel-container {
   position: relative;
-  /* Tall rows so ScrollTrigger scrub (Lenis wheel) has enough scroll distance per hobby */
-  min-height: clamp(420px, 72vh, 880px);
-  padding: clamp(24px, 5vh, 56px) 0;
+  width: 100%;
+  margin: 0 0 48px 0;
+  padding-bottom: 0px;
+  background: transparent !important;
+  /* .hobbies-arc is 300vh tall — without clipping it extends document scroll height */
+  overflow: hidden;
 }
 
-.hobby-row-alt:nth-child(even) {
-  flex-direction: row-reverse;
-}
-
-.hobby-content-alt {
-  width: 40%;
-  position: relative;
-  z-index: 5;
-}
-
-.hobby-num-alt {
-  font-family: var(--font-display);
-  font-size: 1rem;
-  color: var(--accent-neon, #ccff00);
-  opacity: 0.4;
-  display: block;
-  margin-bottom: 20px;
-}
-
-.hobby-title-alt {
-  font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 3rem);
-  font-weight: 800;
-  color: white;
-  margin-bottom: 20px;
-  text-transform: uppercase;
-}
-
-.hobby-desc-alt {
-  font-family: var(--font-sans);
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.6;
-  max-width: 400px;
-}
-
-.hobby-visual-alt {
-  width: 50%;
-  height: 400px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hobby-name-big {
+/* Upward SVG arc — see .hobbies-carousel-rail in JSX */
+.hobbies-carousel-rail {
   position: absolute;
-  font-family: var(--font-display);
-  font-size: clamp(4rem, 12vw, 15rem);
-  font-weight: 950;
-  color: white;
-  opacity: 0.05;
-  text-transform: uppercase;
-  white-space: nowrap;
+  left: 0;
+  right: 0;
+  width: 100%;
+  /* Taller band so preserveAspectRatio="none" doesn’t squash the arc to a line */
+  top: clamp(40px, 16%, 128px);
+  height: clamp(100px, 15vw, 180px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.hobbies-carousel-rail-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hobbies-arc {
+  position: absolute;
+  /* Flatter, wider arc imitating the screenshot */
+  top: 35%;
+  left: -50vw;
+  right: -50vw;
+  height: 300vh; /* Extremely tall to make the radius huge and curve gentle */
+  border-top: none;
+  background: transparent;
+  border-radius: 50%;
   pointer-events: none;
   z-index: 1;
 }
 
-.hobby-float-img {
-  width: 250px;
-  height: 250px;
-  object-fit: contain;
+.hobbies-carousel-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(40px, 6.5vw, 112px);
+  /* Horizontal inset only via .hobby-edge-spacer so end cards can snap to viewport center */
+  padding: clamp(28px, 4vw, 48px) 0 clamp(48px, 7vw, 88px);
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  cursor: grab;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
   position: relative;
-  z-index: 2;
-  filter: drop-shadow(0 0 30px rgba(0, 0, 0, 0.5));
-  will-change: transform;
+  z-index: 4;
+  /* Center snap container safely */
+  scroll-snap-type: x mandatory;
+  background: transparent !important;
 }
 
-@media (max-width: 1024px) {
-  .hobbies-header-alt {
-    margin-bottom: 1.75rem;
-  }
-
-  .hobby-row-alt {
-    flex-direction: column !important;
-    gap: 1.25rem;
-    align-items: flex-start;
-    min-height: unset;
-    padding: 1.25rem 0;
-  }
-
-  .hobby-content-alt,
-  .hobby-visual-alt {
-    width: 100%;
-  }
-
-  .hobby-visual-alt {
-    height: auto;
-    min-height: 200px;
-  }
-
-  .hobby-float-img {
-    width: 150px;
-    height: 150px;
-  }
-
-  .books-section {
-    margin-top: 1.5rem;
-  }
-
-  .books-marquee-container {
-    min-height: unset;
-    padding: 20px 0;
-  }
-
-  .books-marquee-wrapper {
-    min-height: 200px;
-    padding: 20px 0;
-  }
+.hobbies-carousel-track::-webkit-scrollbar {
+  display: none;
 }
 
-/* Books Section */
-.books-section {
-  margin-top: 5vw;
+.hobbies-carousel-track.active {
+  cursor: grabbing;
+}
+
+/*
+ * Half-viewport minus half card width so first/last hobby cards can scroll-snap to true center
+ * (matches .hobby-card flex basis: clamp(232px, 21vw, 336px) → half = clamp(116px, 10.5vw, 168px)).
+ */
+.hobby-edge-spacer {
+  --hobby-card-half: clamp(116px, 10.5vw, 168px);
+  flex: 0 0 max(
+    8px,
+    calc(50vw - var(--hobby-card-half) - env(safe-area-inset-left, 0px))
+  );
+  width: max(
+    8px,
+    calc(50vw - var(--hobby-card-half) - env(safe-area-inset-left, 0px))
+  );
+  height: 1px;
+  align-self: stretch;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.hobby-edge-spacer:last-of-type {
+  flex-basis: max(
+    8px,
+    calc(50vw - var(--hobby-card-half) - env(safe-area-inset-right, 0px))
+  );
+  width: max(
+    8px,
+    calc(50vw - var(--hobby-card-half) - env(safe-area-inset-right, 0px))
+  );
+}
+
+.hobby-card {
+  flex: 0 0 clamp(232px, 21vw, 336px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transform-origin: center center;
+  scroll-snap-align: center;
+}
+
+.hobby-card-inner {
   position: relative;
   z-index: 10;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: transform, opacity;
+  transform-style: preserve-3d;
+}
+
+.hobby-card-img-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  max-height: min(52vh, 440px);
+  border-radius: clamp(22px, 2.4vw, 30px);
+  overflow: hidden;
+  margin-bottom: clamp(22px, 3vw, 30px);
+  background: rgba(0, 0, 0, 0.35);
+  /* Reference: crisp cards, very soft depth + hairline edge */
+  box-shadow:
+    0 2px 1px rgba(255, 255, 255, 0.06) inset,
+    0 18px 48px rgba(0, 0, 0, 0.45),
+    0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.hobby-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+  display: block;
+}
+
+.hobby-card-content {
+  text-align: center;
+  width: 100%;
+  /* JS will toggle opacity between 0 and 1, plus vertical slight shift */
+  transition: opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.hobby-card-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 2.2vw, 1.95rem);
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.98);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.hobby-card-desc {
+  font-family: var(--font-sans);
+  font-size: clamp(0.95rem, 1.35vw, 1.05rem);
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.6;
+  max-width: 90%;
+  margin: 0 auto;
+}
+
+/* Shallow arc between carousel and books (matches reference: fine light curve) */
+.hobbies-books-divider {
+  width: 100%;
+  padding: 0 max(10px, env(safe-area-inset-left, 0px));
+  margin: clamp(12px, 2.5vw, 28px) 0 clamp(8px, 1.5vw, 20px);
+  pointer-events: none;
+  position: relative;
+  z-index: 8;
+}
+
+.hobbies-books-divider-svg {
+  display: block;
+  width: 100%;
+  height: clamp(36px, 5.5vw, 52px);
+  overflow: visible;
+}
+
+/* Books Section - Kept unchanged */
+.books-section {
+  margin-top: clamp(16px, 2vw, 28px);
+  position: relative;
+  z-index: 10;
+  background: transparent !important;
 }
 
 .books-section-title {
@@ -182,6 +249,7 @@
   display: flex;
   align-items: center;
   min-height: 320px;
+  background: transparent !important;
 }
 
 .books-marquee-wrapper {
@@ -195,19 +263,20 @@
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-x;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .books-marquee-wrapper::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
+  display: none;
 }
 
 .books-marquee {
   display: flex;
-  gap: 80px;
+  gap: clamp(48px, 6vw, 80px);
   min-width: max-content;
-  padding: 0 clamp(16px, 5vw, 48px);
+  padding: 0 max(10px, env(safe-area-inset-left, 0px)) 0
+    max(10px, env(safe-area-inset-right, 0px));
   align-items: center;
 }
 
@@ -216,8 +285,8 @@
   top: 50%;
   transform: translateY(-50%);
   z-index: 20;
-  background: rgba(20, 20, 20, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   color: white;
   width: 50px;
   height: 50px;
@@ -226,7 +295,6 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
@@ -238,11 +306,11 @@
 }
 
 .book-scroll-btn.left {
-  left: 3vw;
+  left: max(8px, env(safe-area-inset-left, 0px));
 }
 
 .book-scroll-btn.right {
-  right: 3vw;
+  right: max(8px, env(safe-area-inset-right, 0px));
 }
 
 .book-item {
@@ -290,6 +358,12 @@
 
 @media (max-width: 480px) {
   .hobbies-innovative {
-    padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px));
+    padding: 40px 0;
+  }
+  .hobbies-header-alt {
+    padding: 0 20px;
+  }
+  .hobbies-carousel-track {
+    padding: 40px 0 60px;
   }
 }
