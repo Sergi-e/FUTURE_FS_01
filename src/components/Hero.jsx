@@ -166,7 +166,8 @@ export default function Hero({ approachSlotRef }) {
         </div>
         
         <p className="hero-subtitle">
-          Hello. I'm Serge, a full-stack developer, and an Aspiring AI Engineer. I craft <strong>strategic, user-focused</strong> digital products that ensure reliable systems and <strong>measurable impact</strong>. <a href="#approach" className="hero-more-link">more</a>
+          I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
+          products that are reliable by design and useful by intention.
         </p>
 
         <div className="hero-actions-minimal">
