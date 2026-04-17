@@ -1,12 +1,8 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
 const path = require('path');
+const { openDatabase } = require('./database');
 
 async function seed() {
-  const db = await open({
-    filename: path.join(__dirname, 'portfolio.db'),
-    driver: sqlite3.Database
-  });
+  const db = openDatabase(path.join(__dirname, 'portfolio.db'));
 
   const emery = {
     name: 'Emery Murenzi',
