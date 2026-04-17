@@ -1,47 +1,104 @@
-const Database = require('better-sqlite3');
+const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
-/** Promise-shaped API matching the old `sqlite` + `sqlite3` driver (avoids segfaults from `sqlite3` on some Linux hosts). */
-function wrapDb(raw) {
+/**
+ * SQLite via sql.js (WASM) — no native addons, avoids segfaults (exit 139) from
+ * sqlite3/better-sqlite3 on some Linux/Render runtimes.
+ */
+let sqlJsFactory = null;
+
+async function getSQL() {
+  if (!sqlJsFactory) {
+    const initSqlJs = require('sql.js');
+    const wasmDir = path.join(__dirname, 'node_modules', 'sql.js', 'dist');
+    sqlJsFactory = await initSqlJs({
+      locateFile: (file) => path.join(wasmDir, file),
+    });
+  }
+  return sqlJsFactory;
+}
+
+function wrapSqlJsDatabase(db, dbFile) {
+  function persist() {
+    if (!dbFile) return;
+    const dir = path.dirname(dbFile);
+    if (dir && dir !== '.') {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const data = db.export();
+    fs.writeFileSync(dbFile, Buffer.from(data));
+  }
+
   return {
-    exec(sql) {
-      return Promise.resolve().then(() => {
-        raw.exec(sql);
-      });
+    async exec(sql) {
+      db.exec(sql);
+      persist();
     },
-    get(sql, params = []) {
-      return Promise.resolve().then(() => {
-        const stmt = raw.prepare(sql);
-        return params.length ? stmt.get(...params) : stmt.get();
-      });
+    async get(sql, params = []) {
+      const stmt = db.prepare(sql);
+      try {
+        if (params.length) stmt.bind(params);
+        if (stmt.step()) {
+          return stmt.getAsObject();
+        }
+        return undefined;
+      } finally {
+        stmt.free();
+      }
     },
-    all(sql, params = []) {
-      return Promise.resolve().then(() => {
-        const stmt = raw.prepare(sql);
-        return params.length ? stmt.all(...params) : stmt.all();
-      });
+    async all(sql, params = []) {
+      const stmt = db.prepare(sql);
+      try {
+        if (params.length) stmt.bind(params);
+        const rows = [];
+        while (stmt.step()) {
+          rows.push(stmt.getAsObject());
+        }
+        return rows;
+      } finally {
+        stmt.free();
+      }
     },
-    run(sql, params = []) {
-      return Promise.resolve().then(() => {
-        const stmt = raw.prepare(sql);
-        const info = params.length ? stmt.run(...params) : stmt.run();
-        return {
-          lastID: Number(info.lastInsertRowid),
-          changes: info.changes,
-        };
-      });
+    async run(sql, params = []) {
+      if (params && params.length) {
+        db.run(sql, params);
+      } else {
+        db.run(sql);
+      }
+      const changes = db.getRowsModified();
+      let lastID = 0;
+      const lidStmt = db.prepare('SELECT last_insert_rowid() AS lid');
+      try {
+        if (lidStmt.step()) {
+          lastID = Number(lidStmt.getAsObject().lid) || 0;
+        }
+      } finally {
+        lidStmt.free();
+      }
+      persist();
+      return { lastID, changes };
     },
-    close() {
-      return Promise.resolve().then(() => raw.close());
+    async close() {
+      try {
+        persist();
+      } finally {
+        db.close();
+      }
     },
   };
 }
 
-/** Open DB file with the same async surface as before (for one-off scripts). */
-function openDatabase(filename) {
-  const raw = new Database(filename);
-  return wrapDb(raw);
+async function openDatabase(filename) {
+  const SQL = await getSQL();
+  let raw;
+  if (fs.existsSync(filename)) {
+    raw = new SQL.Database(fs.readFileSync(filename));
+  } else {
+    raw = new SQL.Database();
+  }
+  console.log(`[portfolio-db] ${filename}`);
+  return wrapSqlJsDatabase(raw, filename);
 }
 
 /** Norf Cre8tions — restored from removed `backend/seed_testimonials.js` (commit 4dfb9a3). */
@@ -65,12 +122,6 @@ const TESTIMONIAL_ERIC_KWIZERA = {
   tag: 'IMG_ID: 05',
 };
 
-/**
- * Ensures the two real portfolio testimonials (Emely Murenzi, Eric Kwizera) and their photo paths.
- * If the DB already has exactly those two image paths, only normalizes name/role/quote/tag.
- * Otherwise replaces rows when there are at most six (templates / experiments), so a bad seed
- * self-heals on the next API start. Skips if you have more than six rows (treat as custom data).
- */
 async function seedNorfCreationsTestimonials(db) {
   const rows = await db.all('SELECT * FROM testimonials ORDER BY id ASC');
   const images = new Set(rows.map((r) => String(r.image || '').trim()));
@@ -132,7 +183,6 @@ async function seedNorfCreationsTestimonials(db) {
   );
 }
 
-/** One promise: open DB + schema + seeds. Avoids returning early while init is still running. */
 let initPromise = null;
 
 async function setupDatabase() {
@@ -140,8 +190,14 @@ async function setupDatabase() {
     const dbFile = process.env.PORTFOLIO_DB_PATH || path.join(__dirname, 'portfolio.db');
 
     initPromise = (async () => {
-      const raw = new Database(dbFile);
-      const db = wrapDb(raw);
+      const SQL = await getSQL();
+      let raw;
+      if (fs.existsSync(dbFile)) {
+        raw = new SQL.Database(fs.readFileSync(dbFile));
+      } else {
+        raw = new SQL.Database();
+      }
+      const db = wrapSqlJsDatabase(raw, dbFile);
       console.log(`[portfolio-db] ${dbFile}`);
 
       await db.exec(`

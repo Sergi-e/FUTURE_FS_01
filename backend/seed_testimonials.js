@@ -2,7 +2,7 @@ const path = require('path');
 const { openDatabase } = require('./database');
 
 async function seed() {
-  const db = openDatabase(path.join(__dirname, 'portfolio.db'));
+  const db = await openDatabase(path.join(__dirname, 'portfolio.db'));
 
   const emery = {
     name: 'Emery Murenzi',
