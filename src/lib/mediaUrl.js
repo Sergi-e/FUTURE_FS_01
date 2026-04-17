@@ -19,6 +19,8 @@ export function publicAssetPath(rootRelativePath) {
  * 2. In the browser (not file:), same origin as the page — use when you ship files in Vite `public/assets`
  *    (static host). This avoids broken media when the API does not serve those static files.
  * 3. API_ORIGIN — fallback for SSR, file://, or when window is unavailable.
+ * In Vite dev (local API), `/assets/…` uses the page hostname with the API port so Network/LAN URLs
+ * (e.g. phone on http://192.168.x.x:5173) still load uploads from the machine running Express.
  */
 export function resolveMediaUrl(path) {
   if (path == null || typeof path !== 'string') return '';
@@ -38,7 +40,28 @@ export function resolveMediaUrl(path) {
 
     const apiOrigin = API_ORIGIN.replace(/\/$/, '');
     if (apiOrigin && /^\/assets\//i.test(p)) {
-      return `${apiOrigin}${p}`;
+      let originForAssets = apiOrigin;
+      const usingRemoteApi = Boolean(
+        typeof import.meta !== 'undefined' && String(import.meta.env?.VITE_API_BASE_URL || '').trim()
+      );
+      if (
+        typeof import.meta !== 'undefined' &&
+        import.meta.env.DEV &&
+        !usingRemoteApi &&
+        typeof window !== 'undefined' &&
+        window.location?.hostname &&
+        window.location.protocol !== 'file:'
+      ) {
+        try {
+          const parsed = new URL(apiOrigin.includes('://') ? apiOrigin : `http://${apiOrigin}`);
+          const port = parsed.port || (parsed.protocol === 'https:' ? '443' : '80');
+          const host = window.location.hostname;
+          originForAssets = `${parsed.protocol}//${host}:${port}`;
+        } catch {
+          /* keep apiOrigin */
+        }
+      }
+      return `${originForAssets.replace(/\/$/, '')}${p}`;
     }
 
     if (
