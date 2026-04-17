@@ -114,8 +114,8 @@ export function apiSetupHintParagraph() {
     typeof import.meta !== 'undefined' && import.meta.env?.DEV;
   if (dev) {
     return (
-      'You are in Vite dev mode. Run `npm run dev:stack` from the project root to start both the API (port 5000) and this dev server, ' +
-      'or keep `npm run dev` and in a second terminal run `cd backend` then `npm start`. ' +
+      'You are in Vite dev mode. Run `npm run dev` from the project root to start the API (port 5000) and this dev server together. ' +
+      'Use `npm run dev:web` for the frontend only if the API already runs elsewhere. ' +
       'Alternatively add a root `.env.local` with VITE_API_BASE_URL / VITE_API_ORIGIN pointing at Render. ' +
       'Netlify-only instructions apply after `npm run build`.'
     );
