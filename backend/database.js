@@ -1,7 +1,48 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
+const Database = require('better-sqlite3');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+
+/** Promise-shaped API matching the old `sqlite` + `sqlite3` driver (avoids segfaults from `sqlite3` on some Linux hosts). */
+function wrapDb(raw) {
+  return {
+    exec(sql) {
+      return Promise.resolve().then(() => {
+        raw.exec(sql);
+      });
+    },
+    get(sql, params = []) {
+      return Promise.resolve().then(() => {
+        const stmt = raw.prepare(sql);
+        return params.length ? stmt.get(...params) : stmt.get();
+      });
+    },
+    all(sql, params = []) {
+      return Promise.resolve().then(() => {
+        const stmt = raw.prepare(sql);
+        return params.length ? stmt.all(...params) : stmt.all();
+      });
+    },
+    run(sql, params = []) {
+      return Promise.resolve().then(() => {
+        const stmt = raw.prepare(sql);
+        const info = params.length ? stmt.run(...params) : stmt.run();
+        return {
+          lastID: Number(info.lastInsertRowid),
+          changes: info.changes,
+        };
+      });
+    },
+    close() {
+      return Promise.resolve().then(() => raw.close());
+    },
+  };
+}
+
+/** Open DB file with the same async surface as before (for one-off scripts). */
+function openDatabase(filename) {
+  const raw = new Database(filename);
+  return wrapDb(raw);
+}
 
 /** Norf Cre8tions — restored from removed `backend/seed_testimonials.js` (commit 4dfb9a3). */
 const TESTIMONIAL_EMELY_MURENZI = {
@@ -91,22 +132,18 @@ async function seedNorfCreationsTestimonials(db) {
   );
 }
 
-/** One promise: open DB + schema + seeds. Avoids returning `open()` early while init is still running. */
+/** One promise: open DB + schema + seeds. Avoids returning early while init is still running. */
 let initPromise = null;
 
 async function setupDatabase() {
   if (!initPromise) {
-    const dbFile =
-      process.env.PORTFOLIO_DB_PATH || path.join(__dirname, 'portfolio.db');
+    const dbFile = process.env.PORTFOLIO_DB_PATH || path.join(__dirname, 'portfolio.db');
 
     initPromise = (async () => {
-      const db = await open({
-        filename: dbFile,
-        driver: sqlite3.Database
-      });
+      const raw = new Database(dbFile);
+      const db = wrapDb(raw);
       console.log(`[portfolio-db] ${dbFile}`);
 
-      // Create tables
       await db.exec(`
         CREATE TABLE IF NOT EXISTS admin (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -150,7 +187,6 @@ async function setupDatabase() {
         await db.run(`UPDATE messages SET is_read = 1`);
       }
 
-      // Seed admin user if not exists (password: admin123)
       const admin = await db.get('SELECT * FROM admin WHERE username = ?', ['admin']);
       if (!admin) {
         const salt = await bcrypt.genSalt(10);
@@ -158,7 +194,6 @@ async function setupDatabase() {
         await db.run('INSERT INTO admin (username, password) VALUES (?, ?)', ['admin', hash]);
       }
 
-      // Seed sample project if empty
       const project = await db.get('SELECT * FROM projects');
       if (!project) {
         await db.run(
@@ -171,10 +206,8 @@ async function setupDatabase() {
         );
       }
 
-      // Emely Murenzi + Eric Kwizera (Norf Cre8tions) — canonical copy + photo paths
       await seedNorfCreationsTestimonials(db);
 
-      // Seed settings if empty
       const setting = await db.get('SELECT * FROM settings WHERE key = ?', ['resume_url']);
       if (!setting) {
         await db.run('INSERT INTO settings (key, value) VALUES (?, ?)', ['resume_url', '/Serge_Ishimwe_Resume.pdf']);
@@ -187,4 +220,4 @@ async function setupDatabase() {
   return initPromise;
 }
 
-module.exports = { setupDatabase };
+module.exports = { setupDatabase, openDatabase };
