@@ -4,6 +4,7 @@ import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
 import approachBadge from '../assets/approach-badge.svg';
 import { getJson } from '../lib/apiClient';
+import { resolveMediaUrl } from '../lib/mediaUrl';
 
 export default function Hero({ approachSlotRef }) {
   const container = useRef(null);
@@ -172,7 +173,7 @@ export default function Hero({ approachSlotRef }) {
 
         <div className="hero-actions-minimal">
           <a 
-            href={resumeUrl}
+            href={resolveMediaUrl(resumeUrl) || resumeUrl}
             target="_blank" 
             rel="noopener noreferrer"
             className="minimal-resume-link"
