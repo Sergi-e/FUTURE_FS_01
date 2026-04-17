@@ -637,7 +637,9 @@ export default function AdminDashboard() {
                 className={`admin-nav-item ${activeTab === item.id ? 'is-active' : ''}`}
                 onClick={() => setActiveTab(item.id)}
               >
-                {item.label}
+                {item.id === 'messages' && inboxUnreadCount > 0
+                  ? `${item.label} (${inboxUnreadCount})`
+                  : item.label}
               </button>
             ))}
           </nav>
