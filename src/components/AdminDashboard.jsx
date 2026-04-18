@@ -238,7 +238,7 @@ export default function AdminDashboard() {
     getJson('/health')
       .then((data) => {
         if (cancelled || !data || typeof data !== 'object') return;
-        const w = data.db?.ephemeralWarning;
+        const w = data.storage?.ephemeralWarning ?? data.db?.ephemeralWarning;
         setDbEphemeralWarning(typeof w === 'string' && w.trim() ? w.trim() : null);
       })
       .catch(() => {
@@ -670,15 +670,18 @@ export default function AdminDashboard() {
                     <p>
                       Use <strong>Upload image</strong> to send a JPEG, PNG, WebP, or GIF to the API (saved under{' '}
                       <code>/assets/</code>). You can still type <code>/assets/…</code> or any <code>https://</code> link.
-                      On hosts without a persistent disk (e.g. Render free), uploads can be lost on redeploy — keep copies
-                      or use external URLs for production.
+                      On hosts without a persistent disk, uploads can be lost on redeploy — set{' '}
+                      <code className="admin-inline-code">PORTFOLIO_UPLOADS_DIR</code> to a folder on the same volume as your DB
+                      (e.g. <code className="admin-inline-code">/data/assets</code>), or use external URLs.
                     </p>
                     <p>
-                      <strong>Projects disappearing?</strong> The CMS stores everything in SQLite. On Render (and similar),
-                      set <code className="admin-inline-code">PORTFOLIO_DB_PATH</code> to a file on a{' '}
-                      <strong>mounted persistent disk</strong> (e.g. <code className="admin-inline-code">/data/portfolio.db</code>
-                      ) so rows survive redeploys. Check your API logs for <code className="admin-inline-code">[portfolio-db]</code> to
-                      confirm which file is in use.
+                      <strong>Projects or uploads disappearing?</strong> The CMS uses SQLite plus files under{' '}
+                      <code>/assets/</code>. On Render (and similar), attach a <strong>persistent disk</strong>, then set{' '}
+                      <code className="admin-inline-code">PORTFOLIO_DB_PATH</code> (e.g.{' '}
+                      <code className="admin-inline-code">/data/portfolio.db</code>) and{' '}
+                      <code className="admin-inline-code">PORTFOLIO_UPLOADS_DIR</code> (e.g.{' '}
+                      <code className="admin-inline-code">/data/assets</code>). Check API logs for{' '}
+                      <code className="admin-inline-code">[portfolio-db]</code> to confirm the DB path.
                     </p>
                   </details>
 
