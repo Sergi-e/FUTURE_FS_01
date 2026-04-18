@@ -675,13 +675,13 @@ export default function AdminDashboard() {
                       (e.g. <code className="admin-inline-code">/data/assets</code>), or use external URLs.
                     </p>
                     <p>
-                      <strong>Projects or uploads disappearing?</strong> The CMS uses SQLite plus files under{' '}
-                      <code>/assets/</code>. On Render (and similar), attach a <strong>persistent disk</strong>, then set{' '}
-                      <code className="admin-inline-code">PORTFOLIO_DB_PATH</code> (e.g.{' '}
-                      <code className="admin-inline-code">/data/portfolio.db</code>) and{' '}
-                      <code className="admin-inline-code">PORTFOLIO_UPLOADS_DIR</code> (e.g.{' '}
-                      <code className="admin-inline-code">/data/assets</code>). Check API logs for{' '}
-                      <code className="admin-inline-code">[portfolio-db]</code> to confirm the DB path.
+                      <strong>Projects or uploads disappearing?</strong> On free Render, use <strong>Turso</strong> (
+                      <code className="admin-inline-code">LIBSQL_URL</code>) and <strong>Cloudinary</strong> for uploads.
+                      Or attach a <strong>persistent disk</strong> and set{' '}
+                      <code className="admin-inline-code">PORTFOLIO_DB_PATH</code> and{' '}
+                      <code className="admin-inline-code">PORTFOLIO_UPLOADS_DIR</code>. Check API logs for{' '}
+                      <code className="admin-inline-code">[portfolio-db]</code> (local file or{' '}
+                      <code className="admin-inline-code">libsql (Turso)</code>).
                     </p>
                   </details>
 
