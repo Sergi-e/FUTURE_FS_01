@@ -40,7 +40,8 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'no-store');
-  const persistentPathConfigured = Boolean(process.env.PORTFOLIO_DB_PATH);
+  const dbPathConfigured = Boolean(process.env.PORTFOLIO_DB_PATH);
+  const uploadsDirConfigured = Boolean(process.env.PORTFOLIO_UPLOADS_DIR);
   const onPaaS =
     process.env.RENDER === 'true' ||
     process.env.RENDER === '1' ||
@@ -48,31 +49,53 @@ app.get('/api/health', (req, res) => {
     Boolean(process.env.FLY_APP_NAME) ||
     Boolean(process.env.DYNO);
   let ephemeralWarning;
-  if (!persistentPathConfigured && onPaaS) {
-    ephemeralWarning =
-      'SQLite is using the default path on this host, which is usually not persistent. Projects, messages, and other CMS data can disappear after a redeploy or instance restart. Fix: attach a persistent disk and set PORTFOLIO_DB_PATH to a file on that disk (e.g. /data/portfolio.db on Render), then redeploy.';
+  if (onPaaS && (!dbPathConfigured || !uploadsDirConfigured)) {
+    const parts = [];
+    if (!dbPathConfigured) {
+      parts.push(
+        'Database is on ephemeral storage (projects, messages, CMS data can reset). Mount a disk and set PORTFOLIO_DB_PATH (e.g. /data/portfolio.db).'
+      );
+    }
+    if (!uploadsDirConfigured) {
+      parts.push(
+        'Admin uploads go to the app filesystem and can disappear on redeploy. Set PORTFOLIO_UPLOADS_DIR to a folder on the same disk (e.g. /data/assets).'
+      );
+    }
+    ephemeralWarning = parts.join(' ');
   }
   res.status(200).json({
     ok: true,
+    storage: {
+      dbPathConfigured,
+      uploadsDirConfigured,
+      ...(ephemeralWarning ? { ephemeralWarning } : {}),
+    },
+    /** @deprecated use storage.dbPathConfigured */
     db: {
-      persistentPathConfigured,
+      persistentPathConfigured: dbPathConfigured,
       ...(ephemeralWarning ? { ephemeralWarning } : {}),
     },
   });
 });
 
-// Project/testimonial media paths in the DB are like /assets/foo.png — serve them here
-app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
+// Bundled media from the repo; uploads may live on a persistent volume (see PORTFOLIO_UPLOADS_DIR).
+const BUNDLED_ASSETS_DIR = path.join(__dirname, 'public', 'assets');
+const UPLOADS_DIR = process.env.PORTFOLIO_UPLOADS_DIR
+  ? path.resolve(process.env.PORTFOLIO_UPLOADS_DIR)
+  : BUNDLED_ASSETS_DIR;
 
-const ASSETS_UPLOAD_DIR = path.join(__dirname, 'public', 'assets');
+// Project/testimonial media paths in the DB are like /assets/foo.png — try bundled files, then persistent uploads
+app.use('/assets', express.static(BUNDLED_ASSETS_DIR));
+app.use('/assets', express.static(UPLOADS_DIR));
+
 function ensureAssetsUploadDir() {
-  fs.mkdirSync(ASSETS_UPLOAD_DIR, { recursive: true });
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
 
 const uploadImageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     ensureAssetsUploadDir();
-    cb(null, ASSETS_UPLOAD_DIR);
+    cb(null, UPLOADS_DIR);
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname || '').toLowerCase();
