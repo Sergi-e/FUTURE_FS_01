@@ -2,9 +2,15 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 
+function isLibsqlConfigured() {
+  return Boolean(
+    String(process.env.LIBSQL_URL || '').trim() && String(process.env.LIBSQL_AUTH_TOKEN || '').trim()
+  );
+}
+
 /**
- * SQLite via sql.js (WASM) — no native addons, avoids segfaults (exit 139) from
- * sqlite3/better-sqlite3 on some Linux/Render runtimes.
+ * SQLite via sql.js (WASM) — local file; no native addons.
+ * Or Turso (@libsql/client) when LIBSQL_URL + LIBSQL_AUTH_TOKEN are set (persistent on free Render).
  */
 let sqlJsFactory = null;
 
@@ -85,6 +91,49 @@ function wrapSqlJsDatabase(db, dbFile) {
       } finally {
         db.close();
       }
+    },
+  };
+}
+
+function libsqlRowToObject(row, columns) {
+  const o = {};
+  for (const c of columns) {
+    let v = row[c];
+    if (typeof v === 'bigint') v = Number(v);
+    o[c] = v;
+  }
+  return o;
+}
+
+function wrapLibsqlClient(client) {
+  return {
+    async exec(sql) {
+      await client.executeMultiple(sql);
+    },
+    async get(sql, params = []) {
+      const rs = await (params.length
+        ? client.execute({ sql, args: params })
+        : client.execute(sql));
+      if (!rs.rows.length) return undefined;
+      return libsqlRowToObject(rs.rows[0], rs.columns);
+    },
+    async all(sql, params = []) {
+      const rs = await (params.length
+        ? client.execute({ sql, args: params })
+        : client.execute(sql));
+      return rs.rows.map((row) => libsqlRowToObject(row, rs.columns));
+    },
+    async run(sql, params = []) {
+      const rs = await (params.length
+        ? client.execute({ sql, args: params })
+        : client.execute(sql));
+      return {
+        lastID: Number(rs.lastInsertRowid ?? 0),
+        changes: rs.rowsAffected,
+      };
+    },
+    async close() {
+      await client.close();
     },
   };
 }
@@ -183,24 +232,8 @@ async function seedNorfCreationsTestimonials(db) {
   );
 }
 
-let initPromise = null;
-
-async function setupDatabase() {
-  if (!initPromise) {
-    const dbFile = process.env.PORTFOLIO_DB_PATH || path.join(__dirname, 'portfolio.db');
-
-    initPromise = (async () => {
-      const SQL = await getSQL();
-      let raw;
-      if (fs.existsSync(dbFile)) {
-        raw = new SQL.Database(fs.readFileSync(dbFile));
-      } else {
-        raw = new SQL.Database();
-      }
-      const db = wrapSqlJsDatabase(raw, dbFile);
-      console.log(`[portfolio-db] ${dbFile}`);
-
-      await db.exec(`
+async function migrateAndSeed(db) {
+  await db.exec(`
         CREATE TABLE IF NOT EXISTS admin (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           username TEXT UNIQUE,
@@ -237,38 +270,69 @@ async function setupDatabase() {
         );
       `);
 
-      const msgCols = await db.all(`PRAGMA table_info(messages)`);
-      if (!msgCols.some((c) => c.name === 'is_read')) {
-        await db.run(`ALTER TABLE messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0`);
-        await db.run(`UPDATE messages SET is_read = 1`);
+  const msgCols = await db.all(`PRAGMA table_info(messages)`);
+  if (!msgCols.some((c) => c.name === 'is_read')) {
+    await db.run(`ALTER TABLE messages ADD COLUMN is_read INTEGER NOT NULL DEFAULT 0`);
+    await db.run(`UPDATE messages SET is_read = 1`);
+  }
+
+  const admin = await db.get('SELECT * FROM admin WHERE username = ?', ['admin']);
+  if (!admin) {
+    const salt = await bcrypt.genSalt(10);
+    const hash = await bcrypt.hash('admin123', salt);
+    await db.run('INSERT INTO admin (username, password) VALUES (?, ?)', ['admin', hash]);
+  }
+
+  const project = await db.get('SELECT * FROM projects');
+  if (!project) {
+    await db.run(
+      'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
+      ['CLIMATE CHANGE IMPACT', 'Marine Life Monitoring & Data Visualization via ArcGIS', '2025', 'https://arcg.is/09v5GS1', 'video', '/assets/kivu.mp4']
+    );
+    await db.run(
+      'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
+      ['BE THE LIGHT WEBSITE', 'Impactful Community Hub built with Lovable', '2025', 'https://bethe-light-hub.lovable.app/', 'image', '/assets/bethelight.png']
+    );
+  }
+
+  await seedNorfCreationsTestimonials(db);
+
+  const setting = await db.get('SELECT * FROM settings WHERE key = ?', ['resume_url']);
+  if (!setting) {
+    await db.run('INSERT INTO settings (key, value) VALUES (?, ?)', ['resume_url', '/Serge_Ishimwe_Resume.pdf']);
+  }
+
+  return db;
+}
+
+let initPromise = null;
+
+async function setupDatabase() {
+  if (!initPromise) {
+    initPromise = (async () => {
+      if (isLibsqlConfigured()) {
+        const { createClient } = require('@libsql/client');
+        const client = createClient({
+          url: String(process.env.LIBSQL_URL).trim(),
+          authToken: String(process.env.LIBSQL_AUTH_TOKEN).trim(),
+        });
+        const db = wrapLibsqlClient(client);
+        console.log('[portfolio-db] libsql (Turso)');
+        await migrateAndSeed(db);
+        return db;
       }
 
-      const admin = await db.get('SELECT * FROM admin WHERE username = ?', ['admin']);
-      if (!admin) {
-        const salt = await bcrypt.genSalt(10);
-        const hash = await bcrypt.hash('admin123', salt);
-        await db.run('INSERT INTO admin (username, password) VALUES (?, ?)', ['admin', hash]);
+      const dbFile = process.env.PORTFOLIO_DB_PATH || path.join(__dirname, 'portfolio.db');
+      const SQL = await getSQL();
+      let raw;
+      if (fs.existsSync(dbFile)) {
+        raw = new SQL.Database(fs.readFileSync(dbFile));
+      } else {
+        raw = new SQL.Database();
       }
-
-      const project = await db.get('SELECT * FROM projects');
-      if (!project) {
-        await db.run(
-          'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
-          ['CLIMATE CHANGE IMPACT', 'Marine Life Monitoring & Data Visualization via ArcGIS', '2025', 'https://arcg.is/09v5GS1', 'video', '/assets/kivu.mp4']
-        );
-        await db.run(
-          'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
-          ['BE THE LIGHT WEBSITE', 'Impactful Community Hub built with Lovable', '2025', 'https://bethe-light-hub.lovable.app/', 'image', '/assets/bethelight.png']
-        );
-      }
-
-      await seedNorfCreationsTestimonials(db);
-
-      const setting = await db.get('SELECT * FROM settings WHERE key = ?', ['resume_url']);
-      if (!setting) {
-        await db.run('INSERT INTO settings (key, value) VALUES (?, ?)', ['resume_url', '/Serge_Ishimwe_Resume.pdf']);
-      }
-
+      const db = wrapSqlJsDatabase(raw, dbFile);
+      console.log(`[portfolio-db] ${dbFile}`);
+      await migrateAndSeed(db);
       return db;
     })();
   }
@@ -276,4 +340,4 @@ async function setupDatabase() {
   return initPromise;
 }
 
-module.exports = { setupDatabase, openDatabase };
+module.exports = { setupDatabase, openDatabase, isLibsqlConfigured };
