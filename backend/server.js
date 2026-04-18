@@ -7,7 +7,15 @@ const multer = require('multer');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { setupDatabase } = require('./database');
+const { setupDatabase, isLibsqlConfigured } = require('./database');
+
+function isCloudinaryConfigured() {
+  return Boolean(
+    process.env.CLOUDINARY_CLOUD_NAME &&
+      process.env.CLOUDINARY_API_KEY &&
+      process.env.CLOUDINARY_API_SECRET
+  );
+}
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -40,8 +48,12 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'no-store');
+  const libsqlConfigured = isLibsqlConfigured();
+  const cloudinaryConfigured = isCloudinaryConfigured();
   const dbPathConfigured = Boolean(process.env.PORTFOLIO_DB_PATH);
   const uploadsDirConfigured = Boolean(process.env.PORTFOLIO_UPLOADS_DIR);
+  const dbPersistent = libsqlConfigured || dbPathConfigured;
+  const uploadsPersistent = cloudinaryConfigured || uploadsDirConfigured;
   const onPaaS =
     process.env.RENDER === 'true' ||
     process.env.RENDER === '1' ||
@@ -49,16 +61,16 @@ app.get('/api/health', (req, res) => {
     Boolean(process.env.FLY_APP_NAME) ||
     Boolean(process.env.DYNO);
   let ephemeralWarning;
-  if (onPaaS && (!dbPathConfigured || !uploadsDirConfigured)) {
+  if (onPaaS && (!dbPersistent || !uploadsPersistent)) {
     const parts = [];
-    if (!dbPathConfigured) {
+    if (!dbPersistent) {
       parts.push(
-        'Database is on ephemeral storage (projects, messages, CMS data can reset). Mount a disk and set PORTFOLIO_DB_PATH (e.g. /data/portfolio.db).'
+        'Database is ephemeral. Set LIBSQL_URL + LIBSQL_AUTH_TOKEN (Turso), or mount a disk and set PORTFOLIO_DB_PATH.'
       );
     }
-    if (!uploadsDirConfigured) {
+    if (!uploadsPersistent) {
       parts.push(
-        'Admin uploads go to the app filesystem and can disappear on redeploy. Set PORTFOLIO_UPLOADS_DIR to a folder on the same disk (e.g. /data/assets).'
+        'Admin image uploads are ephemeral. Set CLOUDINARY_* env vars, or PORTFOLIO_UPLOADS_DIR on a persistent disk.'
       );
     }
     ephemeralWarning = parts.join(' ');
@@ -66,8 +78,12 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     ok: true,
     storage: {
+      libsqlConfigured,
+      cloudinaryConfigured,
       dbPathConfigured,
       uploadsDirConfigured,
+      dbPersistent,
+      uploadsPersistent,
       ...(ephemeralWarning ? { ephemeralWarning } : {}),
     },
     /** @deprecated use storage.dbPathConfigured */
@@ -106,7 +122,7 @@ const uploadImageStorage = multer.diskStorage({
 });
 
 const uploadImage = multer({
-  storage: uploadImageStorage,
+  storage: isCloudinaryConfigured() ? multer.memoryStorage() : uploadImageStorage,
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (/^image\/(jpeg|png|webp|gif)$/i.test(file.mimetype)) return cb(null, true);
@@ -391,13 +407,27 @@ app.delete(
   })
 );
 
-// --- Admin image upload (saved under /assets, same origin as API) ---
+// --- Admin image upload: Cloudinary (HTTPS URL in DB) or local /assets ---
 app.post(
   '/api/upload',
   authenticate,
   uploadImage.single('file'),
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    if (isCloudinaryConfigured()) {
+      const cloudinary = require('cloudinary').v2;
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
+      const dataUri = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      const result = await cloudinary.uploader.upload(dataUri, {
+        folder: 'portfolio',
+        resource_type: 'image',
+      });
+      return res.json({ path: result.secure_url, filename: result.public_id });
+    }
     res.json({ path: `/assets/${req.file.filename}`, filename: req.file.filename });
   })
 );
