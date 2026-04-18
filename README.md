@@ -126,7 +126,9 @@ Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static up
 4. **Start Command:** `npm start`
 5. **Environment:** set **`JWT_SECRET`** to a long random string (required for admin login).
 6. After deploy, copy the service URL (e.g. `https://your-api.onrender.com`). Open `https://your-api.onrender.com/api/health` — you should see `{"ok":true}` and no `ephemeralWarning` once storage is configured (see step 7). If you get `x-render-routing: no-server` or plain “Not Found”, the URL is wrong or the service failed to start (check Render logs).
-7. **Persistent disk (required for a stable public site):** Render’s filesystem is ephemeral. Attach a **persistent disk** (e.g. mount **`/data`**; paid instance types — check Render’s current limits). Set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** and **`PORTFOLIO_UPLOADS_DIR=/data/assets`**. The DB holds projects, messages, and CMS fields; **`PORTFOLIO_UPLOADS_DIR`** keeps admin-uploaded images across redeploys (bundled files in `backend/public/assets` are redeployed from git each time). Optional: use the repo’s **`render.yaml`** as a Blueprint template when creating a new service.
+7. **Persistence (pick one):**
+   - **Free Render (no paid disk):** Set **`LIBSQL_URL`** + **`LIBSQL_AUTH_TOKEN`** (Turso) and **`CLOUDINARY_CLOUD_NAME`**, **`CLOUDINARY_API_KEY`**, **`CLOUDINARY_API_SECRET`**. The API uses Turso for SQLite in the cloud and Cloudinary for admin image URLs (HTTPS in the DB).
+   - **Paid Render disk:** Attach a **persistent disk** (e.g. mount **`/data`**). Set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** and **`PORTFOLIO_UPLOADS_DIR=/data/assets`**. Optional: use the repo’s **`render.yaml`** as a Blueprint template when creating a new service.
 
 **2. Frontend on Netlify**
 
