@@ -245,7 +245,13 @@ export default function Works() {
         {!loading && loadError && (
           <div className="works-empty-state">
             <h3>Could not load projects</h3>
-            <p>Request URL: <code>{`${API_BASE_URL}/projects`}</code>. {apiSetupHintParagraph()}</p>
+            <p>
+              Request URL: <code>{`${API_BASE_URL}/projects`}</code>
+            </p>
+            <p>
+              <strong>Error:</strong> <code>{loadError}</code>
+            </p>
+            <p>{apiSetupHintParagraph()}</p>
           </div>
         )}
 
