@@ -122,11 +122,11 @@ Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static up
 
 1. New **Web Service** → connect this repo.
 2. **Root Directory:** `backend`
-3. **Build Command:** `npm install && npm rebuild sqlite3 --build-from-source` (same as `npm run render-build`).
+3. **Build Command:** `npm install` (same as `npm run render-build`).
 4. **Start Command:** `npm start`
 5. **Environment:** set **`JWT_SECRET`** to a long random string (required for admin login).
-6. After deploy, copy the service URL (e.g. `https://your-api.onrender.com`). Open `https://your-api.onrender.com/api/health` — you should see `{"ok":true}`. If you get `x-render-routing: no-server` or plain “Not Found”, the URL is wrong or the service failed to start (check Render logs).
-7. **SQLite persistence:** Render’s filesystem is ephemeral unless you add a **persistent disk**. Mount it (e.g. to `/data`) and set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** on the service. Without a disk, the DB resets when the instance restarts or redeploys.
+6. After deploy, copy the service URL (e.g. `https://your-api.onrender.com`). Open `https://your-api.onrender.com/api/health` — you should see `{"ok":true}` and no `ephemeralWarning` once storage is configured (see step 7). If you get `x-render-routing: no-server` or plain “Not Found”, the URL is wrong or the service failed to start (check Render logs).
+7. **Persistent disk (required for a stable public site):** Render’s filesystem is ephemeral. Attach a **persistent disk** (e.g. mount **`/data`**; paid instance types — check Render’s current limits). Set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** and **`PORTFOLIO_UPLOADS_DIR=/data/assets`**. The DB holds projects, messages, and CMS fields; **`PORTFOLIO_UPLOADS_DIR`** keeps admin-uploaded images across redeploys (bundled files in `backend/public/assets` are redeployed from git each time). Optional: use the repo’s **`render.yaml`** as a Blueprint template when creating a new service.
 
 **2. Frontend on Netlify**
 
@@ -163,7 +163,7 @@ The API uses open `cors()` so the Netlify origin can call Render without extra c
 
 ### Backend elsewhere
 
-Deploy the `backend/` folder (Railway, Fly.io, VPS, etc.). Set **`JWT_SECRET`**. Use **`PORTFOLIO_DB_PATH`** when the SQLite file should live on a mounted volume.
+Deploy the `backend/` folder (Railway, Fly.io, VPS, etc.). Set **`JWT_SECRET`**. On any host with an ephemeral filesystem, set **`PORTFOLIO_DB_PATH`** and **`PORTFOLIO_UPLOADS_DIR`** on a mounted volume so the database and uploaded files survive restarts.
 
 ---
 
