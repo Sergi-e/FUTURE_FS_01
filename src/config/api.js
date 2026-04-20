@@ -24,7 +24,7 @@ function viteApiBaseUrl() {
     isLocalhostUrl(raw)
   ) {
     console.error(
-      '[portfolio] VITE_API_BASE_URL is set to localhost in a production bundle — fix Netlify env (use https://YOUR-SERVICE.onrender.com/api) and redeploy.'
+      '[portfolio] VITE_API_BASE_URL is set to localhost in a production bundle — fix Vercel/Netlify env (use https://YOUR-SERVICE.onrender.com/api) and redeploy.'
     );
     return '';
   }
@@ -96,12 +96,12 @@ function rawViteApiBaseUrl() {
 if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) {
   const raw = rawViteApiBaseUrl();
   if (!raw) {
-    console.error(
-      '[portfolio] VITE_API_BASE_URL is unset. Built-in fetch uses relative "/api", which on Netlify returns the SPA HTML, not JSON. Set VITE_API_BASE_URL (e.g. https://your-service.onrender.com/api) and VITE_API_ORIGIN, then trigger a fresh deploy with cache clear.'
+    console.warn(
+      '[portfolio] VITE_API_BASE_URL is unset — using same-origin "/api". Correct when the API is deployed with this site (e.g. Vercel serverless). If fetches return HTML or 404, set VITE_API_BASE_URL to your full HTTPS API URL + /api and redeploy.'
     );
   } else if (isLocalhostUrl(raw)) {
     console.error(
-      '[portfolio] VITE_API_BASE_URL was localhost at build time — it is ignored in the bundle, but you must set Netlify env to your Render HTTPS URL and redeploy so the next build bakes the correct value.'
+      '[portfolio] VITE_API_BASE_URL was localhost at build time — it is ignored in the bundle, but you must set Vercel/Netlify env to your Render HTTPS URL and redeploy so the next build bakes the correct value.'
     );
   }
 }
@@ -121,9 +121,9 @@ export function apiSetupHintParagraph() {
     );
   }
   return (
-    'This is a production build. In Netlify: Site configuration → Environment variables → set VITE_API_BASE_URL to ' +
+    'This is a production build. On Vercel: Project → Settings → Environment Variables (Production) → set VITE_API_BASE_URL to ' +
     'https://YOUR-SERVICE.onrender.com/api and VITE_API_ORIGIN to https://YOUR-SERVICE.onrender.com (HTTPS, not localhost). ' +
-    'Then Deploys → Trigger deploy → Clear cache and deploy site. Push your latest git commit so Netlify rebuilds; ' +
-    'hard-refresh the page (Ctrl+Shift+R) after deploy.'
+    'Then Deployments → Redeploy (Vite bakes these at build time). On Netlify: Site configuration → Environment variables, then ' +
+    'Trigger deploy → Clear cache and deploy. Hard-refresh the page (Ctrl+Shift+R) after deploy.'
   );
 }
