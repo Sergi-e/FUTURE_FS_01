@@ -8,6 +8,10 @@ function isLibsqlConfigured() {
   );
 }
 
+function isVercelServerless() {
+  return process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+}
+
 /**
  * SQLite via sql.js (WASM) — local file; no native addons.
  * Or Turso (@libsql/client) when LIBSQL_URL + LIBSQL_AUTH_TOKEN are set (persistent on free Render).
@@ -310,6 +314,14 @@ let initPromise = null;
 async function setupDatabase() {
   if (!initPromise) {
     initPromise = (async () => {
+      /** sql.js cold init often exceeds Vercel Hobby's ~10s function limit — Turso (libsql) is required. */
+      if (isVercelServerless() && !isLibsqlConfigured()) {
+        const err = new Error(
+          'Set LIBSQL_URL and LIBSQL_AUTH_TOKEN (Turso) in Vercel → Environment Variables (Production). File-based SQLite via sql.js is not viable on Vercel serverless.'
+        );
+        err.code = 'SERVERLESS_SQLITE_UNSUPPORTED';
+        throw err;
+      }
       if (isLibsqlConfigured()) {
         const { createClient } = require('@libsql/client');
         const client = createClient({

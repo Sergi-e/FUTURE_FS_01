@@ -1,14 +1,21 @@
 import { API_BASE_URL } from '../config/api';
 
 function parseJsonBody(text, url) {
+  const raw = text == null ? '' : String(text);
+  const trimmed = raw.trim();
+  if (!trimmed) {
+    throw new Error(
+      `Empty response from ${url}. Common causes: Vercel function timeout (cold start + DB), or missing LIBSQL_URL / LIBSQL_AUTH_TOKEN on Production. Check /api/health (storage.libsqlConfigured) and Vercel → Functions → logs.`
+    );
+  }
   let data;
   try {
-    data = text ? JSON.parse(text) : null;
+    data = JSON.parse(trimmed);
   } catch {
-    const isHtml = /^\s*</.test(text);
+    const isHtml = /^\s*</.test(trimmed);
     throw new Error(
       isHtml
-        ? `Got HTML instead of JSON from ${url}. Set VITE_API_BASE_URL on your static host (full Render URL including /api) and redeploy.`
+        ? `Got HTML instead of JSON from ${url}. The /api route may not be running, or the function timed out (Vercel Hobby ~10s). Fix VITE_* to same-origin /api, set Turso env vars, redeploy.`
         : `Invalid JSON from ${url}`
     );
   }

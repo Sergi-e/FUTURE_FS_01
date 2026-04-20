@@ -493,6 +493,13 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
+  if (err.code === 'SERVERLESS_SQLITE_UNSUPPORTED') {
+    return res.status(503).json({
+      error: 'database_not_configured',
+      code: err.code,
+      message: err.message,
+    });
+  }
   if (err.code === 'LIMIT_FILE_SIZE') {
     return res.status(400).json({ error: 'file_too_large', message: 'Image must be 8MB or smaller' });
   }
