@@ -36,6 +36,22 @@ app.use((req, res, next) => {
   next();
 });
 
+/** Needed for Vercel serverless: DB init before route handlers run (no prior `app.listen`). */
+async function ensureDb() {
+  if (!db) {
+    db = await setupDatabase();
+  }
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await ensureDb();
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Register JSON routes BEFORE static files so nothing intercepts /api/*
 app.get('/', (req, res) => {
   res.set('Cache-Control', 'no-store');
@@ -481,7 +497,7 @@ app.use((err, req, res, next) => {
 });
 
 async function startServer() {
-  db = await setupDatabase();
+  await ensureDb();
   // Render requires listening on 0.0.0.0 so public traffic reaches the process
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Backend server running on port ${PORT}`);
@@ -508,7 +524,11 @@ async function startServer() {
   });
 }
 
-startServer().catch((err) => {
-  console.error('Fatal startup error:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  startServer().catch((err) => {
+    console.error('Fatal startup error:', err);
+    process.exit(1);
+  });
+}
+
+module.exports = { app };
