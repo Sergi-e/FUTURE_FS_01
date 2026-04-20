@@ -10,7 +10,16 @@ const multer = require('multer');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { setupDatabase, isLibsqlConfigured } = require('./database');
+const {
+  setupDatabase,
+  isMongoConfigured,
+  Admin,
+  Project,
+  Message,
+  Testimonial,
+  Setting,
+  nextId,
+} = require('./database');
 
 function isCloudinaryConfigured() {
   return Boolean(
@@ -41,15 +50,13 @@ app.use((req, res, next) => {
 
 /** Needed for Vercel serverless: DB init before route handlers run (no prior `app.listen`). */
 async function ensureDb() {
-  if (!db) {
-    db = await setupDatabase();
-  }
+  await setupDatabase();
 }
 
 app.use(async (req, res, next) => {
   try {
     const p = req.path || '';
-    // Fast paths for Vercel serverless: avoid Turso/sql.js init before timeout on cold start.
+    // Fast paths for Vercel serverless: avoid Mongo init before health handler runs.
     if (req.method === 'OPTIONS') return next();
     if (req.method === 'GET' && (p === '/' || p === '/api/health')) {
       return next();
@@ -73,11 +80,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.set('Cache-Control', 'no-store');
-  const libsqlConfigured = isLibsqlConfigured();
+  const mongodbConfigured = isMongoConfigured();
   const cloudinaryConfigured = isCloudinaryConfigured();
-  const dbPathConfigured = Boolean(process.env.PORTFOLIO_DB_PATH);
   const uploadsDirConfigured = Boolean(process.env.PORTFOLIO_UPLOADS_DIR);
-  const dbPersistent = libsqlConfigured || dbPathConfigured;
+  const dbPersistent = mongodbConfigured;
   const uploadsPersistent = cloudinaryConfigured || uploadsDirConfigured;
   const onPaaS =
     process.env.RENDER === 'true' ||
@@ -90,9 +96,7 @@ app.get('/api/health', (req, res) => {
   if (onPaaS && (!dbPersistent || !uploadsPersistent)) {
     const parts = [];
     if (!dbPersistent) {
-      parts.push(
-        'Database is ephemeral. Set LIBSQL_URL + LIBSQL_AUTH_TOKEN (Turso), or mount a disk and set PORTFOLIO_DB_PATH.'
-      );
+      parts.push('Database is not configured. Set MONGODB_URI (MongoDB Atlas) in your host environment variables.');
     }
     if (!uploadsPersistent) {
       parts.push(
@@ -104,17 +108,16 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({
     ok: true,
     storage: {
-      libsqlConfigured,
+      mongodbConfigured,
       cloudinaryConfigured,
-      dbPathConfigured,
       uploadsDirConfigured,
       dbPersistent,
       uploadsPersistent,
       ...(ephemeralWarning ? { ephemeralWarning } : {}),
     },
-    /** @deprecated use storage.dbPathConfigured */
+    /** @deprecated use storage.mongodbConfigured */
     db: {
-      persistentPathConfigured: dbPathConfigured,
+      mongodbConfigured,
       ...(ephemeralWarning ? { ephemeralWarning } : {}),
     },
   });
@@ -156,8 +159,6 @@ const uploadImage = multer({
   },
 });
 
-let db;
-
 /** Route async errors -> Express error middleware (avoids unhandled rejections). */
 function asyncHandler(fn) {
   return (req, res, next) => {
@@ -192,7 +193,7 @@ app.post(
   '/api/login',
   asyncHandler(async (req, res) => {
     const { username, password } = req.body;
-    const admin = await db.get('SELECT * FROM admin WHERE username = ?', [username]);
+    const admin = await Admin.findOne({ username });
 
     if (admin && (await bcrypt.compare(password, admin.password))) {
       const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '12h' });
@@ -211,7 +212,7 @@ app.get(
   '/api/auth/me',
   authenticate,
   asyncHandler(async (req, res) => {
-    const row = await db.get('SELECT id, username FROM admin WHERE id = ?', [req.user.id]);
+    const row = await Admin.findOne({ id: req.user.id }).select('id username').lean();
     if (!row) return res.status(404).json({ error: 'Not found' });
     res.json({ id: row.id, username: row.username });
   })
@@ -228,14 +229,15 @@ app.put(
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'New password must be at least 8 characters' });
     }
-    const admin = await db.get('SELECT * FROM admin WHERE id = ?', [req.user.id]);
+    const admin = await Admin.findOne({ id: req.user.id });
     if (!admin) return res.status(404).json({ error: 'Account not found' });
     if (!(await bcrypt.compare(currentPassword, admin.password))) {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(newPassword, salt);
-    await db.run('UPDATE admin SET password = ? WHERE id = ?', [hash, req.user.id]);
+    admin.password = hash;
+    await admin.save();
     res.json({ success: true });
   })
 );
@@ -252,14 +254,15 @@ app.put(
     if (name.length < 2 || name.length > 64) {
       return res.status(400).json({ error: 'Username must be between 2 and 64 characters' });
     }
-    const admin = await db.get('SELECT * FROM admin WHERE id = ?', [req.user.id]);
+    const admin = await Admin.findOne({ id: req.user.id });
     if (!admin) return res.status(404).json({ error: 'Account not found' });
     if (!(await bcrypt.compare(currentPassword, admin.password))) {
       return res.status(401).json({ error: 'Current password is incorrect' });
     }
-    const taken = await db.get('SELECT id FROM admin WHERE username = ? AND id != ?', [name, req.user.id]);
+    const taken = await Admin.findOne({ username: name, id: { $ne: req.user.id } });
     if (taken) return res.status(409).json({ error: 'That username is already in use' });
-    await db.run('UPDATE admin SET username = ? WHERE id = ?', [name, req.user.id]);
+    admin.username = name;
+    await admin.save();
     const token = jwt.sign({ id: admin.id, username: name }, JWT_SECRET, { expiresIn: '12h' });
     res.json({ success: true, token, username: name });
   })
@@ -270,8 +273,8 @@ app.get(
   '/api/projects',
   asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'no-store');
-    const projects = await db.all('SELECT * FROM projects ORDER BY id DESC');
-    res.json(projects);
+    const projects = await Project.find().sort({ id: -1 });
+    res.json(projects.map((p) => p.toJSON()));
   })
 );
 
@@ -280,11 +283,9 @@ app.post(
   authenticate,
   asyncHandler(async (req, res) => {
     const { title, subtitle, year, link, mediaType, mediaPath } = req.body;
-    const result = await db.run(
-      'INSERT INTO projects (title, subtitle, year, link, mediaType, mediaPath) VALUES (?, ?, ?, ?, ?, ?)',
-      [title, subtitle, year, link, mediaType, mediaPath]
-    );
-    res.json({ id: result.lastID, title, subtitle, year, link, mediaType, mediaPath });
+    const id = await nextId('project');
+    await Project.create({ id, title, subtitle, year, link, mediaType, mediaPath });
+    res.json({ id, title, subtitle, year, link, mediaType, mediaPath });
   })
 );
 
@@ -296,8 +297,8 @@ app.delete(
     if (!Number.isInteger(id) || id < 1) {
       return res.status(400).json({ error: 'Invalid project id' });
     }
-    const result = await db.run('DELETE FROM projects WHERE id = ?', [id]);
-    if (!result.changes) {
+    const result = await Project.findOneAndDelete({ id });
+    if (!result) {
       return res.status(404).json({ error: 'Project not found' });
     }
     res.json({ success: true });
@@ -313,11 +314,11 @@ app.put(
       return res.status(400).json({ error: 'Invalid project id' });
     }
     const { title, subtitle, year, link, mediaType, mediaPath } = req.body;
-    const result = await db.run(
-      'UPDATE projects SET title = ?, subtitle = ?, year = ?, link = ?, mediaType = ?, mediaPath = ? WHERE id = ?',
-      [title, subtitle, year, link, mediaType, mediaPath, id]
+    const result = await Project.findOneAndUpdate(
+      { id },
+      { $set: { title, subtitle, year, link, mediaType, mediaPath } }
     );
-    if (!result.changes) {
+    if (!result) {
       return res.status(404).json({ error: 'Project not found' });
     }
     res.json({ success: true });
@@ -346,10 +347,8 @@ app.post(
       return res.status(400).json({ error: 'Message is too long (max 20,000 characters).' });
     }
     const date = new Date().toISOString();
-    await db.run(
-      'INSERT INTO messages (name, email, message, date, is_read) VALUES (?, ?, ?, ?, 0)',
-      [name, email, message, date]
-    );
+    const mid = await nextId('message');
+    await Message.create({ id: mid, name, email, message, date, is_read: 0 });
     res.json({ success: true });
   })
 );
@@ -358,8 +357,8 @@ app.get(
   '/api/messages',
   authenticate,
   asyncHandler(async (req, res) => {
-    const messages = await db.all('SELECT * FROM messages ORDER BY id DESC');
-    res.json(messages);
+    const messages = await Message.find().sort({ id: -1 });
+    res.json(messages.map((m) => m.toJSON()));
   })
 );
 
@@ -367,7 +366,7 @@ app.put(
   '/api/messages/mark-read',
   authenticate,
   asyncHandler(async (req, res) => {
-    await db.run('UPDATE messages SET is_read = 1 WHERE is_read = 0');
+    await Message.updateMany({ is_read: 0 }, { $set: { is_read: 1 } });
     res.json({ success: true });
   })
 );
@@ -380,8 +379,8 @@ app.delete(
     if (!Number.isInteger(id) || id < 1) {
       return res.status(400).json({ error: 'Invalid message id' });
     }
-    const result = await db.run('DELETE FROM messages WHERE id = ?', [id]);
-    if (!result.changes) {
+    const result = await Message.findOneAndDelete({ id });
+    if (!result) {
       return res.status(404).json({ error: 'Message not found' });
     }
     res.json({ success: true });
@@ -393,8 +392,8 @@ app.get(
   '/api/testimonials',
   asyncHandler(async (req, res) => {
     res.set('Cache-Control', 'no-store');
-    const testimonials = await db.all('SELECT * FROM testimonials ORDER BY id ASC');
-    res.json(testimonials);
+    const testimonials = await Testimonial.find().sort({ id: 1 });
+    res.json(testimonials.map((t) => t.toJSON()));
   })
 );
 
@@ -403,11 +402,9 @@ app.post(
   authenticate,
   asyncHandler(async (req, res) => {
     const { name, role, location, image, quote, tag } = req.body;
-    const result = await db.run(
-      'INSERT INTO testimonials (name, role, location, image, quote, tag) VALUES (?, ?, ?, ?, ?, ?)',
-      [name, role, location, image, quote, tag]
-    );
-    res.json({ id: result.lastID, name, role, location, image, quote, tag });
+    const tid = await nextId('testimonial');
+    await Testimonial.create({ id: tid, name, role, location, image, quote, tag });
+    res.json({ id: tid, name, role, location, image, quote, tag });
   })
 );
 
@@ -416,9 +413,10 @@ app.put(
   authenticate,
   asyncHandler(async (req, res) => {
     const { name, role, location, image, quote, tag } = req.body;
-    await db.run(
-      'UPDATE testimonials SET name = ?, role = ?, location = ?, image = ?, quote = ?, tag = ? WHERE id = ?',
-      [name, role, location, image, quote, tag, req.params.id]
+    const tid = Number.parseInt(String(req.params.id), 10);
+    await Testimonial.updateOne(
+      { id: tid },
+      { $set: { name, role, location, image, quote, tag } }
     );
     res.json({ success: true });
   })
@@ -428,7 +426,8 @@ app.delete(
   '/api/testimonials/:id',
   authenticate,
   asyncHandler(async (req, res) => {
-    await db.run('DELETE FROM testimonials WHERE id = ?', [req.params.id]);
+    const tid = Number.parseInt(String(req.params.id), 10);
+    await Testimonial.deleteOne({ id: tid });
     res.json({ success: true });
   })
 );
@@ -462,7 +461,7 @@ app.post(
 app.get(
   '/api/settings/resume',
   asyncHandler(async (req, res) => {
-    const setting = await db.get('SELECT value FROM settings WHERE key = ?', ['resume_url']);
+    const setting = await Setting.findOne({ key: 'resume_url' }).lean();
     res.json({ value: setting ? setting.value : '/Serge_Ishimwe_Resume.pdf' });
   })
 );
@@ -474,9 +473,10 @@ app.put(
     const { value } = req.body;
     if (!value) return res.status(400).json({ error: 'Value is required' });
 
-    await db.run(
-      'INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value',
-      ['resume_url', value]
+    await Setting.findOneAndUpdate(
+      { key: 'resume_url' },
+      { $set: { value } },
+      { upsert: true, new: true }
     );
     res.json({ success: true, value });
   })
@@ -493,7 +493,7 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
   console.error(err);
-  if (err.code === 'SERVERLESS_SQLITE_UNSUPPORTED') {
+  if (err.code === 'SERVERLESS_DB_REQUIRED' || err.code === 'MONGODB_URI_MISSING') {
     return res.status(503).json({
       error: 'database_not_configured',
       code: err.code,

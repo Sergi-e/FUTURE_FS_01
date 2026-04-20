@@ -1,17 +1,19 @@
-const path = require('path');
-const { openDatabase } = require('./database');
+if (!process.env.VERCEL) {
+  require('dotenv').config();
+}
+const { setupDatabase, Testimonial } = require('./database');
 
 async function update() {
-  const db = await openDatabase(path.join(__dirname, 'portfolio.db'));
+  await setupDatabase();
 
-  await db.run(
-    "UPDATE testimonials SET role = ?, location = ? WHERE name = 'Emery Murenzi'",
-    ['CTO, Norf Cre8tions', 'Musanze, Rwanda']
+  await Testimonial.updateMany(
+    { name: 'Emery Murenzi' },
+    { $set: { role: 'CTO, Norf Cre8tions', location: 'Musanze, Rwanda' } }
   );
 
-  await db.run(
-    "UPDATE testimonials SET role = ?, location = ? WHERE name = 'Kwizera Eric'",
-    ['Software Developer, Norf Cre8tions', 'Musanze, Rwanda']
+  await Testimonial.updateMany(
+    { name: 'Kwizera Eric' },
+    { $set: { role: 'Software Developer, Norf Cre8tions', location: 'Musanze, Rwanda' } }
   );
 
   console.log('Testimonials updated successfully');

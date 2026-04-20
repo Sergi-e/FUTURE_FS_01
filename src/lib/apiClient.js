@@ -5,7 +5,7 @@ function parseJsonBody(text, url) {
   const trimmed = raw.trim();
   if (!trimmed) {
     throw new Error(
-      `Empty response from ${url}. Common causes: Vercel function timeout (cold start + DB), or missing LIBSQL_URL / LIBSQL_AUTH_TOKEN on Production. Check /api/health (storage.libsqlConfigured) and Vercel → Functions → logs.`
+      `Empty response from ${url}. Common causes: Vercel function timeout (cold start + DB), or missing MONGODB_URI on Production. Check /api/health (storage.mongodbConfigured) and Vercel → Functions → logs.`
     );
   }
   let data;

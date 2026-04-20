@@ -259,9 +259,8 @@ export default function Works() {
           <div className="works-empty-state">
             <h3>No projects yet</h3>
             <p>
-              The API returned an empty list. If you use Render without a persistent disk, add projects again in the admin
-              dashboard after each redeploy, or set <code>PORTFOLIO_DB_PATH</code> and{' '}
-              <code>PORTFOLIO_UPLOADS_DIR</code> on a mounted volume (see README).
+              The API returned an empty list. Add projects in the admin dashboard, or set{' '}
+              <code>MONGODB_URI</code> (MongoDB Atlas) on the API host so data persists across deploys.
             </p>
           </div>
         )}

@@ -2,7 +2,7 @@
 
 /**
  * Vercel invokes this for /api (rewritten from /api/*).
- * IMPORTANT: /api/health must respond WITHOUT loading Express/sql.js/Turso — Hobby ~10s limit.
+ * IMPORTANT: /api/health responds inline (no Express) for fast cold starts.
  */
 function pathOnly(req) {
   let u = req.url || '';
@@ -24,9 +24,7 @@ function sendJson(res, status, body) {
 }
 
 function sendHealth(req, res) {
-  const libsqlConfigured = Boolean(
-    String(process.env.LIBSQL_URL || '').trim() && String(process.env.LIBSQL_AUTH_TOKEN || '').trim()
-  );
+  const mongodbConfigured = Boolean(String(process.env.MONGODB_URI || '').trim());
   const cloudinaryConfigured = Boolean(
     process.env.CLOUDINARY_CLOUD_NAME &&
       process.env.CLOUDINARY_API_KEY &&
@@ -37,11 +35,10 @@ function sendHealth(req, res) {
     service: 'portfolio-api',
     via: 'api/index-health',
     storage: {
-      libsqlConfigured,
+      mongodbConfigured,
       cloudinaryConfigured,
-      dbPathConfigured: Boolean(process.env.PORTFOLIO_DB_PATH),
       uploadsDirConfigured: Boolean(process.env.PORTFOLIO_UPLOADS_DIR),
-      dbPersistent: libsqlConfigured || Boolean(process.env.PORTFOLIO_DB_PATH),
+      dbPersistent: mongodbConfigured,
       uploadsPersistent: cloudinaryConfigured || Boolean(process.env.PORTFOLIO_UPLOADS_DIR),
     },
   });

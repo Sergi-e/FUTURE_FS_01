@@ -1,10 +1,12 @@
-const path = require('path');
-const { openDatabase } = require('./database');
+if (!process.env.VERCEL) {
+  require('dotenv').config();
+}
+const { setupDatabase, Testimonial } = require('./database');
 
 async function clean() {
-  const db = await openDatabase(path.join(__dirname, 'portfolio.db'));
+  await setupDatabase();
 
-  await db.run("DELETE FROM testimonials WHERE name NOT IN ('Emery Murenzi', 'Kwizera Eric')");
+  await Testimonial.deleteMany({ name: { $nin: ['Emery Murenzi', 'Kwizera Eric'] } });
   console.log('Old testimonials deleted successfully');
 }
 
