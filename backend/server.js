@@ -1,4 +1,7 @@
-require('dotenv').config();
+// Vercel injects env at runtime — dotenv is not bundled in serverless; skip to avoid "Cannot find module 'dotenv'".
+if (!process.env.VERCEL) {
+  require('dotenv').config();
+}
 const fs = require('fs');
 const https = require('https');
 const path = require('path');
