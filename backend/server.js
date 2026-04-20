@@ -48,6 +48,12 @@ async function ensureDb() {
 
 app.use(async (req, res, next) => {
   try {
+    const p = req.path || '';
+    // Fast paths for Vercel serverless: avoid Turso/sql.js init before timeout on cold start.
+    if (req.method === 'OPTIONS') return next();
+    if (req.method === 'GET' && (p === '/' || p === '/api/health')) {
+      return next();
+    }
     await ensureDb();
     next();
   } catch (err) {
@@ -76,6 +82,7 @@ app.get('/api/health', (req, res) => {
   const onPaaS =
     process.env.RENDER === 'true' ||
     process.env.RENDER === '1' ||
+    process.env.VERCEL === '1' ||
     Boolean(process.env.RAILWAY_ENVIRONMENT) ||
     Boolean(process.env.FLY_APP_NAME) ||
     Boolean(process.env.DYNO);
