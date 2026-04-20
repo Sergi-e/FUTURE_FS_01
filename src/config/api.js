@@ -107,7 +107,7 @@ if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) {
 }
 
 /**
- * Shown when API fetch fails — different copy for `npm run dev` vs production (Netlify).
+ * Shown when API fetch fails — dev vs production (Vercel / Netlify).
  */
 export function apiSetupHintParagraph() {
   const dev =
@@ -116,14 +116,14 @@ export function apiSetupHintParagraph() {
     return (
       'You are in Vite dev mode. Run `npm run dev` from the project root to start the API (port 5000) and this dev server together. ' +
       'Use `npm run dev:web` for the frontend only if the API already runs elsewhere. ' +
-      'Alternatively add a root `.env.local` with VITE_API_BASE_URL / VITE_API_ORIGIN pointing at Render. ' +
-      'Netlify-only instructions apply after `npm run build`.'
+      'Optional: `.env.local` with VITE_API_BASE_URL / VITE_API_ORIGIN pointing at a deployed API (https).'
     );
   }
   return (
-    'This is a production build. On Vercel: Project → Settings → Environment Variables (Production) → set VITE_API_BASE_URL to ' +
-    'https://YOUR-SERVICE.onrender.com/api and VITE_API_ORIGIN to https://YOUR-SERVICE.onrender.com (HTTPS, not localhost). ' +
-    'Then Deployments → Redeploy (Vite bakes these at build time). On Netlify: Site configuration → Environment variables, then ' +
-    'Trigger deploy → Clear cache and deploy. Hard-refresh the page (Ctrl+Shift+R) after deploy.'
+    'This is a production build. API is on the same Vercel project: In Vercel → Environment Variables (Production), ' +
+    'remove VITE_API_BASE_URL and VITE_API_ORIGIN so the app uses relative `/api`, OR set VITE_API_BASE_URL to ' +
+    '`https://YOUR-DOMAIN.vercel.app/api` and VITE_API_ORIGIN to `https://YOUR-DOMAIN.vercel.app` (your real URL). ' +
+    'Redeploy after changes. If you still see this, open DevTools → Network → the failed request → Response: ' +
+    'if it is HTML, the `/api` route is not running (check Deployment build logs and Settings → Functions).'
   );
 }
