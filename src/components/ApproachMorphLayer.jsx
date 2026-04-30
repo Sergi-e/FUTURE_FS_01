@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -76,7 +76,7 @@ export default function ApproachMorphLayer({ slotRef }) {
     };
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!mountNode || !enabled) {
       document.documentElement.classList.remove('approach-morph-active');
       document.documentElement.classList.remove('approach-morph-revealing');
@@ -140,7 +140,7 @@ export default function ApproachMorphLayer({ slotRef }) {
 
       /* Hero → Approach ambient blend (normally on #approach::before) — paint on morph so it isn’t covered by section stacking */
       const showEdgeBlend =
-        progress > 0.05 && progress < 0.93 && morphOpacity > 0.22;
+        progress >= REVEAL_PROGRESS && progress < 0.93 && morphOpacity > 0.22;
       layer.dataset.edgeBlend = showEdgeBlend ? '1' : '0';
 
       gsap.set(layer, {
@@ -174,6 +174,7 @@ export default function ApproachMorphLayer({ slotRef }) {
       start: 'top top',
       endTrigger: '#approach',
       end: 'top top',
+      scroller: document.documentElement,
       /* Tied directly to scroll position so scrolling up reverses the morph (no smoothing lag). */
       scrub: true,
       invalidateOnRefresh: true,
@@ -190,6 +191,7 @@ export default function ApproachMorphLayer({ slotRef }) {
       trigger: '#approach',
       start: 'top bottom',
       end: 'bottom top',
+      scroller: document.documentElement,
       onUpdate() {
         if (homeSt.progress >= 0.97) {
           applyFrame(homeSt.progress);
@@ -217,7 +219,7 @@ export default function ApproachMorphLayer({ slotRef }) {
       document.documentElement.classList.remove('approach-morph-active');
       document.documentElement.classList.remove('approach-morph-revealing');
     };
-  }, [mountNode, enabled, slotRef]);
+  }, [mountNode, enabled, slotRef]); // useEffect — runs after SmoothScroll's useLayoutEffect sets the Lenis proxy
 
   if (!mountNode || !enabled) return null;
 
