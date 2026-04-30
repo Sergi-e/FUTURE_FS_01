@@ -56,7 +56,21 @@ export default function SmoothScroll({ children }) {
     window.addEventListener("resize", onResize);
     requestAnimationFrame(() => ScrollTrigger.refresh());
 
+    // Re-calculate scroll positions whenever dynamic content (e.g. API-loaded
+    // projects / testimonials) changes the page height.
+    let refreshTimer;
+    const ro = new ResizeObserver(() => {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        lenis.resize();
+        ScrollTrigger.refresh();
+      }, 120);
+    });
+    ro.observe(document.body);
+
     return () => {
+      clearTimeout(refreshTimer);
+      ro.disconnect();
       window.removeEventListener("resize", onResize);
       gsap.ticker.remove(raf);
       lenis.destroy();
