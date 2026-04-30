@@ -59,7 +59,7 @@ export default function Ethos() {
   return (
     <section className="ethos" id="approach" ref={sectionRef}>
       <div className="ethos-content" ref={textRef}>
-        <h2 className="ethos-title">Approach</h2>
+        <h2 className="ethos-title">My Approach</h2>
         <div className="ethos-text-container">
           <p className="ethos-text-mask">
             I take unstructured, real-world problems and work backwards from the outcome, combining
