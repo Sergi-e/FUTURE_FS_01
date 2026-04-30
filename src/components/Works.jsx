@@ -233,6 +233,8 @@ export default function Works() {
   }, [projects, loading]);
 
   return (
+    <>
+    <p className="works-section-label">MY WORK</p>
     <section className="works-split" id="projects" ref={sectionRef}>
       <div className="works-split-container" ref={containerRef}>
         
@@ -316,5 +318,6 @@ export default function Works() {
 
       </div>
     </section>
+    </>
   );
 }
