@@ -5,10 +5,12 @@ html.approach-morph-revealing #approach.ethos {
 
 /*
  * Ethos stacks above the morph (z-index 5 vs 4), so #approach::before would paint on top of the
- * morph. We hide that strip on desktop morph; the edge blend is drawn on .approach-morph-layer::after
- * during scroll (see data-edge-blend) so the gradient still appears while animating.
+ * morph layer while it is actively expanding. Hide the ::before only during the revealing phase;
+ * the edge blend is instead drawn on .approach-morph-layer::after (see data-edge-blend).
+ * At rest (not yet scrolled, or after morph fades out) the ::before shows normally so the
+ * Hero → Approach gradient blend is always visible.
  */
-html.approach-morph-active #approach.ethos::before {
+html.approach-morph-revealing #approach.ethos::before {
   opacity: 0 !important;
   height: 0 !important;
   min-height: 0 !important;
