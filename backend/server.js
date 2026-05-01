@@ -35,11 +35,26 @@ const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
+
+const ALLOWED_ORIGINS = [
+  /^http:\/\/localhost(:\d+)?$/,
+  /^http:\/\/127\.0\.0\.1(:\d+)?$/,
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/,
+];
+if (process.env.FRONTEND_URL) {
+  ALLOWED_ORIGINS.push(new RegExp(`^${process.env.FRONTEND_URL.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`));
+}
+
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (ALLOWED_ORIGINS.some((r) => r.test(origin))) return callback(null, true);
+      callback(new Error(`CORS: origin not allowed — ${origin}`));
+    },
     methods: ['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 app.use(express.json());

@@ -1,29 +1,31 @@
 # Render Blueprint — https://render.com/docs/blueprint-spec
-# Use when creating a NEW Web Service from this repo, or mirror these settings on an existing service.
-# Persistent disks require an instance type that supports them (see Render pricing/docs).
+# Backend API only. The React frontend is deployed separately on Vercel.
 services:
   - type: web
     name: portfolio-api
     runtime: node
     region: oregon
-    plan: starter
+    plan: free
     rootDir: backend
     branch: main
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health
-    disk:
-      name: portfolio-data
-      mountPath: /data
-      sizeGB: 1
     envVars:
       - key: NODE_VERSION
         value: "20.18.0"
-      - key: PORTFOLIO_DB_PATH
-        value: /data/portfolio.db
-      - key: PORTFOLIO_UPLOADS_DIR
-        value: /data/assets
+      - key: PORT
+        value: "5000"
       - key: WEB_CONCURRENCY
         value: "1"
+      # Set these in the Render dashboard — do NOT commit real values here.
+      - key: MONGODB_URI
+        sync: false
       - key: JWT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
         sync: false

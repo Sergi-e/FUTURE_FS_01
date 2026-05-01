@@ -44,6 +44,12 @@ export default function Ethos() {
           { backgroundPositionX: '0%', ease: 'none' },
           0
         );
+        tl.fromTo(
+          '.ethos-code-card',
+          { opacity: 0, y: 32 },
+          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.4 },
+          0.1
+        );
       }, sectionRef);
       ScrollTrigger.refresh();
     };
@@ -59,15 +65,66 @@ export default function Ethos() {
   return (
     <section className="ethos" id="approach" ref={sectionRef}>
       <div className="ethos-content" ref={textRef}>
-        <h2 className="ethos-title">My Approach</h2>
-        <div className="ethos-text-container">
-          <p className="ethos-text-mask">
-            I take unstructured, real-world problems and work backwards from the outcome, combining
-            software engineering and data thinking to build systems that hold up under pressure.
-            Beyond the screen, I&apos;m a committed environmental conservationist dedicated to
-            protecting water bodies and marine life.
-          </p>
+
+        {/* Left: title + body */}
+        <div className="ethos-left">
+          <h2 className="ethos-title">My Approach</h2>
+          <div className="ethos-text-container">
+            <p className="ethos-text-mask">
+              I take unstructured, real-world problems and work backwards from the outcome, combining
+              software engineering and data thinking to build systems that hold up under pressure.
+              Beyond the screen, I&apos;m a committed environmental conservationist dedicated to
+              protecting water bodies and marine life.
+            </p>
+          </div>
         </div>
+
+        {/* Right: code card */}
+        <div className="ethos-code-card" aria-hidden="true">
+          <div className="ethos-code-card__bar">
+            <span className="ethos-code-card__dot ethos-code-card__dot--r" />
+            <span className="ethos-code-card__dot ethos-code-card__dot--y" />
+            <span className="ethos-code-card__dot ethos-code-card__dot--g" />
+            <span className="ethos-code-card__filename">developer.js</span>
+          </div>
+          <div className="ethos-code-card__body">
+            {[
+              <>
+                <span className="ec-keyword">const</span>
+                <span className="ec-var"> developer </span>
+                <span className="ec-punct">= {'{'}</span>
+              </>,
+              <>
+                <span className="ec-indent-pad" />
+                <span className="ec-key">name</span>
+                <span className="ec-punct">: </span>
+                <span className="ec-string">&quot;Serge Ishimwe&quot;</span>
+                <span className="ec-punct">,</span>
+              </>,
+              <>
+                <span className="ec-indent-pad" />
+                <span className="ec-key">focus</span>
+                <span className="ec-punct">: </span>
+                <span className="ec-string">&quot;Fullstack + AI/ML&quot;</span>
+                <span className="ec-punct">,</span>
+              </>,
+              <>
+                <span className="ec-indent-pad" />
+                <span className="ec-key">available</span>
+                <span className="ec-punct">: </span>
+                <span className="ec-bool">true</span>
+                <span className="ec-punct">,</span>
+              </>,
+              <><span className="ec-punct">{'};'}</span></>,
+            ].map((line, i) => (
+              <div key={i} className="ec-line">
+                <span className="ec-lineno">{i + 1}</span>
+                <span className="ec-code">{line}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
       </div>
     </section>
   );

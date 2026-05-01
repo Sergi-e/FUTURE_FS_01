@@ -162,6 +162,22 @@
   color: var(--accent-neon);
 }
 
+.status-company {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.45);
+  text-decoration: none;
+  margin-top: 0.25rem;
+  letter-spacing: 0.04em;
+  transition: color 0.2s ease;
+}
+
+.status-company:hover {
+  color: var(--accent-neon);
+  text-decoration: underline;
+}
+
 @media (max-width: 1024px) {
   .testimonials-layout {
     grid-template-columns: 1fr;

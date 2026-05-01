@@ -151,6 +151,16 @@ export default function Testimonials() {
             <div className="status-item">
               <span className="status-label">ROLE</span>
               <span className="status-value highlight">{current.role}</span>
+              {current.tag && (
+                <a
+                  className="status-company"
+                  href="https://norfcre8ions.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {current.tag}
+                </a>
+              )}
             </div>
             <div className="status-item">
               <span className="status-label">LOC</span>
