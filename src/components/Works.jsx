@@ -103,7 +103,7 @@ export default function Works() {
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
   const [projects, setProjects] = useState(SEED_PROJECTS);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {

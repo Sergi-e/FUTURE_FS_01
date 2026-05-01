@@ -8,6 +8,8 @@ export default defineConfig([
   globalIgnores([
     'dist',
     'backend/**',
+    'api/**',
+    'old_hobbies.js',
     'get_covers.js',
     'download_missing.js',
     'download_books.js',
