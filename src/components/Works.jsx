@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL, apiSetupHintParagraph } from '../config/api';
 import { getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
+import { SEED_PROJECTS } from '../data/seed';
 import './Works.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -101,8 +102,8 @@ function projectMediaType(project) {
 export default function Works() {
   const sectionRef = useRef(null);
   const containerRef = useRef(null);
-  const [projects, setProjects] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [projects, setProjects] = useState(SEED_PROJECTS);
+  const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
@@ -111,16 +112,12 @@ export default function Works() {
       .then((data) => {
         if (cancelled) return;
         setLoadError(null);
-        setProjects(Array.isArray(data) ? data : []);
+        if (Array.isArray(data) && data.length > 0) setProjects(data);
       })
       .catch((err) => {
         if (cancelled) return;
         console.error('Failed to fetch projects', `${API_BASE_URL}/projects`, err);
-        setProjects([]);
         setLoadError(err.message || 'Request failed');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;

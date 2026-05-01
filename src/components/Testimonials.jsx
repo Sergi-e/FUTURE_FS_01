@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { API_BASE_URL } from '../config/api';
 import { getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
+import { SEED_TESTIMONIALS } from '../data/seed';
 import './Testimonials.css';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -17,7 +18,7 @@ function prefetchImageSrc(url) {
 
 export default function Testimonials() {
   const [index, setIndex] = useState(0);
-  const [testimonials, setTestimonials] = useState([]);
+  const [testimonials, setTestimonials] = useState(SEED_TESTIMONIALS);
   const textRef = useRef(null);
   const infoRef = useRef(null);
   const imageRef = useRef(null);
@@ -27,9 +28,7 @@ export default function Testimonials() {
     getJson('/testimonials')
       .then((data) => {
         if (cancelled) return;
-        if (data && data.length > 0) {
-          setTestimonials(Array.isArray(data) ? data : []);
-        }
+        if (Array.isArray(data) && data.length > 0) setTestimonials(data);
       })
       .catch((err) => {
         if (cancelled) return;
