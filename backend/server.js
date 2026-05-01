@@ -138,6 +138,12 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve the built React frontend when it exists (production: dist/ is copied next to server.js)
+const FRONTEND_DIST = path.join(__dirname, 'dist');
+if (fs.existsSync(FRONTEND_DIST)) {
+  app.use(express.static(FRONTEND_DIST));
+}
+
 // Bundled media from the repo; uploads may live on a persistent volume (see PORTFOLIO_UPLOADS_DIR).
 const BUNDLED_ASSETS_DIR = path.join(__dirname, 'public', 'assets');
 const UPLOADS_DIR = process.env.PORTFOLIO_UPLOADS_DIR
@@ -497,7 +503,12 @@ app.put(
   })
 );
 
+// SPA fallback: non-API routes serve the React app (react-router handles the path)
 app.use((req, res) => {
+  const indexHtml = path.join(__dirname, 'dist', 'index.html');
+  if (!req.path.startsWith('/api') && fs.existsSync(indexHtml)) {
+    return res.sendFile(indexHtml);
+  }
   res.status(404).json({
     error: 'not_found',
     method: req.method,

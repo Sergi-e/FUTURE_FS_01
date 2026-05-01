@@ -1,21 +1,20 @@
-# Render Blueprint — https://render.com/docs/blueprint-spec
-# Backend API only. The React frontend is deployed separately on Vercel.
+# Render Blueprint — single service: Express API + React frontend served together.
+# One URL, no CORS issues, no cross-origin env vars needed.
 services:
   - type: web
-    name: portfolio-api
+    name: portfolio
     runtime: node
     region: oregon
     plan: free
-    rootDir: backend
     branch: main
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: npm install && npm run build && cp -r dist backend/dist
+    startCommand: node backend/server.js
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
         value: "20.18.0"
       - key: PORT
-        value: "5000"
+        value: "10000"
       - key: WEB_CONCURRENCY
         value: "1"
       # Set these in the Render dashboard — do NOT commit real values here.
