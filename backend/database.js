@@ -113,6 +113,9 @@ async function connectMongo() {
     cached.promise = mongoose.connect(uri, {
       bufferCommands: false,
       maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      connectTimeoutMS: 5000,
+      socketTimeoutMS: 8000,
     });
   }
   cached.conn = await cached.promise;
