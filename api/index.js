@@ -46,7 +46,7 @@ function sendHealth(req, res) {
 
 let serverlessHandler;
 
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const p = pathOnly(req);
 
   if (req.method === 'GET' && (p === '/api/health' || p === '/api/health/')) {
