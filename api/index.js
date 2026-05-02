@@ -75,6 +75,49 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Handle login directly (bypass Express to avoid cold-start stall)
+  if (req.method === 'POST' && (p === '/api/login' || p === '/api/login/')) {
+    try {
+      const mongoose = require('mongoose');
+      const bcrypt = require('bcryptjs');
+      const jwt = require('jsonwebtoken');
+      const uri = String(process.env.MONGODB_URI || '').trim();
+      const secret = String(process.env.JWT_SECRET || 'super_secret_key_123').trim();
+
+      if (!uri) return sendJson(res, 503, { error: 'database_not_configured' });
+
+      // Read body
+      const body = await new Promise((resolve) => {
+        let data = '';
+        req.on('data', (c) => { data += c; });
+        req.on('end', () => resolve(data));
+      });
+      const { username, password } = JSON.parse(body || '{}');
+      if (!username || !password) return sendJson(res, 400, { error: 'username and password required' });
+
+      // Connect
+      if (mongoose.connection.readyState !== 1) {
+        await mongoose.connect(uri, { serverSelectionTimeoutMS: 20000, connectTimeoutMS: 20000 });
+      }
+
+      // Admin schema (idempotent)
+      const Admin = mongoose.models.Admin || mongoose.model('Admin', new mongoose.Schema({
+        id: Number, username: String, password: String,
+      }));
+
+      const admin = await Admin.findOne({ username });
+      if (!admin || !(await bcrypt.compare(password, admin.password))) {
+        return sendJson(res, 401, { error: 'Invalid credentials' });
+      }
+
+      const token = jwt.sign({ id: admin.id, username: admin.username }, secret, { expiresIn: '12h' });
+      return sendJson(res, 200, { token, username: admin.username });
+    } catch (err) {
+      console.error('[login]', err.message);
+      return sendJson(res, 500, { error: 'login_error', message: err.message });
+    }
+  }
+
   try {
     if (!serverlessHandler) {
       const serverless = require('serverless-http');
