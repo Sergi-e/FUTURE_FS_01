@@ -60,6 +60,50 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Handle image upload directly (Multer+Express stalls in serverless)
+  if (req.method === 'POST' && (p === '/api/upload' || p === '/api/upload/')) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const secret = String(process.env.JWT_SECRET || 'super_secret_key_123').trim();
+      const auth = String(req.headers['authorization'] || '');
+      const token = auth.replace(/^Bearer\s+/i, '').trim();
+      if (!token) return sendJson(res, 401, { error: 'Unauthorized' });
+      try { jwt.verify(token, secret); } catch { return sendJson(res, 401, { error: 'Invalid token' }); }
+
+      const Busboy = require('busboy');
+      const bb = Busboy({ headers: req.headers });
+      let fileBuffer = null;
+      let fileMime = 'image/jpeg';
+
+      await new Promise((resolve, reject) => {
+        bb.on('file', (_name, file, info) => {
+          fileMime = info.mimeType || fileMime;
+          const chunks = [];
+          file.on('data', (d) => chunks.push(d));
+          file.on('end', () => { fileBuffer = Buffer.concat(chunks); });
+        });
+        bb.on('close', resolve);
+        bb.on('error', reject);
+        req.pipe(bb);
+      });
+
+      if (!fileBuffer) return sendJson(res, 400, { error: 'No file uploaded' });
+
+      const cloudinary = require('cloudinary').v2;
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      });
+      const dataUri = `data:${fileMime};base64,${fileBuffer.toString('base64')}`;
+      const result = await cloudinary.uploader.upload(dataUri, { folder: 'portfolio', resource_type: 'image' });
+      return sendJson(res, 200, { path: result.secure_url });
+    } catch (err) {
+      console.error('[upload]', err.message);
+      return sendJson(res, 500, { error: 'upload_error', message: err.message });
+    }
+  }
+
   // Handle login directly (bypass Express to avoid cold-start stall)
   if (req.method === 'POST' && (p === '/api/login' || p === '/api/login/')) {
     try {
