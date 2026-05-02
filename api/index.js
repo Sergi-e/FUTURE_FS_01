@@ -60,21 +60,6 @@ module.exports = async (req, res) => {
     }
   }
 
-  if (req.method === 'GET' && (p === '/api/dbtest' || p === '/api/dbtest/')) {
-    const mongoose = require('mongoose');
-    const uri = String(process.env.MONGODB_URI || '').trim();
-    if (!uri) return sendJson(res, 500, { ok: false, error: 'MONGODB_URI not set' });
-    try {
-      if (mongoose.connection.readyState === 1) {
-        return sendJson(res, 200, { ok: true, state: 'already_connected' });
-      }
-      await mongoose.connect(uri, { serverSelectionTimeoutMS: 15000, connectTimeoutMS: 15000 });
-      return sendJson(res, 200, { ok: true, state: 'connected' });
-    } catch (err) {
-      return sendJson(res, 500, { ok: false, error: err.message, name: err.name, code: err.code });
-    }
-  }
-
   // Handle login directly (bypass Express to avoid cold-start stall)
   if (req.method === 'POST' && (p === '/api/login' || p === '/api/login/')) {
     try {
