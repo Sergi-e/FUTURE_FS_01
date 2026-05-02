@@ -272,7 +272,8 @@ async function setupDatabase() {
         throw err;
       }
       await connectMongo();
-      await migrateAndSeed();
+      // Run seeding in background so the first request (e.g. login) is not blocked by seed ops
+      migrateAndSeed().catch((e) => console.error('[seed]', e.message));
       return true;
     })();
   }
