@@ -75,11 +75,15 @@ module.exports = async (req, res) => {
     }
   }
 
-  if (!serverlessHandler) {
-    const serverless = require('serverless-http');
-    const { app } = require('../backend/server.js');
-    serverlessHandler = serverless(app);
+  try {
+    if (!serverlessHandler) {
+      const serverless = require('serverless-http');
+      const { app } = require('../backend/server.js');
+      serverlessHandler = serverless(app);
+    }
+    return await serverlessHandler(req, res);
+  } catch (err) {
+    console.error('[api/index crash]', err.stack || err.message);
+    return sendJson(res, 500, { error: 'internal', message: err.message });
   }
-
-  return serverlessHandler(req, res);
 };
