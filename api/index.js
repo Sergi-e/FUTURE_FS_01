@@ -16,10 +16,15 @@ function sendJson(res, status, body) {
 }
 
 async function getBody(req) {
+  // Vercel may have already buffered the body as req.body
+  if (req.body !== undefined && req.body !== null) {
+    return typeof req.body === 'string' ? req.body : JSON.stringify(req.body);
+  }
   return new Promise((resolve) => {
     let data = '';
     req.on('data', (c) => { data += c; });
     req.on('end', () => resolve(data));
+    req.on('error', () => resolve(''));
   });
 }
 
@@ -115,8 +120,17 @@ module.exports = async (req, res) => {
       const { username, password } = body;
       if (!username || !password) return sendJson(res, 400, { error: 'username and password required' });
       const mongoose = await getMongo();
-      const { Admin } = getModels(mongoose);
-      const admin = await Admin.findOne({ username });
+      const { Admin, Counter } = getModels(mongoose);
+      let admin = await Admin.findOne({ username });
+      // Auto-seed admin on first deployment if none exists
+      if (!admin) {
+        const count = await Admin.countDocuments();
+        if (count === 0) {
+          const id = await nextId(Counter, 'admin');
+          const hash = await bcrypt.hash('admin123', 10);
+          admin = await Admin.create({ id, username: 'admin', password: hash });
+        }
+      }
       if (!admin || !(await bcrypt.compare(password, admin.password))) return sendJson(res, 401, { error: 'Invalid credentials' });
       const token = jwt.sign({ id: admin.id, username: admin.username }, secret, { expiresIn: '12h' });
       return sendJson(res, 200, { token, username: admin.username });
