@@ -1,263 +1,167 @@
 # Serge Ishimwe — Portfolio
 
-A full-stack personal portfolio designed to present my work, skills, and story in one smooth, scroll-driven experience. It combines a React (Vite) frontend with GSAP and Lenis for motion, plus a small **Express + SQLite** API so projects, testimonials, the contact form, resume link, and an **admin dashboard** stay easy to update and deploy.
+A full-stack personal portfolio built to present my work, skills, and story in one smooth, scroll-driven experience. The frontend is powered by React and Vite with GSAP and Lenis for motion. The backend is a serverless Node.js API deployed on Vercel, backed by MongoDB Atlas, with Cloudinary for persistent image storage and an admin dashboard for full content management.
 
-**Stack at a glance:** React 19 · Vite · GSAP / ScrollTrigger · Lenis · React Router · Express · SQLite · JWT.
+**Live site:** [serge-portifolio.vercel.app](https://serge-portifolio.vercel.app)
+
+---
+
+## Tech Stack
+
+| Area | Technologies |
+|------|--------------|
+| Frontend | React 19, Vite 7, CSS (component-scoped) |
+| Motion | GSAP 3, ScrollTrigger, Lenis |
+| Routing | React Router 7 |
+| Backend | Node.js 20, Vercel Serverless Functions |
+| Database | MongoDB Atlas (Mongoose) |
+| Image storage | Cloudinary |
+| Auth | JWT, bcryptjs |
+| Deployment | Vercel (frontend + API in one project) |
+| CI | GitHub Actions (lint + build on push) |
 
 ---
 
 ## Features
 
-- **Single-page layout** with hash-friendly sections (Hero, Ethos, Skills, Works, Testimonials, Hobbies, Contact)
-- **Lenis** smooth scrolling integrated with **GSAP ScrollTrigger** for pinned sections and scrubbed animations
-- **React Router** for `/admin` (dashboard) and redirects from `/login`
-- **Theme switcher** (accent colors on `:root`)
-- **Responsive layout** with safe-area support for notched devices (`viewport-fit=cover`, `env(safe-area-inset-*)`)
-- **Project media** resolved from `public/assets` on the static host (or configurable origin via env)
-- **GitHub Actions CI** — `npm ci`, `lint`, and production `build` on push/PR to `main` / `master`
+- Scroll-driven single-page layout: Hero, Approach, Skills, Projects, Testimonials, Hobbies, Contact
+- Pinned scroll animations and scrubbed GSAP sequences powered by Lenis + ScrollTrigger
+- React Router for `/admin` dashboard
+- Admin dashboard: add / edit / delete projects and testimonials, view contact messages, update resume link, change credentials
+- Image uploads stored permanently on Cloudinary CDN
+- Seed data baked into the frontend build so visitors see content instantly even on API cold starts
+- GitHub Actions CI — lint and build checks on every push to `main`
 
 ---
 
-## Tech stack
-
-| Area | Technologies |
-|------|----------------|
-| UI | React 19, Vite 7, CSS (component-scoped stylesheets) |
-| Motion | GSAP 3, ScrollTrigger, Lenis |
-| Routing | React Router 7 |
-| Backend | Node 20, Express 5, SQLite (`sqlite` / `sqlite3`), JWT, bcryptjs |
-| Tooling | ESLint 9 (flat config), npm |
-
----
-
-## Repository layout
+## Repository Layout
 
 ```
 portfolio-2026/
+├── api/
+│   └── index.js          # Vercel serverless function — all API routes
 ├── src/
-│   ├── components/     # Page sections + AdminDashboard
-│   ├── config/         # API base URL (Vite env aware)
-│   ├── lib/            # e.g. resolveMediaUrl for CMS-style paths
+│   ├── components/        # Page sections + AdminDashboard
+│   ├── config/            # API base URL (Vite env-aware)
+│   ├── data/seed.js       # Fallback data baked into the build
+│   ├── lib/               # resolveMediaUrl, apiClient helpers
 │   ├── App.jsx
 │   └── main.jsx
-├── public/             # Static assets copied to dist root (e.g. /assets/*, _redirects)
-├── backend/            # Express API + SQLite DB file
-├── .github/workflows/  # CI workflow
-├── vercel.json         # SPA rewrite for Vercel
+├── public/                # Static assets (resume PDF, images)
+├── backend/               # Express app (local dev server only)
+├── .github/workflows/     # CI workflow
+├── vercel.json            # Vercel rewrites + function config
 └── package.json
 ```
 
 ---
 
-## Prerequisites
+## Local Development
 
-- **Node.js 20+** (matches `backend/package.json` engines)
-- npm (or compatible client)
+### Prerequisites
 
----
+- Node.js 20+
+- npm
 
-## Environment variables (frontend)
-
-Copy `.env.example` to `.env` or `.env.local` and adjust if your API or asset host differs.
-
-| Variable | Purpose |
-|----------|---------|
-| `VITE_API_BASE_URL` | Full JSON API base, including `/api` (e.g. `https://your-api.onrender.com/api`) |
-| `VITE_API_ORIGIN` | API origin without `/api` (used with `API_ORIGIN` in code) |
-| `VITE_ASSET_ORIGIN` | Force media host for root-relative `/assets/...` paths when files are **not** on the same origin as the SPA |
-
-**Production:** set `VITE_API_BASE_URL` and `VITE_API_ORIGIN` on your static host (e.g. Netlify). If unset, production builds use relative `/api` (usually wrong for this split setup). Local dev defaults to `http://localhost:5000` when `import.meta.env.DEV` is true.
-
----
-
-## Local development
-
-### Frontend
+### Install and run
 
 ```bash
 npm install
 npm run dev
 ```
 
-Opens the Vite dev server (default port `5173`). With no `VITE_API_BASE_URL` in `.env.local`, the app calls **`/api/...` on the same origin** and Vite **proxies** those requests to `http://127.0.0.1:5000`, so you must have the backend running for projects and testimonials to load.
+This starts both the Vite dev server (port 5173) and the local Express API (port 5000) concurrently. The Vite dev server proxies `/api/*` requests to `http://localhost:5000`.
 
-**One command for frontend + API:** from the repo root, `npm run dev:stack` (starts Express on `5000` and Vite on `5173`).
+### Environment variables (local)
 
-### Backend (optional)
+Create `backend/.env`:
 
-From `backend/`:
-
-```bash
-cd backend
-npm install
-cp .env.example .env   # if you add one; set JWT_SECRET for production
-npm start
+```env
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/portfolio?retryWrites=true&w=majority&appName=Cluster0
+JWT_SECRET=<your-secret>
+CLOUDINARY_CLOUD_NAME=<name>
+CLOUDINARY_API_KEY=<key>
+CLOUDINARY_API_SECRET=<secret>
 ```
 
-Default port `5000` (or `PORT` from env). Serves JSON under `/api` and static uploads under `/assets` from `backend/public/assets`.
-
-### Scripts
+### Available scripts
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start Vite dev server (API must be on port 5000, or use `dev:stack`) |
-| `npm run dev:stack` | Start backend + Vite together for local full-stack |
+| `npm run dev` | Start frontend + backend together |
+| `npm run dev:web` | Frontend only (Vite, port 5173) |
+| `npm run dev:api` | Backend only (Express, port 5000) |
 | `npm run build` | Production build to `dist/` |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint on the frontend |
-
-### Before deploy (quick check)
-
-1. From repo root: `npm run lint` and `npm run build` (both should pass).
-2. Local full stack: `npm run dev:stack`, open `http://localhost:5173`, then scroll the full page: **Works** (pinned stack), **Hobbies** (horizontal books + parallax rows), **Ethos / Contact** (ScrollTrigger intros), **Navbar** section highlights. Confirm **testimonials** and **projects** load from the API (backend on port 5000).
-3. Commit and push; then deploy Netlify + Render using the steps below.
+| `npm run lint` | Run ESLint |
+| `npm run preview` | Preview production build locally |
 
 ---
 
-## Deployment
+## Deployment (Vercel)
 
-### Full stack (recommended): Netlify (frontend) + Render (API)
+The entire project (frontend + API) is deployed as a single Vercel project.
 
-**1. Backend on Render**
+### Required environment variables on Vercel
 
-1. New **Web Service** → connect this repo.
-2. **Root Directory:** `backend`
-3. **Build Command:** `npm install` (same as `npm run render-build`).
-4. **Start Command:** `npm start`
-5. **Environment:** set **`JWT_SECRET`** to a long random string (required for admin login).
-6. After deploy, copy the service URL (e.g. `https://your-api.onrender.com`). Open `https://your-api.onrender.com/api/health` — you should see `{"ok":true}` and no `ephemeralWarning` once storage is configured (see step 7). If you get `x-render-routing: no-server` or plain “Not Found”, the URL is wrong or the service failed to start (check Render logs).
-7. **Persistence (pick one):**
-   - **Free Render (no paid disk):** Set **`LIBSQL_URL`** + **`LIBSQL_AUTH_TOKEN`** (Turso) and **`CLOUDINARY_CLOUD_NAME`**, **`CLOUDINARY_API_KEY`**, **`CLOUDINARY_API_SECRET`**. The API uses Turso for SQLite in the cloud and Cloudinary for admin image URLs (HTTPS in the DB).
-   - **Paid Render disk:** Attach a **persistent disk** (e.g. mount **`/data`**). Set **`PORTFOLIO_DB_PATH=/data/portfolio.db`** and **`PORTFOLIO_UPLOADS_DIR=/data/assets`**. Optional: use the repo’s **`render.yaml`** as a Blueprint template when creating a new service.
+| Variable | Purpose |
+|----------|---------|
+| `MONGODB_URI` | MongoDB Atlas connection string (`mongodb+srv://...`) |
+| `JWT_SECRET` | Secret for signing admin JWT tokens |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name |
+| `CLOUDINARY_API_KEY` | Cloudinary API key |
+| `CLOUDINARY_API_SECRET` | Cloudinary API secret |
 
-**2. Frontend on Netlify**
+Set these under **Project Settings → Environment Variables** for the **Production** environment.
 
-1. New site from Git → same repo, **base directory empty** (repo root).
-2. **Build command:** `npm run build`
-3. **Publish directory:** `dist`
-4. **Environment variables** (Site settings → Environment variables), then trigger a new deploy (clear cache if you change them):
+### How it works
 
-   | Name | Example value |
-   |------|----------------|
-   | `VITE_API_ORIGIN` | `https://your-api.onrender.com` (no trailing slash) |
-   | `VITE_API_BASE_URL` | `https://your-api.onrender.com/api` |
+- `vercel.json` rewrites `/api/*` to `api/index.js` (serverless function) and all other routes to `index.html` (SPA fallback)
+- The serverless function handles all CRUD operations directly using Mongoose — no Express layer in production
+- MongoDB Atlas IP access list should include `0.0.0.0/0` since Vercel uses dynamic IPs
 
-5. `netlify.toml` already SPA-rewrites `/*` → `/index.html` so `/admin` works.
+### After deploy
 
-**Common mistake:** If the live site tries to load `http://localhost:5000/api/...`, Netlify (or a committed `.env`) has **`VITE_API_BASE_URL` set to localhost**. Browsers on your visitors’ machines cannot reach your laptop. Replace it with your Render URL (`https://…onrender.com/api`), save, and trigger a new deploy. The production build will fail fast if these variables still point at localhost.
-
-**3. Media (projects / testimonials)**
-
-- Easiest: keep files in **`public/assets/`** in this repo so Netlify serves them at `https://your-site.netlify.app/assets/...`. The app resolves `/assets/...` to the **same origin** as the site by default.
-- If media is only on the API, set **`VITE_ASSET_ORIGIN`** to your Render URL so `resolveMediaUrl` points `/assets/...` at the backend.
-
-**4. CORS**
-
-The API uses open `cors()` so the Netlify origin can call Render without extra config.
+- Portfolio: `https://serge-portifolio.vercel.app`
+- Admin: `https://serge-portifolio.vercel.app/admin`
+- Default credentials: `admin` / `admin123` — **change the password immediately after first login**
 
 ---
 
-### Static frontend only (Vercel / Netlify / similar)
+## API Endpoints
 
-1. Build command: `npm run build`
-2. Output directory: `dist`
-3. **SPA routing:** `vercel.json` and `public/_redirects` / `netlify.toml` send client routes like `/admin` to `index.html`.
+All endpoints are under `/api`:
 
-### Backend elsewhere
-
-Deploy the `backend/` folder (Railway, Fly.io, VPS, etc.). Set **`JWT_SECRET`**. On any host with an ephemeral filesystem, set **`PORTFOLIO_DB_PATH`** and **`PORTFOLIO_UPLOADS_DIR`** on a mounted volume so the database and uploaded files survive restarts.
-
----
-
-## API overview (backend)
-
-High-level routes (all under `/api` unless you mount differently):
-
-- `GET/POST` projects, testimonials (admin for mutations)
-- `POST /contact` — contact form
-- `GET/PUT` resume URL setting
-- `POST /login`, `GET /verify` — admin auth
-
-See `backend/server.js` for the full list.
-
----
-
-## Admin
-
-- Route: **`/admin`** (after build + SPA hosting rules)
-- Default seeded credentials exist only in local DB setup (change password in production).
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| GET | `/health` | — | Health check |
+| POST | `/login` | — | Admin login → JWT |
+| GET | `/auth/me` | ✓ | Current admin info |
+| PUT | `/auth/password` | ✓ | Change password |
+| PUT | `/auth/username` | ✓ | Change username |
+| GET | `/projects` | — | List projects |
+| POST | `/projects` | ✓ | Create project |
+| PUT | `/projects/:id` | ✓ | Update project |
+| DELETE | `/projects/:id` | ✓ | Delete project |
+| GET | `/testimonials` | — | List testimonials |
+| POST | `/testimonials` | ✓ | Create testimonial |
+| PUT | `/testimonials/:id` | ✓ | Update testimonial |
+| DELETE | `/testimonials/:id` | ✓ | Delete testimonial |
+| POST | `/contact` | — | Submit contact message |
+| GET | `/messages` | ✓ | List messages |
+| PUT | `/messages/mark-read` | ✓ | Mark all messages read |
+| DELETE | `/messages/:id` | ✓ | Delete message |
+| POST | `/upload` | ✓ | Upload image to Cloudinary |
+| GET | `/settings/resume` | — | Get resume URL |
+| PUT | `/settings/resume` | ✓ | Update resume URL |
 
 ---
 
 ## Author
 
-**Serge Ishimwe** — full-stack developer, aspiring AI engineer.
-
----
-
-## GitHub profile & repo About
-
-The line under your repo name on your profile comes from the repo **About** description on GitHub (not from this README).
-
-### If the description will not save
-
-- Use **plain typing** or paste from the **ASCII lines below** (avoid curly quotes or long em dashes copied from the web).
-- Stay under **350 characters** (GitHub’s limit).
-- Click **Save changes** at the bottom of the About panel (closing the panel without saving discards edits).
-- Add **Topics** one at a time: type a word, press **Enter**, then save. Do not paste the whole topic list as one blob into the description box.
-- Try another browser or a private window if the button does nothing (extensions sometimes block GitHub).
-- Try **Settings** (not only the About gear): open `https://github.com/Sergi-e/FUTURE_FS_01/settings` → **General** → find the **Description** field under the repository name, save with **Save** at the bottom of that page.
-
-### Set the description via API (when the website still fails)
-
-Use **Node** (same as this project) so auth matches what GitHub expects:
-
-1. Create a **Personal Access Token** (never commit it):
-   - **Classic (simplest):** [New classic token](https://github.com/settings/tokens/new) → enable **`repo`** → generate → copy `ghp_...`.
-   - **Fine-grained:** [New fine-grained token](https://github.com/settings/personal-access-tokens/new) → repository **FUTURE_FS_01** only → **Administration**: **Read and write**.
-
-2. From the project root in a terminal:
-
-```bash
-# Windows CMD
-set GITHUB_TOKEN=ghp_your_token_here
-npm run repo:description
-
-# PowerShell
-$env:GITHUB_TOKEN = "ghp_your_token_here"
-npm run repo:description
-```
-
-Custom one-liner:
-
-```bash
-npm run repo:description -- "Personal portfolio - React, Vite, Express, SQLite."
-```
-
-The script tries **Bearer** and **`token`** auth (classic PATs often need the second). If it still fails, the printed **JSON error message** is the real reason (wrong scopes, SSO not authorized, typo in token, etc.).
-
-**PowerShell-only** (alternative): `.\scripts\set-github-repo-description.ps1`
-
-Revoke the token after use if you want it gone.
-
-### Copy-paste descriptions (plain ASCII)
-
-**Recommended (one line):**
-
-```text
-Full-stack portfolio: React, Vite, GSAP, Lenis, Express, SQLite API, projects, testimonials, contact, admin dashboard.
-```
-
-**Shorter:**
-
-```text
-Personal portfolio - React, Vite, GSAP, Lenis, Express, SQLite, admin tools.
-```
-
-**Topics to add separately** (each as its own topic chip): `react` `vite` `portfolio` `gsap` `lenis` `express` `sqlite` `javascript` `fullstack`
+**Serge Ishimwe** — Full-stack developer and aspiring AI/ML engineer.
 
 ---
 
 ## License
 
-This project is **private** / personal unless you choose to add an explicit license file.
+Private / personal project.
