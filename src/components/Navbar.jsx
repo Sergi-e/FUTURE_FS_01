@@ -225,8 +225,8 @@ export default function Navbar() {
           <div className="menu-left-col">
             <div className="menu-discovery-card">
               <p className="discovery-text">
-                Thank you for your interest in knowing what I do.
-                <span>To know more about me, navigate through my portfolio.</span>
+                Here is everything in one place.
+                <span>Pick a section and explore.</span>
               </p>
               <div className="shiny-arrow">
                 <svg viewBox="0 0 100 20" fill="none" xmlns="http://www.w3.org/2000/svg">

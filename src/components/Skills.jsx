@@ -57,9 +57,6 @@ function TechPill({ tech, iconUrl }) {
         />
       </div>
       <span className="tech-name-label">{tech.name}</span>
-      <div className="tech-role-info">
-        <span className="tech-role-tag">{tech.role}</span>
-      </div>
     </div>
   );
 }

@@ -87,7 +87,6 @@
 .ethos-code-card {
   flex: 0 0 auto;
   align-self: center;
-  margin-top: clamp(3rem, 6vw, 5rem);
   width: clamp(300px, 38%, 460px);
   /* warm-dark to match --c-ethos section palette */
   background: hsl(38 8% 10%);

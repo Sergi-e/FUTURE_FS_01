@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import './Hero.css';
 import portrait from '../assets/serge_portrait.png';
-import approachBadge from '../assets/approach-badge.svg';
 import { getJson } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
 
@@ -125,16 +124,7 @@ export default function Hero({ approachSlotRef }) {
         </a>
       </div>
 
-      <div className="hero-bottom-info">
-        <a 
-          href="https://maps.google.com/?q=Accra,+Ghana" 
-          target="_blank" 
-          rel="noopener noreferrer" 
-          className="info-location-link"
-        >
-          <span className="info-location bottom-right-loc">ACCRA, GHANA</span>
-        </a>
-      </div>
+      <div className="hero-bottom-info" style={{ display: 'none' }} aria-hidden="true" />
 
       <div className="hero-content-centered">
         <div className="hero-portrait-wrap">
@@ -154,21 +144,14 @@ export default function Hero({ approachSlotRef }) {
               ref={approachSlotRef}
               className="title-approach-slot"
               aria-hidden="true"
-            >
-              <img
-                src={approachBadge}
-                alt=""
-                className="title-approach-badge-img"
-                draggable={false}
-              />
-            </span>
+            />
             <span className="title-word accent-text">{splitTextToSpans(' AI/ML')}</span>
           </div>
         </div>
         
         <p className="hero-subtitle">
           Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
-          products that are reliable by design and useful by intention. Welcome to my portfolio!
+          products that are reliable by design and useful by intention.
         </p>
 
         <div className="hero-actions-minimal">
@@ -180,6 +163,12 @@ export default function Hero({ approachSlotRef }) {
           >
             [ VIEW RESUME ]
           </a>
+        </div>
+
+        <div className="hero-scroll-indicator" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
         </div>
       </div>
     </section>

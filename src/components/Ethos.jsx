@@ -44,11 +44,13 @@ export default function Ethos() {
           { backgroundPositionX: '0%', ease: 'none' },
           0
         );
+        /* Code card starts at 0.55 so it only appears after the text reveal is more than
+           halfway done — the two elements never animate simultaneously at the same progress. */
         tl.fromTo(
           '.ethos-code-card',
-          { opacity: 0, y: 32 },
-          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.4 },
-          0.1
+          { opacity: 0, y: 24 },
+          { opacity: 1, y: 0, ease: 'power2.out', duration: 0.45 },
+          0.55
         );
       }, sectionRef);
       ScrollTrigger.refresh();

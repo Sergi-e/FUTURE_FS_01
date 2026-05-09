@@ -180,30 +180,14 @@
 }
 
 .title-approach-slot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
   vertical-align: middle;
-  /* Match visual weight of the old “+” at headline scale (parent row has no title font-size) */
-  width: clamp(2.5rem, 7.5vw, 4.75rem);
-  height: clamp(2.5rem, 7.5vw, 4.75rem);
-  margin: 0 clamp(0.15rem, 0.5vw, 0.35rem);
-  position: relative;
   flex-shrink: 0;
-}
-
-.title-approach-badge-img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  pointer-events: none;
-}
-
-@media (min-width: 769px) {
-  html.approach-morph-active .title-approach-badge-img {
-    visibility: hidden;
-  }
 }
 
 /* Subtitle */
@@ -327,4 +311,21 @@
     white-space: normal;
     line-height: 1.3;
   }
+}
+
+
+/* Scroll indicator */
+.hero-scroll-indicator {
+  margin-top: 0.25rem;
+  color: var(--accent-neon);
+  opacity: 0.8;
+  animation: heroScrollBounce 1.8s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes heroScrollBounce {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(7px); opacity: 1; }
 }
