@@ -35,6 +35,12 @@
   z-index: 1100;
 }
 
+/* Keep the X (hamburger close) button above the menu overlay */
+.navbar.menu-open .navbar-top {
+  position: relative;
+  z-index: 1200;
+}
+
 .navbar.scrolled {
   /* Tint follows active section (see data-section + rules below); matches section-ambient --c-* */
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);

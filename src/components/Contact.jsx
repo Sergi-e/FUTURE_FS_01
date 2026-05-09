@@ -161,7 +161,7 @@ export default function Contact() {
       <footer className="footer">
         <div className="footer-left">
           <span style={{ fontSize: '0.85rem', fontWeight: '300', letterSpacing: '0.05em' }}>
-            Copyright &copy; 2026 Serge Ishimwe
+            &copy; 2026 Leadrift. All rights reserved.
           </span>
         </div>
         <div className="footer-right">
