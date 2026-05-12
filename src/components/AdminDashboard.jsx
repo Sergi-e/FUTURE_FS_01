@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, startTransition } from 'react';
+import React, { useState, useEffect, useCallback, useRef, startTransition } from 'react';
 import { API_BASE_URL } from '../config/api';
 import { fetchJson, fetchJsonWithStatus, getJson, getJsonAuth, uploadAdminImage } from '../lib/apiClient';
 import { resolveMediaUrl } from '../lib/mediaUrl';
@@ -165,6 +165,10 @@ export default function AdminDashboard() {
 
   const [projectForm, setProjectForm] = useState({ ...EMPTY_PROJECT });
   const [editingProjectId, setEditingProjectId] = useState(null);
+  const [editProjectForm, setEditProjectForm] = useState({ ...EMPTY_PROJECT });
+  const [editProjectSaving, setEditProjectSaving] = useState(false);
+  const editProjectTriggerRef = useRef(null);
+  const editProjectFirstFieldRef = useRef(null);
 
   const [newTestimonial, setNewTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
   const [editTestimonial, setEditTestimonial] = useState({ ...EMPTY_TESTIMONIAL });
@@ -312,40 +316,91 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleSaveProject = async (e) => {
+  const handleAddProject = async (e) => {
     e.preventDefault();
     try {
-      if (editingProjectId) {
-        await fetchJson(`${API_BASE_URL}/projects/${editingProjectId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(projectForm),
-        });
-        setEditingProjectId(null);
-      } else {
-        await fetchJson(`${API_BASE_URL}/projects`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(projectForm),
-        });
-      }
+      await fetchJson(`${API_BASE_URL}/projects`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(projectForm),
+      });
       setProjectForm({ ...EMPTY_PROJECT });
       fetchData();
     } catch (err) {
       if (consumeAuthFailure(err)) return;
-      alert(editingProjectId ? 'Failed to update project' : 'Failed to add project');
+      alert('Failed to add project');
     }
   };
 
-  const startEditProject = (p) => {
-    setEditingProjectId(p.id);
-    setProjectForm({
+  const closeEditProjectModal = useCallback(() => {
+    setEditingProjectId(null);
+    setEditProjectForm({ ...EMPTY_PROJECT });
+    setEditProjectSaving(false);
+    const trigger = editProjectTriggerRef.current;
+    editProjectTriggerRef.current = null;
+    if (trigger && typeof trigger.focus === 'function') {
+      trigger.focus();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (editingProjectId == null) return undefined;
+    const onKey = (e) => {
+      if (e.key === 'Escape' && !editProjectSaving) {
+        e.stopPropagation();
+        closeEditProjectModal();
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const focusTimer = window.setTimeout(() => {
+      editProjectFirstFieldRef.current?.focus();
+    }, 0);
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+      window.clearTimeout(focusTimer);
+    };
+  }, [editingProjectId, editProjectSaving, closeEditProjectModal]);
+
+  const handleUpdateProject = async (e) => {
+    e.preventDefault();
+    if (editingProjectId == null) return;
+    const rawId = String(editingProjectId).trim();
+    if (!rawId) {
+      alert('Cannot save: missing project id.');
+      return;
+    }
+    setEditProjectSaving(true);
+    try {
+      await fetchJson(`${API_BASE_URL}/projects/${encodeURIComponent(rawId)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(editProjectForm),
+      });
+      closeEditProjectModal();
+      fetchData();
+    } catch (err) {
+      setEditProjectSaving(false);
+      if (consumeAuthFailure(err)) return;
+      alert(err instanceof Error ? err.message : 'Failed to update project');
+    }
+  };
+
+  const startEditProject = (p, triggerEl) => {
+    if (!p || p.id == null) {
+      alert('Cannot edit: missing project id.');
+      return;
+    }
+    editProjectTriggerRef.current = triggerEl || null;
+    setEditProjectForm({
       title: p.title || '',
       subtitle: p.subtitle || '',
       year: p.year || '',
@@ -353,11 +408,11 @@ export default function AdminDashboard() {
       mediaType: p.mediaType || 'image',
       mediaPath: p.mediaPath || '',
     });
+    setEditingProjectId(p.id);
   };
 
   const cancelEditProject = () => {
-    setEditingProjectId(null);
-    setProjectForm({ ...EMPTY_PROJECT });
+    closeEditProjectModal();
   };
 
   const handleDeleteProject = (id, title) => {
@@ -685,16 +740,12 @@ export default function AdminDashboard() {
                   </details>
 
                   <div className="admin-stack">
-                    <div className={`admin-card${editingProjectId ? ' admin-card--accent' : ''}`}>
+                    <div className="admin-card">
                       <div className="admin-card-header">
-                        <h2 className="admin-card-title">{editingProjectId ? 'Edit project' : 'New project'}</h2>
-                        {editingProjectId ? (
-                          <span className="admin-badge">ID {editingProjectId}</span>
-                        ) : (
-                          <span className="admin-badge admin-badge--muted">Create</span>
-                        )}
+                        <h2 className="admin-card-title">New project</h2>
+                        <span className="admin-badge admin-badge--muted">Create</span>
                       </div>
-                      <form onSubmit={handleSaveProject}>
+                      <form onSubmit={handleAddProject}>
                         <div className="admin-form-grid">
                           <Field id="pf-title" label="Title" className="admin-field--full">
                             <input
@@ -767,13 +818,8 @@ export default function AdminDashboard() {
                         </div>
                         <div className="admin-form-actions">
                           <button type="submit" className="admin-btn-primary">
-                            {editingProjectId ? 'Save changes' : 'Add project'}
+                            Add project
                           </button>
-                          {editingProjectId ? (
-                            <button type="button" className="admin-btn-secondary" onClick={cancelEditProject}>
-                              Cancel editing
-                            </button>
-                          ) : null}
                         </div>
                       </form>
                     </div>
@@ -805,7 +851,13 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                           <div className="admin-row-actions">
-                            <button type="button" className="admin-btn-edit" onClick={() => startEditProject(p)}>
+                            <button
+                              type="button"
+                              className="admin-btn-edit"
+                              aria-haspopup="dialog"
+                              aria-expanded={editingProjectId === p.id}
+                              onClick={(e) => startEditProject(p, e.currentTarget)}
+                            >
                               Edit
                             </button>
                             <button type="button" className="admin-btn-delete" onClick={() => handleDeleteProject(p.id, p.title)}>
@@ -1151,6 +1203,142 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+      {editingProjectId != null ? (
+        <div
+          className="admin-modal-backdrop"
+          role="presentation"
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget && !editProjectSaving) cancelEditProject();
+          }}
+        >
+          <div
+            className="admin-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ep-modal-title"
+          >
+            <div className="admin-modal-header">
+              <div className="admin-modal-header-text">
+                <h2 className="admin-card-title" id="ep-modal-title">
+                  Edit project
+                </h2>
+                <span className="admin-badge">ID {editingProjectId}</span>
+              </div>
+              <button
+                type="button"
+                className="admin-modal-close"
+                aria-label="Close edit project dialog"
+                onClick={cancelEditProject}
+                disabled={editProjectSaving}
+              >
+                ×
+              </button>
+            </div>
+            <form className="admin-modal-form" onSubmit={handleUpdateProject}>
+              <div className="admin-modal-body">
+                <div className="admin-form-grid">
+                  <Field id="ep-title" label="Title" className="admin-field--full">
+                    <input
+                      id="ep-title"
+                      ref={editProjectFirstFieldRef}
+                      className="admin-input"
+                      value={editProjectForm.title}
+                      onChange={(e) =>
+                        setEditProjectForm((p) => ({ ...p, title: e.target.value }))
+                      }
+                      required
+                    />
+                  </Field>
+                  <Field id="ep-year" label="Year">
+                    <input
+                      id="ep-year"
+                      className="admin-input"
+                      value={editProjectForm.year}
+                      onChange={(e) =>
+                        setEditProjectForm((p) => ({ ...p, year: e.target.value }))
+                      }
+                    />
+                  </Field>
+                  <Field id="ep-link" label="Project URL" className="admin-field--full">
+                    <input
+                      id="ep-link"
+                      className="admin-input"
+                      type="url"
+                      placeholder="https://…"
+                      value={editProjectForm.link}
+                      onChange={(e) =>
+                        setEditProjectForm((p) => ({ ...p, link: e.target.value }))
+                      }
+                    />
+                  </Field>
+                  <Field id="ep-sub" label="Subtitle / description" className="admin-field--full">
+                    <input
+                      id="ep-sub"
+                      className="admin-input"
+                      value={editProjectForm.subtitle}
+                      onChange={(e) =>
+                        setEditProjectForm((p) => ({ ...p, subtitle: e.target.value }))
+                      }
+                      required
+                    />
+                  </Field>
+                  <Field id="ep-type" label="Media type">
+                    <select
+                      id="ep-type"
+                      className="admin-select"
+                      value={editProjectForm.mediaType}
+                      onChange={(e) =>
+                        setEditProjectForm((p) => ({ ...p, mediaType: e.target.value }))
+                      }
+                    >
+                      <option value="image">Image</option>
+                      <option value="video">Video</option>
+                      <option value="placeholder">Placeholder</option>
+                    </select>
+                  </Field>
+                  <Field
+                    id="ep-media"
+                    label="Media path or URL"
+                    hint="Type a path / URL or upload — files go to /assets on the API server; upload sets type to Image."
+                    className="admin-field--full"
+                  >
+                    <AdminImagePathInput
+                      id="ep-media"
+                      value={editProjectForm.mediaPath}
+                      token={token}
+                      onAuthError={consumeAuthFailure}
+                      setPath={(path, meta) =>
+                        setEditProjectForm((p) => ({
+                          ...p,
+                          mediaPath: path,
+                          ...(meta?.source === 'upload' ? { mediaType: 'image' } : {}),
+                        }))
+                      }
+                    />
+                  </Field>
+                </div>
+              </div>
+              <div className="admin-modal-actions">
+                <button
+                  type="submit"
+                  className="admin-btn-primary"
+                  disabled={editProjectSaving}
+                >
+                  {editProjectSaving ? 'Saving…' : 'Save changes'}
+                </button>
+                <button
+                  type="button"
+                  className="admin-btn-secondary"
+                  onClick={cancelEditProject}
+                  disabled={editProjectSaving}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
