@@ -269,6 +269,8 @@ export default function Works() {
           const mediaSrc = resolveMediaUrl(project.mediaPath);
           const hasLink = Boolean(project.link && String(project.link).trim());
           const stepNumber = String(i + 1).padStart(2, '0');
+          const isClimateChange = /climate\s*change/i.test(String(project.title || ''));
+          const linkLabel = isClimateChange ? 'VIEW PROJECT' : 'VISIT SITE';
 
           return (
             <div key={project.id} className="works-step-mobile">
@@ -302,7 +304,7 @@ export default function Works() {
                       rel="noopener noreferrer" 
                       className="works-project-link"
                     >
-                      (&nbsp;&nbsp;&nbsp;VISIT SITE ↗&nbsp;&nbsp;&nbsp;)
+                      (&nbsp;&nbsp;&nbsp;{linkLabel} ↗&nbsp;&nbsp;&nbsp;)
                     </a>
                   )}
 
