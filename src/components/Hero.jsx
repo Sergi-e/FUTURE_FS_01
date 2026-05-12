@@ -102,13 +102,14 @@ export default function Hero({ approachSlotRef }) {
       <div className="hero-top-glow"></div>
       
       <div className="hero-info-bar">
-        <a 
-          href="https://maps.google.com/?q=Kigali,+Rwanda" 
-          target="_blank" 
-          rel="noopener noreferrer" 
+        <a
+          href="https://maps.google.com/?q=Accra,+Ghana"
+          target="_blank"
+          rel="noopener noreferrer"
           className="info-location-link"
         >
-          <span className="info-location top-right-loc">KIGALI, RWANDA</span>
+          <span className="info-location-caption">BASED IN</span>
+          <span className="info-location top-right-loc">ACCRA, GHANA</span>
         </a>
       </div>
 
@@ -124,7 +125,17 @@ export default function Hero({ approachSlotRef }) {
         </a>
       </div>
 
-      <div className="hero-bottom-info" style={{ display: 'none' }} aria-hidden="true" />
+      <div className="hero-bottom-info">
+        <a
+          href="https://maps.google.com/?q=Kigali,+Rwanda"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="info-location-link"
+        >
+          <span className="info-location-caption">ALSO IN</span>
+          <span className="info-location bottom-right-loc">KIGALI, RWANDA</span>
+        </a>
+      </div>
 
       <div className="hero-content-centered">
         <div className="hero-portrait-wrap">
@@ -150,8 +161,8 @@ export default function Hero({ approachSlotRef }) {
         </div>
         
         <p className="hero-subtitle">
-          Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer based in Kigali. I build
-          products that are reliable by design and useful by intention.
+          Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer. I build products that
+          are reliable by design and useful by intention.
         </p>
 
         <div className="hero-actions-minimal">
