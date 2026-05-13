@@ -46,6 +46,8 @@ async function getBody(req) {
   });
 }
 
+const EMAIL_FORMAT = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 let _ephemeralJwtSecret = null;
 let _warnedAboutMissingSecret = false;
 /**
@@ -184,13 +186,24 @@ module.exports = async (req, res) => {
       const jwt = require('jsonwebtoken');
       const secret = getJwtSecret();
       const { currentPassword, newUsername } = JSON.parse(await getBody(req) || '{}');
-      if (!currentPassword || !newUsername) return sendJson(res, 400, { error: 'Invalid request' });
+      const name = String(newUsername || '').trim();
+      if (!currentPassword || !name) {
+        return sendJson(res, 400, { error: 'Current password and new username are required' });
+      }
+      if (name.length < 2 || name.length > 64) {
+        return sendJson(res, 400, { error: 'Username must be between 2 and 64 characters' });
+      }
       const admin = await Admin.findOne({ id: user.id });
-      if (!admin || !(await bcrypt.compare(currentPassword, admin.password))) return sendJson(res, 401, { error: 'Current password is incorrect' });
-      admin.username = newUsername;
+      if (!admin) return sendJson(res, 404, { error: 'Account not found' });
+      if (!(await bcrypt.compare(currentPassword, admin.password))) {
+        return sendJson(res, 401, { error: 'Current password is incorrect' });
+      }
+      const taken = await Admin.findOne({ username: name, id: { $ne: user.id } });
+      if (taken) return sendJson(res, 409, { error: 'That username is already in use' });
+      admin.username = name;
       await admin.save();
-      const token = jwt.sign({ id: admin.id, username: newUsername }, secret, { expiresIn: '12h' });
-      return sendJson(res, 200, { success: true, token, username: newUsername });
+      const token = jwt.sign({ id: admin.id, username: name }, secret, { expiresIn: '12h' });
+      return sendJson(res, 200, { success: true, token, username: name });
     }
 
     // --- Projects ---
@@ -214,9 +227,11 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'PUT' && /^\/api\/projects\/\d+$/.test(p)) {
       verifyToken(req);
-      const id = Number(p.split('/').pop());
+      const id = Number.parseInt(String(p.split('/').pop()), 10);
+      if (!Number.isInteger(id) || id < 1) return sendJson(res, 400, { error: 'Invalid project id' });
       const { title, subtitle, year, link, mediaType, mediaPath } = JSON.parse(await getBody(req) || '{}');
-      await Project.findOneAndUpdate({ id }, { $set: { title, subtitle, year, link, mediaType, mediaPath } });
+      const result = await Project.findOneAndUpdate({ id }, { $set: { title, subtitle, year, link, mediaType, mediaPath } });
+      if (!result) return sendJson(res, 404, { error: 'Project not found' });
       return sendJson(res, 200, { success: true });
     }
 
@@ -234,9 +249,11 @@ module.exports = async (req, res) => {
     }
     if (req.method === 'PUT' && /^\/api\/testimonials\/\d+$/.test(p)) {
       verifyToken(req);
-      const id = Number(p.split('/').pop());
+      const id = Number.parseInt(String(p.split('/').pop()), 10);
+      if (!Number.isInteger(id) || id < 1) return sendJson(res, 400, { error: 'Invalid testimonial id' });
       const { name, role, location, image, quote, tag } = JSON.parse(await getBody(req) || '{}');
-      await Testimonial.findOneAndUpdate({ id }, { $set: { name, role, location, image, quote, tag } });
+      const result = await Testimonial.findOneAndUpdate({ id }, { $set: { name, role, location, image, quote, tag } });
+      if (!result) return sendJson(res, 404, { error: 'Testimonial not found' });
       return sendJson(res, 200, { success: true });
     }
     if (req.method === 'DELETE' && /^\/api\/testimonials\/\d+$/.test(p)) {
@@ -268,10 +285,16 @@ module.exports = async (req, res) => {
 
     // --- Contact ---
     if (req.method === 'POST' && p === '/api/contact') {
-      const { name, email, message } = JSON.parse(await getBody(req) || '{}');
-      const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const body = JSON.parse(await getBody(req) || '{}');
+      const name = String(body.name ?? '').trim();
+      const email = String(body.email ?? '').trim();
+      const message = String(body.message ?? '').trim();
       if (!name || !email || !message) return sendJson(res, 400, { error: 'Name, email, and message are required.' });
-      if (!EMAIL_RE.test(email)) return sendJson(res, 400, { error: 'Please enter a valid email address.' });
+      if (!EMAIL_FORMAT.test(email)) {
+        return sendJson(res, 400, { error: 'Please enter a valid email address (e.g. name@example.com).' });
+      }
+      if (name.length > 200) return sendJson(res, 400, { error: 'Name is too long.' });
+      if (message.length > 20000) return sendJson(res, 400, { error: 'Message is too long (max 20,000 characters).' });
       const id = await nextId('message');
       await Message.create({ id, name, email, message, date: new Date().toISOString(), is_read: 0 });
       return sendJson(res, 200, { success: true });
