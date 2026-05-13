@@ -75,31 +75,15 @@
 
 .info-location-link {
   display: inline-flex;
-  flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
   text-decoration: none;
   transition: all 0.3s ease;
   z-index: 20;
 }
 
-.info-location-caption {
-  font-family: var(--font-sans);
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: #6a6a6a;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-.info-location-link:hover .info-location,
-.info-location-link:hover .info-location-caption {
+.info-location-link:hover .info-location {
   color: var(--accent-neon, #ccff00);
   opacity: 1;
-}
-
-.info-location-link:hover .info-location {
   text-shadow: 0 0 10px rgba(204, 255, 0, 0.3);
 }
 
@@ -311,11 +295,6 @@
   .hero-info-bar .info-location,
   .hero-bottom-info .info-location {
     font-size: 0.7rem;
-  }
-  .hero-info-bar .info-location-caption,
-  .hero-bottom-info .info-location-caption {
-    font-size: 0.55rem;
-    letter-spacing: 1.6px;
   }
   .hero-bottom-info {
     padding: 0 30px;

@@ -108,7 +108,6 @@ export default function Hero({ approachSlotRef }) {
           rel="noopener noreferrer"
           className="info-location-link"
         >
-          <span className="info-location-caption">BASED IN</span>
           <span className="info-location top-right-loc">ACCRA, GHANA</span>
         </a>
       </div>
@@ -132,7 +131,6 @@ export default function Hero({ approachSlotRef }) {
           rel="noopener noreferrer"
           className="info-location-link"
         >
-          <span className="info-location-caption">ALSO IN</span>
           <span className="info-location bottom-right-loc">KIGALI, RWANDA</span>
         </a>
       </div>
