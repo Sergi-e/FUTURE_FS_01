@@ -420,9 +420,9 @@
   .skills {
     padding: 24px max(16px, env(safe-area-inset-left, 0px)) 24px max(16px, env(safe-area-inset-right, 0px));
   }
-}
-
-@media (max-width: 767px) {
+  .skills-title {
+    letter-spacing: -0.5px;
+  }
   .experience-card {
     grid-template-columns: 1fr;
     text-align: center;

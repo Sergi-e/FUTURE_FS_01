@@ -374,7 +374,18 @@
   .hobbies-header-alt {
     padding: 0 20px;
   }
+  .hobbies-tag-alt {
+    font-size: 1rem;
+    letter-spacing: 0.18em;
+  }
+  .hobbies-main-title {
+    letter-spacing: -1px;
+  }
   .hobbies-carousel-track {
     padding: 40px 0 60px;
+  }
+  .book-item {
+    width: 120px;
+    height: 180px;
   }
 }

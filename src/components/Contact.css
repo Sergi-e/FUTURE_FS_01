@@ -92,7 +92,10 @@
   text-underline-offset: 3px;
   cursor: pointer;
   transition: color 0.3s ease;
-  padding: 0;
+  padding: 0.6rem 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .contact-form-trigger:hover {
@@ -132,6 +135,7 @@
 
 .contact-input {
   padding: 12px;
+  min-height: 44px;
   border: 1px solid #333;
   border-radius: 6px;
   background: #0a0a0a;
@@ -158,6 +162,7 @@
 
 .contact-submit-btn {
   padding: 12px 24px;
+  min-height: 44px;
   background: var(--accent-neon);
   color: black;
   border: none;
