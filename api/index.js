@@ -28,9 +28,43 @@ async function getBody(req) {
   });
 }
 
+let _ephemeralJwtSecret = null;
+let _warnedAboutMissingSecret = false;
+/**
+ * Returns the JWT signing secret. Refuses to fall back to a hardcoded default:
+ * - Production (Vercel sets `VERCEL=1` / `NODE_ENV=production`): throws a 500
+ *   so admin endpoints cannot be silently signed with a publicly-known secret.
+ * - Non-production: generates a single random secret per Node process so dev
+ *   tokens are unforgeable across machines and restarts.
+ */
+function getJwtSecret() {
+  const fromEnv = String(process.env.JWT_SECRET || '').trim();
+  if (fromEnv) return fromEnv;
+  const isProd =
+    process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL === '1' ||
+    process.env.VERCEL === 'true';
+  if (isProd) {
+    const err = new Error(
+      'JWT_SECRET is not configured on the server. Set JWT_SECRET (a long random string) in your host environment (e.g. Vercel → Project Settings → Environment Variables) and redeploy.'
+    );
+    err.status = 500;
+    err.code = 'JWT_SECRET_MISSING';
+    throw err;
+  }
+  if (!_ephemeralJwtSecret) {
+    _ephemeralJwtSecret = require('crypto').randomBytes(32).toString('hex');
+  }
+  if (!_warnedAboutMissingSecret) {
+    _warnedAboutMissingSecret = true;
+    console.warn('[api] JWT_SECRET is not set — using an ephemeral random secret for this process (development only). Set JWT_SECRET to keep admin sessions valid across restarts.');
+  }
+  return _ephemeralJwtSecret;
+}
+
 function verifyToken(req) {
   const jwt = require('jsonwebtoken');
-  const secret = String(process.env.JWT_SECRET || 'super_secret_key_123').trim();
+  const secret = getJwtSecret();
   const auth = String(req.headers['authorization'] || '');
   const token = auth.replace(/^Bearer\s+/i, '').trim();
   if (!token) throw Object.assign(new Error('Unauthorized'), { status: 401 });
@@ -115,7 +149,7 @@ module.exports = async (req, res) => {
     if (req.method === 'POST' && p === '/api/login') {
       const bcrypt = require('bcryptjs');
       const jwt = require('jsonwebtoken');
-      const secret = String(process.env.JWT_SECRET || 'super_secret_key_123').trim();
+      const secret = getJwtSecret();
       const body = JSON.parse(await getBody(req) || '{}');
       const { username, password } = body;
       if (!username || !password) return sendJson(res, 400, { error: 'username and password required' });
@@ -147,7 +181,7 @@ module.exports = async (req, res) => {
           }
           const resumeSetting = await Setting.findOne({ key: 'resume_url' });
           if (!resumeSetting) {
-            await Setting.create({ key: 'resume_url', value: '/Serge_Ishimwe_Resume_Portifolio.pdf' });
+            await Setting.create({ key: 'resume_url', value: '/Serge_Ishimwe_Resume.pdf' });
           }
         }
       }
@@ -186,7 +220,7 @@ module.exports = async (req, res) => {
       const user = verifyToken(req);
       const bcrypt = require('bcryptjs');
       const jwt = require('jsonwebtoken');
-      const secret = String(process.env.JWT_SECRET || 'super_secret_key_123').trim();
+      const secret = getJwtSecret();
       const { currentPassword, newUsername } = JSON.parse(await getBody(req) || '{}');
       if (!currentPassword || !newUsername) return sendJson(res, 400, { error: 'Invalid request' });
       const mongoose = await getMongo();
@@ -312,7 +346,7 @@ module.exports = async (req, res) => {
       const mongoose = await getMongo();
       const { Setting } = getModels(mongoose);
       const setting = await Setting.findOne({ key: 'resume_url' }).lean();
-      return sendJson(res, 200, { value: setting ? setting.value : '/Serge_Ishimwe_Resume_Portifolio.pdf' });
+      return sendJson(res, 200, { value: setting ? setting.value : '/Serge_Ishimwe_Resume.pdf' });
     }
     if (req.method === 'PUT' && p === '/api/settings/resume') {
       verifyToken(req);

@@ -131,25 +131,25 @@ async function nextId(counterName) {
   return r.seq;
 }
 
-/** Norf Cre8tions — same seed logic as former SQLite version. */
+/** Norf Cre8tions — kept in sync with src/data/seed.js and api/index.js seed. */
 const TESTIMONIAL_EMELY_MURENZI = {
   name: 'Emely Murenzi',
   role: 'Chief Technology Officer (CTO)',
-  location: 'Norf Cre8tions',
+  location: 'Musanze, Rwanda',
   image: '/assets/Emery-prof-2-min.jpg.jpeg',
   quote:
     'Serge is a highly reliable and driven contributor on our team. He approached problems with clarity, delivered clean and scalable solutions, and consistently met expectations while maintaining strong collaboration across the team.',
-  tag: 'IMG_ID: 04',
+  tag: 'Norf Cre8tions',
 };
 
 const TESTIMONIAL_ERIC_KWIZERA = {
   name: 'Eric Kwizera',
   role: 'Software Developer',
-  location: 'Norf Cre8tions',
+  location: 'Kigali, Rwanda',
   image: '/assets/Wizzy.jpeg',
   quote:
     'Working alongside Serge consistently improved the quality and speed of our delivery. He communicates clearly, writes clean and scalable code, and approaches problems with a strong focus on practical, client-ready solutions that perform reliably in real-world use.',
-  tag: 'IMG_ID: 05',
+  tag: 'Norf Cre8tions',
 };
 
 async function seedNorfCreationsTestimonials() {
@@ -229,7 +229,8 @@ async function migrateAndSeed() {
     await Project.create({
       id: id1,
       title: 'CLIMATE CHANGE IMPACT',
-      subtitle: 'Marine Life Monitoring & Data Visualization via ArcGIS',
+      subtitle:
+        'A 2025 field research project on Lake Kivu marine ecosystems, using ArcGIS for spatial analysis and interactive mapping. I monitored biodiversity, collected environmental data, and turned raw field observations into clear data visualizations. Published as an ArcGIS StoryMap — where conservation meets code.',
       year: '2025',
       link: 'https://arcg.is/09v5GS1',
       mediaType: 'video',
@@ -238,7 +239,8 @@ async function migrateAndSeed() {
     await Project.create({
       id: id2,
       title: 'BE THE LIGHT WEBSITE',
-      subtitle: 'Impactful Community Hub built with Lovable',
+      subtitle:
+        'A community platform for Be The Light, a grassroots organization supporting families in hardship and empowering youth across Rwanda, built with Lovable. It brings together the organization\'s story, mission, blog, and a community call to action in one place. A warm, purpose-driven design that reflects the heart of the movement.',
       year: '2025',
       link: 'https://bethe-light-hub.lovable.app/',
       mediaType: 'image',

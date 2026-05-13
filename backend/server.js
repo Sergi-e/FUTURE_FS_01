@@ -31,7 +31,25 @@ function isCloudinaryConfigured() {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_key_123';
+
+/**
+ * JWT signing secret. Refuses to fall back to a hardcoded default so a known
+ * value can never be used to forge admin tokens. In production we exit the
+ * process with a clear message; in development we generate a random
+ * per-process secret so dev tokens remain unforgeable across restarts.
+ */
+const JWT_SECRET = (() => {
+  const fromEnv = String(process.env.JWT_SECRET || '').trim();
+  if (fromEnv) return fromEnv;
+  const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+  if (isProd) {
+    console.error('[api] JWT_SECRET is not configured. Set JWT_SECRET (a long random string) in your host environment and restart.');
+    process.exit(1);
+  }
+  const generated = require('crypto').randomBytes(32).toString('hex');
+  console.warn('[api] JWT_SECRET is not set — using an ephemeral random secret for this process (development only). Set JWT_SECRET to keep admin sessions valid across restarts.');
+  return generated;
+})();
 
 app.set('trust proxy', 1);
 app.disable('x-powered-by');
