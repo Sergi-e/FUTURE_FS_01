@@ -258,27 +258,36 @@ async function migrateAndSeed() {
 
 let initPromise = null;
 
+/**
+ * Connects to MongoDB and runs migrations/seeds exactly once per process.
+ * The seed is awaited (not fire-and-forget) so a request that arrives during
+ * cold-start cannot observe an empty `admin` row, an uninitialized `Counter`,
+ * or partially-seeded collections. If init fails (e.g. transient Atlas blip),
+ * we clear the cached promise so the next request retries instead of being
+ * stuck on a rejected promise.
+ */
 async function setupDatabase() {
-  if (!initPromise) {
-    initPromise = (async () => {
-      if (isVercelServerless() && !isMongoConfigured()) {
-        const err = new Error(
-          'Set MONGODB_URI (MongoDB Atlas) in Vercel → Environment Variables (Production).'
-        );
-        err.code = 'SERVERLESS_DB_REQUIRED';
-        throw err;
-      }
-      if (!isMongoConfigured()) {
-        const err = new Error('Set MONGODB_URI in the environment for the API to use MongoDB Atlas.');
-        err.code = 'MONGODB_URI_MISSING';
-        throw err;
-      }
-      await connectMongo();
-      // Run seeding in background so the first request (e.g. login) is not blocked by seed ops
-      migrateAndSeed().catch((e) => console.error('[seed]', e.message));
-      return true;
-    })();
-  }
+  if (initPromise) return initPromise;
+  initPromise = (async () => {
+    if (isVercelServerless() && !isMongoConfigured()) {
+      const err = new Error(
+        'Set MONGODB_URI (MongoDB Atlas) in Vercel → Environment Variables (Production).'
+      );
+      err.code = 'SERVERLESS_DB_REQUIRED';
+      throw err;
+    }
+    if (!isMongoConfigured()) {
+      const err = new Error('Set MONGODB_URI in the environment for the API to use MongoDB Atlas.');
+      err.code = 'MONGODB_URI_MISSING';
+      throw err;
+    }
+    await connectMongo();
+    await migrateAndSeed();
+    return true;
+  })().catch((err) => {
+    initPromise = null;
+    throw err;
+  });
   return initPromise;
 }
 

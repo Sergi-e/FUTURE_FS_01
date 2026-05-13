@@ -1,5 +1,23 @@
 'use strict';
 
+/**
+ * Vercel serverless entry. Mongoose models, migrations, and seed data live in
+ * `backend/database.js` so this function and the local Express server share a
+ * single source of truth — no drift between the two seed paths, no duplicated
+ * connection or counter logic, and the first request (cold start) always sees
+ * a fully seeded database because `setupDatabase()` awaits the seed.
+ */
+
+const {
+  setupDatabase,
+  Admin,
+  Project,
+  Testimonial,
+  Message,
+  Setting,
+  nextId,
+} = require('../backend/database.js');
+
 /** Shared helpers */
 function pathOnly(req) {
   let u = req.url || '';
@@ -71,33 +89,6 @@ function verifyToken(req) {
   try { return jwt.verify(token, secret); } catch { throw Object.assign(new Error('Invalid token'), { status: 401 }); }
 }
 
-let _mongoose = null;
-async function getMongo() {
-  const mongoose = require('mongoose');
-  if (mongoose.connection.readyState === 1) { _mongoose = mongoose; return mongoose; }
-  const uri = String(process.env.MONGODB_URI || '').trim();
-  if (!uri) throw new Error('MONGODB_URI not set');
-  await mongoose.connect(uri, { serverSelectionTimeoutMS: 20000, connectTimeoutMS: 20000 });
-  _mongoose = mongoose;
-  return mongoose;
-}
-
-function getModels(mongoose) {
-  const { Schema } = mongoose;
-  const Counter = mongoose.models.Counter || mongoose.model('Counter', new Schema({ _id: String, seq: { type: Number, default: 0 } }));
-  const Admin = mongoose.models.Admin || mongoose.model('Admin', new Schema({ id: Number, username: String, password: String }));
-  const Project = mongoose.models.Project || mongoose.model('Project', new Schema({ id: Number, title: String, subtitle: String, year: String, link: String, mediaType: String, mediaPath: String }));
-  const Testimonial = mongoose.models.Testimonial || mongoose.model('Testimonial', new Schema({ id: Number, name: String, role: String, location: String, image: String, quote: String, tag: String }));
-  const Message = mongoose.models.Message || mongoose.model('Message', new Schema({ id: Number, name: String, email: String, message: String, date: String, is_read: { type: Number, default: 0 } }));
-  const Setting = mongoose.models.Setting || mongoose.model('Setting', new Schema({ key: String, value: String }));
-  return { Counter, Admin, Project, Testimonial, Message, Setting };
-}
-
-async function nextId(Counter, name) {
-  const r = await Counter.findOneAndUpdate({ _id: name }, { $inc: { seq: 1 } }, { new: true, upsert: true });
-  return r.seq;
-}
-
 module.exports = async (req, res) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
@@ -122,7 +113,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // --- Image Upload ---
+    // --- Image Upload (Cloudinary, no DB) ---
     if (req.method === 'POST' && p === '/api/upload') {
       verifyToken(req);
       const Busboy = require('busboy');
@@ -145,6 +136,12 @@ module.exports = async (req, res) => {
       return sendJson(res, 200, { path: result.secure_url, filename: result.public_id });
     }
 
+    // All routes below this point need MongoDB. setupDatabase() connects once
+    // per process AND awaits the seed, so the first request (cold start) never
+    // observes an empty admin/projects/testimonials state. Warm invocations
+    // return the cached promise immediately.
+    await setupDatabase();
+
     // --- Login ---
     if (req.method === 'POST' && p === '/api/login') {
       const bcrypt = require('bcryptjs');
@@ -153,38 +150,7 @@ module.exports = async (req, res) => {
       const body = JSON.parse(await getBody(req) || '{}');
       const { username, password } = body;
       if (!username || !password) return sendJson(res, 400, { error: 'username and password required' });
-      const mongoose = await getMongo();
-      const { Admin, Counter } = getModels(mongoose);
-      let admin = await Admin.findOne({ username });
-      // Auto-seed admin on first deployment if none exists
-      if (!admin) {
-        const count = await Admin.countDocuments();
-        if (count === 0) {
-          const id = await nextId(Counter, 'admin');
-          const hash = await bcrypt.hash('admin123', 10);
-          admin = await Admin.create({ id, username: 'admin', password: hash });
-          // Also seed default projects and testimonials on brand-new database
-          const { Project, Testimonial, Setting } = getModels(mongoose);
-          const projectCount = await Project.countDocuments();
-          if (projectCount === 0) {
-            const pid1 = await nextId(Counter, 'project');
-            const pid2 = await nextId(Counter, 'project');
-            await Project.create({ id: pid1, title: 'CLIMATE CHANGE IMPACT', subtitle: 'A 2025 field research project on Lake Kivu marine ecosystems, using ArcGIS for spatial analysis and interactive mapping. I monitored biodiversity, collected environmental data, and turned raw field observations into clear data visualizations. Published as an ArcGIS StoryMap — where conservation meets code.', year: '2025', link: 'https://arcg.is/09v5GS1', mediaType: 'video', mediaPath: '/assets/kivu.mp4' });
-            await Project.create({ id: pid2, title: 'BE THE LIGHT WEBSITE', subtitle: 'A community platform for Be The Light, a grassroots organization supporting families in hardship and empowering youth across Rwanda, built with Lovable. It brings together the organization\'s story, mission, blog, and a community call to action in one place. A warm, purpose-driven design that reflects the heart of the movement.', year: '2025', link: 'https://bethe-light-hub.lovable.app/', mediaType: 'image', mediaPath: '/assets/bethelight.png' });
-          }
-          const testimonialCount = await Testimonial.countDocuments();
-          if (testimonialCount === 0) {
-            const tid1 = await nextId(Counter, 'testimonial');
-            const tid2 = await nextId(Counter, 'testimonial');
-            await Testimonial.create({ id: tid1, name: 'Emely Murenzi', role: 'Chief Technology Officer (CTO)', location: 'Musanze, Rwanda', image: '/assets/Emery-prof-2-min.jpg.jpeg', quote: 'Serge is a highly reliable and driven contributor on our team. He approached problems with clarity, delivered clean and scalable solutions, and consistently met expectations while maintaining strong collaboration across the team.', tag: 'Norf Cre8tions' });
-            await Testimonial.create({ id: tid2, name: 'Eric Kwizera', role: 'Software Developer', location: 'Kigali, Rwanda', image: '/assets/Wizzy.jpeg', quote: 'Working alongside Serge consistently improved the quality and speed of our delivery. He communicates clearly, writes clean and scalable code, and approaches problems with a strong focus on practical, client-ready solutions that perform reliably in real-world use.', tag: 'Norf Cre8tions' });
-          }
-          const resumeSetting = await Setting.findOne({ key: 'resume_url' });
-          if (!resumeSetting) {
-            await Setting.create({ key: 'resume_url', value: '/Serge_Ishimwe_Resume.pdf' });
-          }
-        }
-      }
+      const admin = await Admin.findOne({ username });
       if (!admin || !(await bcrypt.compare(password, admin.password))) return sendJson(res, 401, { error: 'Invalid credentials' });
       const token = jwt.sign({ id: admin.id, username: admin.username }, secret, { expiresIn: '12h' });
       return sendJson(res, 200, { token, username: admin.username });
@@ -193,8 +159,6 @@ module.exports = async (req, res) => {
     // --- Auth: me ---
     if (req.method === 'GET' && p === '/api/auth/me') {
       const user = verifyToken(req);
-      const mongoose = await getMongo();
-      const { Admin } = getModels(mongoose);
       const admin = await Admin.findOne({ id: user.id });
       if (!admin) return sendJson(res, 404, { error: 'Not found' });
       return sendJson(res, 200, { id: admin.id, username: admin.username });
@@ -206,8 +170,6 @@ module.exports = async (req, res) => {
       const bcrypt = require('bcryptjs');
       const { currentPassword, newPassword } = JSON.parse(await getBody(req) || '{}');
       if (!currentPassword || !newPassword || newPassword.length < 8) return sendJson(res, 400, { error: 'Invalid request' });
-      const mongoose = await getMongo();
-      const { Admin } = getModels(mongoose);
       const admin = await Admin.findOne({ id: user.id });
       if (!admin || !(await bcrypt.compare(currentPassword, admin.password))) return sendJson(res, 401, { error: 'Current password is incorrect' });
       admin.password = await bcrypt.hash(newPassword, 10);
@@ -223,8 +185,6 @@ module.exports = async (req, res) => {
       const secret = getJwtSecret();
       const { currentPassword, newUsername } = JSON.parse(await getBody(req) || '{}');
       if (!currentPassword || !newUsername) return sendJson(res, 400, { error: 'Invalid request' });
-      const mongoose = await getMongo();
-      const { Admin } = getModels(mongoose);
       const admin = await Admin.findOne({ id: user.id });
       if (!admin || !(await bcrypt.compare(currentPassword, admin.password))) return sendJson(res, 401, { error: 'Current password is incorrect' });
       admin.username = newUsername;
@@ -235,25 +195,19 @@ module.exports = async (req, res) => {
 
     // --- Projects ---
     if (req.method === 'GET' && p === '/api/projects') {
-      const mongoose = await getMongo();
-      const { Project } = getModels(mongoose);
       const projects = await Project.find().sort({ id: -1 }).lean();
       return sendJson(res, 200, projects.map(({ _id, __v, ...rest }) => rest));
     }
     if (req.method === 'POST' && p === '/api/projects') {
       verifyToken(req);
-      const mongoose = await getMongo();
-      const { Counter, Project } = getModels(mongoose);
       const { title, subtitle, year, link, mediaType, mediaPath } = JSON.parse(await getBody(req) || '{}');
-      const id = await nextId(Counter, 'project');
+      const id = await nextId('project');
       await Project.create({ id, title, subtitle, year, link, mediaType, mediaPath });
       return sendJson(res, 200, { id, title, subtitle, year, link, mediaType, mediaPath });
     }
     if (req.method === 'DELETE' && /^\/api\/projects\/\d+$/.test(p)) {
       verifyToken(req);
       const id = Number(p.split('/').pop());
-      const mongoose = await getMongo();
-      const { Project } = getModels(mongoose);
       const result = await Project.findOneAndDelete({ id });
       if (!result) return sendJson(res, 404, { error: 'Project not found' });
       return sendJson(res, 200, { success: true });
@@ -261,8 +215,6 @@ module.exports = async (req, res) => {
     if (req.method === 'PUT' && /^\/api\/projects\/\d+$/.test(p)) {
       verifyToken(req);
       const id = Number(p.split('/').pop());
-      const mongoose = await getMongo();
-      const { Project } = getModels(mongoose);
       const { title, subtitle, year, link, mediaType, mediaPath } = JSON.parse(await getBody(req) || '{}');
       await Project.findOneAndUpdate({ id }, { $set: { title, subtitle, year, link, mediaType, mediaPath } });
       return sendJson(res, 200, { success: true });
@@ -270,25 +222,19 @@ module.exports = async (req, res) => {
 
     // --- Testimonials ---
     if (req.method === 'GET' && p === '/api/testimonials') {
-      const mongoose = await getMongo();
-      const { Testimonial } = getModels(mongoose);
       const testimonials = await Testimonial.find().sort({ id: 1 }).lean();
       return sendJson(res, 200, testimonials.map(({ _id, __v, ...rest }) => rest));
     }
     if (req.method === 'POST' && p === '/api/testimonials') {
       verifyToken(req);
-      const mongoose = await getMongo();
-      const { Counter, Testimonial } = getModels(mongoose);
       const { name, role, location, image, quote, tag } = JSON.parse(await getBody(req) || '{}');
-      const id = await nextId(Counter, 'testimonial');
+      const id = await nextId('testimonial');
       await Testimonial.create({ id, name, role, location, image, quote, tag });
       return sendJson(res, 200, { id, name, role, location, image, quote, tag });
     }
     if (req.method === 'PUT' && /^\/api\/testimonials\/\d+$/.test(p)) {
       verifyToken(req);
       const id = Number(p.split('/').pop());
-      const mongoose = await getMongo();
-      const { Testimonial } = getModels(mongoose);
       const { name, role, location, image, quote, tag } = JSON.parse(await getBody(req) || '{}');
       await Testimonial.findOneAndUpdate({ id }, { $set: { name, role, location, image, quote, tag } });
       return sendJson(res, 200, { success: true });
@@ -296,8 +242,6 @@ module.exports = async (req, res) => {
     if (req.method === 'DELETE' && /^\/api\/testimonials\/\d+$/.test(p)) {
       verifyToken(req);
       const id = Number(p.split('/').pop());
-      const mongoose = await getMongo();
-      const { Testimonial } = getModels(mongoose);
       const result = await Testimonial.findOneAndDelete({ id });
       if (!result) return sendJson(res, 404, { error: 'Testimonial not found' });
       return sendJson(res, 200, { success: true });
@@ -306,23 +250,17 @@ module.exports = async (req, res) => {
     // --- Messages ---
     if (req.method === 'GET' && p === '/api/messages') {
       verifyToken(req);
-      const mongoose = await getMongo();
-      const { Message } = getModels(mongoose);
       const messages = await Message.find().sort({ id: -1 }).lean();
       return sendJson(res, 200, messages.map(({ _id, __v, ...rest }) => rest));
     }
     if (req.method === 'PUT' && p === '/api/messages/mark-read') {
       verifyToken(req);
-      const mongoose = await getMongo();
-      const { Message } = getModels(mongoose);
       await Message.updateMany({ is_read: 0 }, { $set: { is_read: 1 } });
       return sendJson(res, 200, { success: true });
     }
     if (req.method === 'DELETE' && /^\/api\/messages\/\d+$/.test(p)) {
       verifyToken(req);
       const id = Number(p.split('/').pop());
-      const mongoose = await getMongo();
-      const { Message } = getModels(mongoose);
       const result = await Message.findOneAndDelete({ id });
       if (!result) return sendJson(res, 404, { error: 'Message not found' });
       return sendJson(res, 200, { success: true });
@@ -330,28 +268,22 @@ module.exports = async (req, res) => {
 
     // --- Contact ---
     if (req.method === 'POST' && p === '/api/contact') {
-      const mongoose = await getMongo();
-      const { Counter, Message } = getModels(mongoose);
       const { name, email, message } = JSON.parse(await getBody(req) || '{}');
       const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!name || !email || !message) return sendJson(res, 400, { error: 'Name, email, and message are required.' });
       if (!EMAIL_RE.test(email)) return sendJson(res, 400, { error: 'Please enter a valid email address.' });
-      const id = await nextId(Counter, 'message');
+      const id = await nextId('message');
       await Message.create({ id, name, email, message, date: new Date().toISOString(), is_read: 0 });
       return sendJson(res, 200, { success: true });
     }
 
     // --- Settings ---
     if (req.method === 'GET' && p === '/api/settings/resume') {
-      const mongoose = await getMongo();
-      const { Setting } = getModels(mongoose);
       const setting = await Setting.findOne({ key: 'resume_url' }).lean();
       return sendJson(res, 200, { value: setting ? setting.value : '/Serge_Ishimwe_Resume.pdf' });
     }
     if (req.method === 'PUT' && p === '/api/settings/resume') {
       verifyToken(req);
-      const mongoose = await getMongo();
-      const { Setting } = getModels(mongoose);
       const { value } = JSON.parse(await getBody(req) || '{}');
       if (!value) return sendJson(res, 400, { error: 'Value is required' });
       await Setting.findOneAndUpdate({ key: 'resume_url' }, { $set: { value } }, { upsert: true });
