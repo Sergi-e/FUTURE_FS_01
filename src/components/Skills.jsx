@@ -143,10 +143,9 @@ export default function Skills() {
             <p className="exp-description">of dvpt experience</p>
           </div>
           <div className="exp-middle">
-            <div className="exp-visual-box flower">
-              <div className="flower-shape-layer s1"></div>
-              <div className="flower-shape-layer s2"></div>
-              <div className="exp-text-center">C2C</div>
+            <div className="exp-label-card">
+              <h4 className="exp-label-title">C2C Platforms</h4>
+              <p className="exp-label-subtitle">Marketplace &amp; peer-to-peer architecture</p>
             </div>
           </div>
           <div className="exp-right">

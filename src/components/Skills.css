@@ -308,6 +308,40 @@
   height: 120px;
 }
 
+/* Middle label card — replaces the legacy circular "C2C" badge */
+.exp-label-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 22px;
+  max-width: 240px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.exp-label-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  text-transform: none;
+}
+
+.exp-label-subtitle {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 0.4px;
+  line-height: 1.4;
+}
+
 .exp-visual-box.simple {
   width: 100px;
   height: 100px;
