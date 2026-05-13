@@ -152,65 +152,44 @@ const TESTIMONIAL_ERIC_KWIZERA = {
   tag: 'Norf Cre8tions',
 };
 
+/**
+ * Ensures the two canonical Norf Cre8tions testimonials exist and have correct
+ * field values. Each is looked up by its stable image path and either updated
+ * in place or created — never deleted. Custom testimonials added via the admin
+ * dashboard are left completely untouched regardless of how many exist.
+ */
 async function seedNorfCreationsTestimonials() {
-  const rows = await Testimonial.find().sort({ id: 1 }).lean();
-  const images = new Set(rows.map((r) => String(r.image || '').trim()));
+  await upsertCanonicalTestimonial(TESTIMONIAL_EMELY_MURENZI);
+  await upsertCanonicalTestimonial(TESTIMONIAL_ERIC_KWIZERA);
+}
 
-  const hasEmelyPhoto = images.has(TESTIMONIAL_EMELY_MURENZI.image);
-  const hasEricPhoto = images.has(TESTIMONIAL_ERIC_KWIZERA.image);
-
-  if (rows.length === 2 && hasEmelyPhoto && hasEricPhoto) {
+async function upsertCanonicalTestimonial(data) {
+  const existing = await Testimonial.findOne({ image: data.image }).lean();
+  if (existing) {
     await Testimonial.updateOne(
-      { image: TESTIMONIAL_EMELY_MURENZI.image },
+      { image: data.image },
       {
         $set: {
-          name: TESTIMONIAL_EMELY_MURENZI.name,
-          role: TESTIMONIAL_EMELY_MURENZI.role,
-          location: TESTIMONIAL_EMELY_MURENZI.location,
-          quote: TESTIMONIAL_EMELY_MURENZI.quote,
-          tag: TESTIMONIAL_EMELY_MURENZI.tag,
+          name: data.name,
+          role: data.role,
+          location: data.location,
+          quote: data.quote,
+          tag: data.tag,
         },
       }
     );
-    await Testimonial.updateOne(
-      { image: TESTIMONIAL_ERIC_KWIZERA.image },
-      {
-        $set: {
-          name: TESTIMONIAL_ERIC_KWIZERA.name,
-          role: TESTIMONIAL_ERIC_KWIZERA.role,
-          location: TESTIMONIAL_ERIC_KWIZERA.location,
-          quote: TESTIMONIAL_ERIC_KWIZERA.quote,
-          tag: TESTIMONIAL_ERIC_KWIZERA.tag,
-        },
-      }
-    );
-    return;
+  } else {
+    const id = await nextId('testimonial');
+    await Testimonial.create({
+      id,
+      name: data.name,
+      role: data.role,
+      location: data.location,
+      image: data.image,
+      quote: data.quote,
+      tag: data.tag,
+    });
   }
-
-  if (rows.length > 6) return;
-
-  await Testimonial.deleteMany({});
-
-  const id1 = await nextId('testimonial');
-  const id2 = await nextId('testimonial');
-  await Testimonial.create({
-    id: id1,
-    name: TESTIMONIAL_EMELY_MURENZI.name,
-    role: TESTIMONIAL_EMELY_MURENZI.role,
-    location: TESTIMONIAL_EMELY_MURENZI.location,
-    image: TESTIMONIAL_EMELY_MURENZI.image,
-    quote: TESTIMONIAL_EMELY_MURENZI.quote,
-    tag: TESTIMONIAL_EMELY_MURENZI.tag,
-  });
-  await Testimonial.create({
-    id: id2,
-    name: TESTIMONIAL_ERIC_KWIZERA.name,
-    role: TESTIMONIAL_ERIC_KWIZERA.role,
-    location: TESTIMONIAL_ERIC_KWIZERA.location,
-    image: TESTIMONIAL_ERIC_KWIZERA.image,
-    quote: TESTIMONIAL_ERIC_KWIZERA.quote,
-    tag: TESTIMONIAL_ERIC_KWIZERA.tag,
-  });
 }
 
 async function migrateAndSeed() {
