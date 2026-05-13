@@ -10,9 +10,14 @@ import './Works.css';
 gsap.registerPlugin(ScrollTrigger);
 
 function ProjectMedia({ project, mediaKind, mediaSrc }) {
-  const [failed, setFailed] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [trackedSrc, setTrackedSrc] = useState(mediaSrc);
   const videoRef = useRef(null);
-  const usePlaceholder = !mediaSrc || failed || mediaKind === 'placeholder';
+
+  if (trackedSrc !== mediaSrc) {
+    setTrackedSrc(mediaSrc);
+    setImageFailed(false);
+  }
 
   const tryPlayVideo = useCallback(() => {
     const el = videoRef.current;
@@ -27,6 +32,9 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
     const el = videoRef.current;
     if (!el) return;
 
+    // Force a fresh load when the source changes so we recover from any
+    // earlier failed/aborted attempt rather than staying stuck on a broken state.
+    try { el.load(); } catch { /* ignore */ }
     tryPlayVideo();
 
     const onVis = () => {
@@ -34,15 +42,28 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
     };
     document.addEventListener('visibilitychange', onVis);
 
-    const onCanPlay = () => tryPlayVideo();
-    el.addEventListener('loadeddata', onCanPlay);
-    el.addEventListener('canplay', onCanPlay);
+    const onReady = () => tryPlayVideo();
+    el.addEventListener('loadeddata', onReady);
+    el.addEventListener('canplay', onReady);
+
+    // Recover from transient errors (e.g. autoplay attempt while element is
+    // still being positioned by GSAP) with a single delayed reload+play retry.
+    let retryTimer = null;
+    const onError = () => {
+      if (retryTimer) return;
+      retryTimer = window.setTimeout(() => {
+        retryTimer = null;
+        try { el.load(); } catch { /* ignore */ }
+        tryPlayVideo();
+      }, 600);
+    };
+    el.addEventListener('error', onError);
 
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) tryPlayVideo();
-          else el.pause();
+          else if (!el.paused) el.pause();
         });
       },
       { threshold: 0.08, rootMargin: '40px 0px' }
@@ -51,22 +72,27 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
 
     return () => {
       document.removeEventListener('visibilitychange', onVis);
-      el.removeEventListener('loadeddata', onCanPlay);
-      el.removeEventListener('canplay', onCanPlay);
+      el.removeEventListener('loadeddata', onReady);
+      el.removeEventListener('canplay', onReady);
+      el.removeEventListener('error', onError);
+      if (retryTimer) window.clearTimeout(retryTimer);
       io.disconnect();
     };
   }, [mediaKind, mediaSrc, tryPlayVideo]);
 
-  if (usePlaceholder) {
-    return <div className="work-image-placeholder" />;
+  if (!mediaSrc || mediaKind === 'placeholder') {
+    return <div className="work-image-placeholder" aria-hidden="true" />;
   }
   if (mediaKind === 'image') {
+    if (imageFailed) {
+      return <div className="work-image-placeholder" aria-hidden="true" />;
+    }
     return (
       <img
         src={mediaSrc}
         alt={project?.title || 'Project Image'}
         className="work-media-asset"
-        onError={() => setFailed(true)}
+        onError={() => setImageFailed(true)}
       />
     );
   }
@@ -82,11 +108,10 @@ function ProjectMedia({ project, mediaKind, mediaSrc }) {
         playsInline
         preload="auto"
         className="work-media-asset work-media-video"
-        onError={() => setFailed(true)}
       />
     );
   }
-  return <div className="work-image-placeholder" />;
+  return <div className="work-image-placeholder" aria-hidden="true" />;
 }
 
 function projectMediaType(project) {
