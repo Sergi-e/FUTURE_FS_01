@@ -20,7 +20,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  background-image: url("/noise.svg");
   opacity: 0.15;
   pointer-events: none;
   z-index: 2;
@@ -149,20 +149,28 @@
   flex-direction: column;
   align-items: center;
   gap: 15px;
+  width: 100%;
+  max-width: calc(100vw - 2 * clamp(20px, 5vw, 50px));
+  box-sizing: border-box;
 }
 
 .title-row {
   display: flex;
   justify-content: center;
   align-items: center;
-  line-height: 0.8;
+  flex-wrap: wrap;
+  row-gap: 0.08em;
+  column-gap: 0.06em;
+  max-width: 100%;
+  line-height: 0.85;
   margin: 0;
   padding: 0;
 }
 
 .title-word {
   font-family: var(--font-display);
-  font-size: clamp(2.8rem, 12vw, 9rem);
+  /* Cap vw growth so mid/desktop widths do not clip inside .hero { overflow: hidden } */
+  font-size: clamp(2.8rem, min(11vw, 7.5rem), 7.5rem);
   font-weight: 950;
   color: white;
   text-transform: uppercase;
