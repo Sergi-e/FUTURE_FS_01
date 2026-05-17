@@ -52,6 +52,8 @@ body {
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Fixed navbar clears content when jumping to #sections and reduces accidental overlap while scrolling */
+  scroll-padding-top: 5.75rem;
 }
 
 #root {
@@ -127,7 +129,7 @@ html.lenis body {
   }
 
   section#approach.ethos {
-    padding: 28px max(16px, env(safe-area-inset-left, 0px)) 28px
+    padding: max(5.25rem, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-left, 0px)) 28px
       max(16px, env(safe-area-inset-right, 0px));
   }
 
