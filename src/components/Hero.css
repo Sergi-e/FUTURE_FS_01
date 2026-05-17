@@ -238,6 +238,11 @@
   font-weight: 500;
 }
 
+/* Desktop / tablet wide: Accra + Kigali stay in corner rails */
+.hero-locations-inline {
+  display: none;
+}
+
 /* Resume only: paint slightly higher so brackets stay inside overflow; no hero padding (keeps portrait centered) */
 .hero-actions-minimal {
   margin-top: 20px;
@@ -314,19 +319,37 @@
   .hero {
     padding: 0 24px;
   }
-  .hero-info-bar {
-    padding-left: max(24px, env(safe-area-inset-left, 0px));
-    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 3.5rem);
-    top: 5vh;
-  }
-  .hero-info-bar .info-location,
-  .hero-bottom-info .info-location {
-    font-size: 0.7rem;
-  }
+
+  /* Corner rails clash with fixed nav + asymmetric padding on small viewports; mirror centered column instead */
+  .hero-info-bar,
   .hero-bottom-info {
-    padding-left: max(24px, env(safe-area-inset-left, 0px));
-    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 3.5rem);
+    display: none;
   }
+
+  .hero-locations-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem 0.55rem;
+    max-width: min(22rem, 100%);
+    width: 100%;
+    margin: -0.35rem 0 0;
+    box-sizing: border-box;
+  }
+
+  .hero-locations-inline .info-location {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+  }
+
+  .hero-locations-sep {
+    color: rgba(160, 160, 160, 0.45);
+    font-size: 0.75rem;
+    line-height: 1;
+    user-select: none;
+  }
+
   .hero-portrait-wrap {
     width: 100px;
     height: 100px;
@@ -344,24 +367,9 @@
   }
 }
 
-@media (max-width: 768px) and (hover: none),
-       (max-width: 768px) and (pointer: coarse) {
-  .hero-info-bar {
-    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 8.75rem);
-  }
-  .hero-bottom-info {
-    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 8.75rem);
-  }
-}
-
 @media (max-width: 480px) {
   .hero {
     padding: 0 20px;
-  }
-  .hero-info-bar,
-  .hero-bottom-info {
-    padding-left: max(20px, env(safe-area-inset-left, 0px));
-    padding-right: calc(max(20px, env(safe-area-inset-right, 0px)) + 3.5rem);
   }
   .hero-content-centered {
     gap: 20px;
@@ -377,13 +385,6 @@
   }
 }
 
-@media (max-width: 480px) and (hover: none),
-       (max-width: 480px) and (pointer: coarse) {
-  .hero-info-bar,
-  .hero-bottom-info {
-    padding-right: calc(max(20px, env(safe-area-inset-right, 0px)) + 8.75rem);
-  }
-}
 
 
 /* Scroll indicator */
