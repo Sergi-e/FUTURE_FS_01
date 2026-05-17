@@ -80,7 +80,7 @@
 @media (hover: none), (pointer: coarse) {
   .hero-info-bar,
   .hero-bottom-info {
-    /* Jump toggle + gap + hamburger on touch / DevTools device emulation */
+    /* Wide layouts: reserve navbar column (Jump + hamburger on touch) */
     padding-right: calc(5vw + 8.75rem);
   }
 }
@@ -238,11 +238,6 @@
   font-weight: 500;
 }
 
-/* Desktop / tablet wide: Accra + Kigali stay in corner rails */
-.hero-locations-inline {
-  display: none;
-}
-
 /* Resume only: paint slightly higher so brackets stay inside overflow; no hero padding (keeps portrait centered) */
 .hero-actions-minimal {
   margin-top: 20px;
@@ -320,34 +315,36 @@
     padding: 0 24px;
   }
 
-  /* Corner rails clash with fixed nav + asymmetric padding on small viewports; mirror centered column instead */
-  .hero-info-bar,
+  /*
+   * Corner labels stay visible: anchor to the right under the fixed navbar instead of
+   * full-bleed flex + huge padding (which misaligned text on narrow viewports).
+   */
+  .hero-info-bar {
+    top: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.5rem));
+    left: auto;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-width: min(15rem, calc(100vw - 5rem));
+    padding: 0;
+    justify-content: flex-end;
+    text-align: right;
+  }
+
   .hero-bottom-info {
-    display: none;
+    bottom: max(13vh, calc(env(safe-area-inset-bottom, 0px) + 5rem));
+    left: auto;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    width: auto;
+    max-width: min(15rem, calc(100vw - 3rem));
+    padding: 0;
+    justify-content: flex-end;
+    text-align: right;
   }
 
-  .hero-locations-inline {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem 0.55rem;
-    max-width: min(22rem, 100%);
-    width: 100%;
-    margin: -0.35rem 0 0;
-    box-sizing: border-box;
-  }
-
-  .hero-locations-inline .info-location {
+  .hero-info-bar .info-location,
+  .hero-bottom-info .info-location {
     font-size: 0.68rem;
     letter-spacing: 0.12em;
-  }
-
-  .hero-locations-sep {
-    color: rgba(160, 160, 160, 0.45);
-    font-size: 0.75rem;
-    line-height: 1;
-    user-select: none;
   }
 
   .hero-portrait-wrap {
@@ -371,6 +368,19 @@
   .hero {
     padding: 0 20px;
   }
+
+  .hero-info-bar {
+    top: max(5.25rem, calc(env(safe-area-inset-top, 0px) + 4.25rem));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    max-width: min(13rem, calc(100vw - 4.25rem));
+  }
+
+  .hero-bottom-info {
+    bottom: max(11vh, calc(env(safe-area-inset-bottom, 0px) + 4.25rem));
+    right: max(12px, env(safe-area-inset-right, 0px));
+    max-width: min(13rem, calc(100vw - 2.75rem));
+  }
+
   .hero-content-centered {
     gap: 20px;
     padding-top: clamp(50px, 8vh, 80px);

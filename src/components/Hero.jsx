@@ -27,9 +27,7 @@ export default function Hero({ approachSlotRef }) {
     }
 
     const ctx = gsap.context((self) => {
-      const otherElements = self.selector(
-        '.top-right-loc, .bottom-right-loc, .hero-locations-inline .info-location-link, .hero-portrait-wrap, .hero-subtitle, .hero-actions-minimal'
-      );
+      const otherElements = self.selector('.top-right-loc, .bottom-right-loc, .hero-portrait-wrap, .hero-subtitle, .hero-actions-minimal');
       
       // Reveal animation for non-title elements
       gsap.from(otherElements, {
@@ -164,28 +162,6 @@ export default function Hero({ approachSlotRef }) {
           Hello. I&apos;m Serge, a full-stack developer and aspiring AI/ML engineer. I build products that
           are reliable by design and useful by intention.
         </p>
-
-        <div className="hero-locations-inline" aria-label="Locations">
-          <a
-            href="https://maps.google.com/?q=Accra,+Ghana"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="info-location-link hero-location-inline-link"
-          >
-            <span className="info-location">ACCRA, GHANA</span>
-          </a>
-          <span className="hero-locations-sep" aria-hidden="true">
-            ·
-          </span>
-          <a
-            href="https://maps.google.com/?q=Kigali,+Rwanda"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="info-location-link hero-location-inline-link"
-          >
-            <span className="info-location">KIGALI, RWANDA</span>
-          </a>
-        </div>
 
         <div className="hero-actions-minimal">
           <a 
