@@ -28,7 +28,12 @@
 .testimonials-layout {
   display: grid;
   grid-template-columns: 0.8fr 1.2fr;
-  gap: 3rem;
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "visual info"
+    "nav info";
+  column-gap: 3rem;
+  row-gap: 2rem;
   width: 100%;
   max-width: 1200px;
   /* Top-align so quote block lines up with the image; avoids vertical “float” vs image+nav stack */
@@ -36,11 +41,10 @@
 }
 
 .testimonials-visual {
+  grid-area: visual;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
 }
-
 .image-container {
   position: relative;
   aspect-ratio: 1/1;
@@ -61,6 +65,7 @@
 }
 
 .testimonials-nav {
+  grid-area: nav;
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -101,6 +106,7 @@
 }
 
 .testimonials-info {
+  grid-area: info;
   padding-left: 2rem;
   /* Slight lift so the text block optically balances image + nav height */
   transform: translateY(-0.85rem);
@@ -181,14 +187,56 @@
 @media (max-width: 1024px) {
   .testimonials-layout {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    grid-template-rows: auto;
+    grid-template-areas:
+      "visual"
+      "info"
+      "nav";
+    column-gap: 0;
+    row-gap: 1.5rem;
   }
+
   .testimonials-info {
     padding-left: 0;
     transform: none;
   }
+
   .testimonials-visual {
     margin-top: 0.75rem;
+  }
+
+  /* Portrait framing on small screens — avoids “chin-only” crops */
+  .testimonials-image {
+    object-position: center 22%;
+  }
+
+  /* Controls after quote + attribution */
+  .testimonials-nav {
+    margin-top: 0.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: nowrap;
+  }
+
+  .nav-progress {
+    flex: 1 1 auto;
+    min-width: 3rem;
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    align-self: center;
+  }
+
+  .nav-btn {
+    flex: 0 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+  }
+
+  .nav-btn:focus-visible {
+    outline: 2px solid rgba(0, 242, 255, 0.45);
+    outline-offset: 3px;
   }
 }
 

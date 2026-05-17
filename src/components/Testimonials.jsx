@@ -119,21 +119,6 @@ export default function Testimonials() {
               onLoad={() => requestAnimationFrame(() => ScrollTrigger.refresh())}
             />
           </div>
-
-          <div className="testimonials-nav">
-            <button type="button" onClick={prevTestimonial} className="nav-btn cursor-hover">
-              ← PREV
-            </button>
-            <div className="nav-progress">
-              <div
-                className="progress-bar"
-                style={{ width: `${((index + 1) / testimonials.length) * 100}%` }}
-              />
-            </div>
-            <button type="button" onClick={nextTestimonial} className="nav-btn cursor-hover">
-              NEXT →
-            </button>
-          </div>
         </div>
 
         <div className="testimonials-info">
@@ -166,6 +151,21 @@ export default function Testimonials() {
               <span className="status-value">{current.location}</span>
             </div>
           </footer>
+        </div>
+
+        <div className="testimonials-nav">
+          <button type="button" onClick={prevTestimonial} className="nav-btn cursor-hover">
+            ← PREV
+          </button>
+          <div className="nav-progress">
+            <div
+              className="progress-bar"
+              style={{ width: `${((index + 1) / testimonials.length) * 100}%` }}
+            />
+          </div>
+          <button type="button" onClick={nextTestimonial} className="nav-btn cursor-hover">
+            NEXT →
+          </button>
         </div>
       </div>
     </section>
