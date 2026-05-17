@@ -50,7 +50,9 @@
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  padding: 0 50px;
+  /* Match navbar horizontal inset (5vw) + room for fixed controls so location never sits under hamburger */
+  padding-left: max(50px, 5vw);
+  padding-right: calc(5vw + 3.5rem);
   z-index: 10;
 }
 
@@ -70,8 +72,17 @@
   width: 100%;
   display: flex;
   justify-content: flex-end;
-  padding: 0 50px;
+  padding-left: max(50px, 5vw);
+  padding-right: calc(5vw + 3.5rem);
   z-index: 10;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .hero-info-bar,
+  .hero-bottom-info {
+    /* Jump toggle + gap + hamburger on touch / DevTools device emulation */
+    padding-right: calc(5vw + 8.75rem);
+  }
 }
 
 .info-location-link {
@@ -304,7 +315,8 @@
     padding: 0 24px;
   }
   .hero-info-bar {
-    padding: 0 24px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 3.5rem);
     top: 5vh;
   }
   .hero-info-bar .info-location,
@@ -312,7 +324,8 @@
     font-size: 0.7rem;
   }
   .hero-bottom-info {
-    padding: 0 24px;
+    padding-left: max(24px, env(safe-area-inset-left, 0px));
+    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 3.5rem);
   }
   .hero-portrait-wrap {
     width: 100px;
@@ -331,13 +344,24 @@
   }
 }
 
+@media (max-width: 768px) and (hover: none),
+       (max-width: 768px) and (pointer: coarse) {
+  .hero-info-bar {
+    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 8.75rem);
+  }
+  .hero-bottom-info {
+    padding-right: calc(max(24px, env(safe-area-inset-right, 0px)) + 8.75rem);
+  }
+}
+
 @media (max-width: 480px) {
   .hero {
     padding: 0 20px;
   }
   .hero-info-bar,
   .hero-bottom-info {
-    padding: 0 20px;
+    padding-left: max(20px, env(safe-area-inset-left, 0px));
+    padding-right: calc(max(20px, env(safe-area-inset-right, 0px)) + 3.5rem);
   }
   .hero-content-centered {
     gap: 20px;
@@ -350,6 +374,14 @@
   .hero-subtitle {
     font-size: clamp(0.9rem, 3.5vw, 1.1rem);
     max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) and (hover: none),
+       (max-width: 480px) and (pointer: coarse) {
+  .hero-info-bar,
+  .hero-bottom-info {
+    padding-right: calc(max(20px, env(safe-area-inset-right, 0px)) + 8.75rem);
   }
 }
 
