@@ -149,7 +149,13 @@ export default function Contact() {
                 </button>
               </div>
               {status && (
-                <p className={`contact-status ${status.includes('failed') || status.includes('Error') ? 'contact-status--error' : ''}`}>
+                <p
+                  className={`contact-status ${
+                    status !== 'Sending...' && status !== 'Message successfully sent!'
+                      ? 'contact-status--error'
+                      : ''
+                  }`}
+                >
                   {status}
                 </p>
               )}
@@ -160,8 +166,8 @@ export default function Contact() {
 
       <footer className="footer">
         <div className="footer-left">
-          <span style={{ fontSize: '0.85rem', fontWeight: '300', letterSpacing: '0.05em' }}>
-            &copy; 2026 Serge Ishimwe. All rights reserved.
+          <span className="footer-copyright">
+            © 2026 Serge Ishimwe. All rights reserved.
           </span>
         </div>
         <div className="footer-right">
