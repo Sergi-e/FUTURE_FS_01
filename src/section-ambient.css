@@ -4,6 +4,9 @@
  * Each block uses a nearly flat fill (--c-*). Where two sections meet, the lower
  * section paints a short ::before strip: linear-gradient(previous → current) so the
  * two fills merge instead of a hard edge. Body / hero end use var(--bg-color).
+ *
+ * We do not branch on prefers-color-scheme: light: copy would stay light-on-light on
+ * phones with light OS theme because only --c-* flipped. The experience is dark-first.
  */
 
 :root {
@@ -107,19 +110,4 @@
 #contact.contact > * {
   position: relative;
   z-index: 1;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --c-ethos: hsl(38 8% 97.2%);
-    --c-skills: hsl(212 9% 97%);
-    --c-works: hsl(27 9% 97.3%);
-    --c-testimonials: hsl(265 7% 97.1%);
-    --c-hobbies: hsl(328 8% 97.3%);
-    --c-contact: hsl(192 9% 97%);
-  }
-
-  #approach.ethos::before {
-    background: linear-gradient(180deg, var(--bg-color) 0%, var(--c-ethos) 100%);
-  }
 }
